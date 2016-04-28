@@ -22,9 +22,9 @@ namespace Uduino
             serialArduino.Close();
         }
 
-        public string ReadFromArduino(int timeout)
+        public string ReadFromArduino(string variable, int timeout = 100)
         {
-            return serialArduino.ReadFromArduino(timeout);
+            return serialArduino.ReadFromArduino(variable, timeout);
         }
 
         public void SendCommand(char command)

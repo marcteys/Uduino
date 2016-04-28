@@ -60,8 +60,8 @@ public class LivingDevicesManager : MonoBehaviour {
             {
                 if (serialObject.getStatus() == SerialArduino.SerialStatus.OPEN)
                 {
-                    serialObject.WriteToArduino("I");
-                    string reading = serialObject.ReadFromArduino(50);
+                   // serialObject.WriteToArduino("I");
+                    string reading = serialObject.ReadFromArduino("I", 50);
                     if (reading != null)
                     {
                         this.LivingObjectFound(reading, serialObject);

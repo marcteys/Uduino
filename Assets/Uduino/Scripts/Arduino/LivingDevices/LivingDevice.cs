@@ -32,7 +32,7 @@ public class LivingDevice
 
     public string ReadFromArduino(int timeout)
     {
-        return serialArduino.ReadFromArduino(timeout);
+        return serialArduino.ReadFromArduino(null, timeout);
     }
 
     public void SendCommand(char command)

@@ -17,12 +17,15 @@ namespace Uduino
 
         public static UduinoManager Instance
         {
-            get { return _instance; }
+            get {
+           
+                return _instance;
+            }
             set { _instance = value; }
         }
         private static UduinoManager _instance = null;
 
-        void Start()
+        void Awake()
         {
             if (Instance == null)
             {
@@ -49,11 +52,11 @@ namespace Uduino
                 {
                     if (serialObject.getStatus() == SerialArduino.SerialStatus.OPEN)
                     {
-                        serialObject.WriteToArduino("I");
-                        string reading = serialObject.ReadFromArduino(50);
-                        if (reading != null)
+                        //serialObject.WriteToArduino("I");
+                        string reading = serialObject.ReadFromArduino("I", 100);
+                        if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
                         {
-                            this.ArduinoFound(reading, serialObject);
+                            this.ArduinoFound(reading.Split(new char[0])[1], serialObject);
                             break;
                         }
                         else
@@ -74,11 +77,6 @@ namespace Uduino
         {
             uduinoDevices.Add(name, new UduinoDevice(serialArduino));
             Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + serialArduino.getPort() + "]</color> added to dictionnary");
-        }
-
-        public void SendTestMessage(string target, string message)
-        {
-            uduinoDevices[target].getSerial().WriteToArduino(message);
         }
 
         public void DiscoverPorts()
@@ -119,6 +117,24 @@ namespace Uduino
                 Debug.Log(device.getPort() + " (" + liv.Key + ")" + " is " + state);
             }
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public void SendCommand(string target, string message)
+        {
+            uduinoDevices[target].getSerial().WriteToArduino(message);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public string Read(string target, string variable = null, int timeout = 100)
+        {
+            return uduinoDevices[target].ReadFromArduino(variable, timeout);
+        }
+
 
         public void OnDisable()
         {

@@ -15,7 +15,7 @@ public class SerialArduino
 
     private string _port;
     private int _baudrate;
-    private SerialPort stream;
+    private SerialPort serial;
     SerialStatus serialStatus = SerialStatus.UNDEF;
 
     public SerialArduino(string port, int baudrate = 9600)
@@ -29,11 +29,15 @@ public class SerialArduino
     {
         try
         {
-            stream = new SerialPort(_port, _baudrate);
-            stream.ReadTimeout = 50;
-            stream.Close();
-            stream.Open();
+            serial = new SerialPort(_port, _baudrate);
+            serial.ReadTimeout = 50;
+            serial.Close();
+            serial.Handshake = Handshake.None;
+            serial.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
+
+            serial.Open();
             serialStatus = SerialStatus.OPEN;
+
             Debug.LogWarning("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
         }
         catch (Exception e)
@@ -44,6 +48,17 @@ public class SerialArduino
         }
     }
 
+    private static void DataReceivedHandler(
+                     object sender,
+                     SerialDataReceivedEventArgs e)
+    {
+        SerialPort sp = (SerialPort)sender;
+        string indata = sp.ReadExisting();
+        Console.WriteLine("Data Received:");
+        //Console.Write(indata);
+        Debug.Log(indata);
+    }
+
     public SerialStatus getStatus()
     {
         return serialStatus;
@@ -51,7 +66,7 @@ public class SerialArduino
 
     public SerialPort getStream()
     {
-        return stream;
+        return serial;
     }
 
     public string getPort()
@@ -64,8 +79,8 @@ public class SerialArduino
         try
         {
             Debug.LogWarning("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
-            stream.WriteLine(message);
-            stream.BaseStream.Flush();
+            serial.WriteLine(message);
+            serial.BaseStream.Flush();
         }
         catch (Exception e)
         {
@@ -75,14 +90,19 @@ public class SerialArduino
 
     }
 
-    public string ReadFromArduino(int timeout = 0)
+    public string ReadFromArduino(string variable, int timeout = 100)
     {
+        WriteToArduino(variable);
+        serial.ReadTimeout = timeout;
+
+        serial.DiscardInBuffer();
+        serial.DiscardOutBuffer();
+
         try
         {
-            stream.ReadTimeout = timeout;
             try
             {
-                return stream.ReadLine();
+                return serial.ReadLine();
             }
             catch (TimeoutException)
             {
@@ -98,15 +118,13 @@ public class SerialArduino
        
     }
 
-    public string WriteToArduinoThenRead(string message, int timeout = 2)
+    public string WriteToArduinoThenRead(string message, int timeout = 100)
     {
-        stream.WriteLine(message);
-        stream.BaseStream.Flush();
-
-        stream.ReadTimeout = timeout;
+        serial.WriteLine(message);
+        serial.ReadTimeout = timeout;
         try
         {
-            return stream.ReadLine();
+            return serial.ReadLine();
         }
         catch (TimeoutException)
         {
@@ -127,7 +145,7 @@ public class SerialArduino
         {
             try
             {
-                dataString = stream.ReadLine();
+                dataString = serial.ReadLine();
             }
             catch (TimeoutException)
             {
@@ -155,10 +173,10 @@ public class SerialArduino
 
     public void Close()
     {
-        if (stream.IsOpen)
+        if (serial.IsOpen)
         {
             Debug.Log("Closing port : <color=#2196F3>[" + _port + "]</color>");
-            stream.Close();
+            serial.Close();
             serialStatus = SerialStatus.CLOSE;
         }
         else
@@ -168,7 +186,7 @@ public class SerialArduino
     }
 
 
-    //Specal Handler when application qui;
+    //Specal Handler when application quit;
     private bool isApplicationQuitting = false;
 
     void OnDisable()
