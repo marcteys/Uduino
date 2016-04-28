@@ -6,7 +6,6 @@ using UnityEditor;
 [CustomEditor(typeof(LivingDevicesManager))]
 public class LivingScreenEditor : Editor
 {
-
     private int angle;
     private int distance;
     private int position;

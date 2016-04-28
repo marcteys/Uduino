@@ -32,7 +32,7 @@ public class LivingDevicesManager : MonoBehaviour {
         DontDestroyOnLoad(this.gameObject);
         if (Instance == null)
         {
-            Instance = this;
+            Instance = this; 
         }
         else if (Instance != null && Instance != this)
         {
