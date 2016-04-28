@@ -13,7 +13,7 @@ namespace Uduino
         // TODO : Verbose mode
         // TODO : Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
 
-        Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
+        public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
 
         public static UduinoManager Instance
         {
@@ -135,6 +135,19 @@ namespace Uduino
             return uduinoDevices[target].ReadFromArduino(variable, timeout);
         }
 
+
+        public string lol = "caca";
+
+        public  void ARead(string target, int timeout = 100)
+        {
+            StartCoroutine
+            (
+                uduinoDevices[target].getSerial().AsynchronousReadFromArduino
+                ( (object s) => lol = (string)s,     // Callback
+                    (string s) => Debug.Log(s),   // Error callback
+                    1f )                             // Timeout (seconds)
+            );
+        }
 
         public void OnDisable()
         {

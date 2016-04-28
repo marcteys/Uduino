@@ -22,7 +22,13 @@ namespace Uduino
             serialArduino.Close();
         }
 
-        public string ReadFromArduino(string variable, int timeout = 100)
+        public void AsynchronousReadFromArduino(int timeout = 10)
+        {
+           // serialArduino.AsynchronousReadFromArduino(timeout);
+        }
+
+
+        public string ReadFromArduino(string variable, int timeout = 10)
         {
             return serialArduino.ReadFromArduino(variable, timeout);
         }

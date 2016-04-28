@@ -32,12 +32,8 @@ public class SerialArduino
             serial = new SerialPort(_port, _baudrate);
             serial.ReadTimeout = 50;
             serial.Close();
-            serial.Handshake = Handshake.None;
-            serial.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);
-
             serial.Open();
             serialStatus = SerialStatus.OPEN;
-
             Debug.LogWarning("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
         }
         catch (Exception e)
@@ -46,17 +42,6 @@ public class SerialArduino
             Debug.Log(e);
             Debug.Log("Error on port <color=#2196F3>[" + _port + "]</color>");
         }
-    }
-
-    private static void DataReceivedHandler(
-                     object sender,
-                     SerialDataReceivedEventArgs e)
-    {
-        SerialPort sp = (SerialPort)sender;
-        string indata = sp.ReadExisting();
-        Console.WriteLine("Data Received:");
-        //Console.Write(indata);
-        Debug.Log(indata);
     }
 
     public SerialStatus getStatus()
@@ -90,8 +75,9 @@ public class SerialArduino
 
     }
 
-    public string ReadFromArduino(string variable, int timeout = 100)
+    public string ReadFromArduino(string variable, int timeout = 10)
     {
+        Debug.Log(variable);
         WriteToArduino(variable);
         serial.ReadTimeout = timeout;
 
@@ -118,7 +104,7 @@ public class SerialArduino
        
     }
 
-    public string WriteToArduinoThenRead(string message, int timeout = 100)
+    public string WriteToArduinoThenRead(string message, int timeout = 10)
     {
         serial.WriteLine(message);
         serial.ReadTimeout = timeout;
@@ -133,7 +119,7 @@ public class SerialArduino
     }
 
 
-    public IEnumerator AsynchronousReadFromArduino(Action<string> callback, Action<string> fail = null, float timeout = float.PositiveInfinity)
+    public IEnumerator AsynchronousReadFromArduino(Action<object> callback, Action<string> fail = null, float timeout = float.PositiveInfinity)
     {
         DateTime initialTime = DateTime.Now;
         DateTime nowTime;

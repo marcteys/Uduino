@@ -12,8 +12,14 @@ void setup()
 
   uduino.addVariable("variable", 10);
   uduino.addCommand("I", identityHandler);
+  uduino.addCommand("PING", pong);
 }
 
+void pong () {
+  char *arg;
+  arg = uduino.next();
+  Serial.print("lol");
+}
 
 void identityHandler () {
   Serial.flush();
@@ -34,5 +40,13 @@ void loop()
   delay(400);
     digitalWrite(13,LOW);
 
+}
+
+
+
+//TODO : en faire une méthode arduino
+int charToInt(char* arg) {
+  String msgString = String(arg);
+  return msgString.toInt();
 }
 
