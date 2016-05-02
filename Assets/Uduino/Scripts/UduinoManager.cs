@@ -50,18 +50,18 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                SerialArduino serialObject = new SerialArduino(portName, 9600);
+                UduinoDevice uduinoDevice = new UduinoDevice(portName, 9600);
                 int tries = 0;
                 do
                 {
-                    if (serialObject.getStatus() == SerialArduino.SerialStatus.OPEN)
+                    if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
                     {
                         //serialObject.WriteToArduino("I");
                         //Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
-                        string reading = serialObject.ReadFromArduino("IDENTITY", 100);
+                        string reading = uduinoDevice.ReadFromArduino("IDENTITY", 100);
                         if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
                         {
-                            this.ArduinoFound(reading.Split(new char[0])[1], serialObject);
+                            this.ArduinoFound(reading.Split(new char[0])[1], uduinoDevice);
                             break;
                         }
                         else
@@ -69,20 +69,20 @@ namespace Uduino
                             Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
                         }
                     }
-                } while (serialObject.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 50);
+                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 50);
 
-                if (serialObject.getStatus() == SerialArduino.SerialStatus.UNDEF || serialObject.getStatus() == SerialArduino.SerialStatus.CLOSE)
+                if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
                 {
-                    serialObject = null;
+                    uduinoDevice = null;
                 }
             }
         }
 
-        void ArduinoFound(string name, SerialArduino serialArduino)
+        void ArduinoFound(string name, UduinoDevice uduinoDevice)
         {
-            uduinoDevices.Add(name, new UduinoDevice(serialArduino));
+            uduinoDevices.Add(name, uduinoDevice);
             StartCoroutine(ReadSerial(name, "lol"));
-            Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + serialArduino.getPort() + "]</color> added to dictionnary");
+            Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
         }
 
         public void DiscoverPorts()
@@ -104,7 +104,7 @@ namespace Uduino
              List<string> keys = new List<string>(uduinoDevices.Keys);
              foreach (string key in keys)
              {
-                 SerialArduino device = uduinoDevices[key].getSerial();
+                 SerialArduino device = uduinoDevices[key];
                  device.Close();
                  uduinoDevices.Remove(key);
              }
@@ -116,21 +116,19 @@ namespace Uduino
             {
                 Debug.Log("No port currently open");
             }
-            foreach (KeyValuePair<string, UduinoDevice> uduinio in uduinoDevices)
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
             {
-                SerialArduino device = uduinio.Value.getSerial();
-                string state = device.getStream().IsOpen ? "open " : "closed";
-                Debug.Log(device.getPort() + " (" + uduinio.Key + ")" + " is " + state);
+                string state = uduino.Value.isSerialOpen() ? "open " : "closed";
+                Debug.Log(uduino.Value.getPort() + " (" + uduino.Key + ")" + " is " + state);
             }
         }
-
 
         /// <summary>
         /// 
         /// </summary>
         public void SendCommand(string target, string message)
         {
-            uduinoDevices[target].getSerial().WriteToArduino(message);
+            uduinoDevices[target].WriteToArduino(message);
         }
 
         /// <summary>
@@ -155,7 +153,7 @@ namespace Uduino
         {
             StartCoroutine
             (
-                uduinoDevices[target].getSerial().AsynchronousReadFromArduino
+                uduinoDevices[target].AsynchronousReadFromArduino
                 ( (object s) => lol = (string)s,     // Callback
                     (string s) => Debug.Log(s),   // Error callback
                     1f )                             // Timeout (seconds)
@@ -164,7 +162,7 @@ namespace Uduino
 
         public string TRead(string target, string variable = null)
         {
-            uduinoDevices[target].TReadFromArduino(variable);
+         //   uduinoDevices[target].TReadFromArduino(variable);
             return null;
         }
 
@@ -172,7 +170,6 @@ namespace Uduino
         {
             CloseAllPorts();
         }
-
       
 
         public int nbrCoroutines = 0;
@@ -181,7 +178,7 @@ namespace Uduino
             string data = uduinoDevices[target].ReadFromArduino(variable, 100);
             if (data != null)
             {
-                OnValueReceived(uduinoDevices[target].ReadFromArduino(variable, 100));
+               // OnValueReceived(uduinoDevices[target].ReadFromArduino(variable, 100));
             }
             //nbrCoroutines = 0;
             yield return null;

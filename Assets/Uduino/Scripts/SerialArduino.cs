@@ -15,7 +15,7 @@ public class SerialArduino
 
     private string _port;
     private int _baudrate;
-    private SerialPort serial;
+    public SerialPort serial;
     SerialStatus serialStatus = SerialStatus.UNDEF;
     public System.Threading.Thread _Thread = null;
 
@@ -94,7 +94,7 @@ public class SerialArduino
         return _port;
     }
 
-    public bool isOpen()
+    public bool isSerialOpen()
     {
         return serial.IsOpen;
     }
@@ -156,6 +156,7 @@ public class SerialArduino
         }
     }
 
+
     public bool isReading = false;
     public IEnumerator AsynchronousReadFromArduino(Action<object> callback, Action<string> fail = null, float timeout = float.PositiveInfinity)
     {
@@ -206,6 +207,7 @@ public class SerialArduino
 
     public void Close()
     {
+        WriteToArduino("STOP");
         running = false;
         _Thread.Abort();
         if (serial.IsOpen)
@@ -220,7 +222,6 @@ public class SerialArduino
             Debug.Log(_port + " already closed.");
         }
     }
-
 
     //Specal Handler when application quit;
     private bool isApplicationQuitting = false;
