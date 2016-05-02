@@ -4,7 +4,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
 
-
 namespace Uduino
 {
     public class UduinoManager : MonoBehaviour {
@@ -73,7 +72,7 @@ namespace Uduino
                     {
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
                         uduino.Value.read = null;
-                        if (data != null || data != "")
+                        if (data != null || data != "" || data != "Null")
                         {
                             OnValueReceived((object)data);
                         }
@@ -137,7 +136,6 @@ namespace Uduino
             {
                 Debug.Log("All ports are now closed");
             }
-
              List<string> keys = new List<string>(uduinoDevices.Keys);
              foreach (string key in keys)
              {
@@ -165,12 +163,18 @@ namespace Uduino
             uduinoDevices[target].WriteToArduino(message);
         }
 
-
         public void Read(string target, string variable = null, int timeout = 100)
         {
-            uduinoDevices[target].read = variable;
+            UduinoDevice uduino = null;
+            if (uduinoDevices.TryGetValue(target, out uduino))
+            {
+                uduino.read = variable;
+            }
+            else
+            {
+                Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
+            }
         }
-
 
         public IEnumerator ReadSerial(string target)
         {
@@ -182,7 +186,7 @@ namespace Uduino
                     uduinoDevices[target].read = null;
 
                     yield return null;
-                    if (data != null || data != "")
+                    if (data != null || data != "" || data != "Null")
                     {
                         OnValueReceived((object)data);
                     }

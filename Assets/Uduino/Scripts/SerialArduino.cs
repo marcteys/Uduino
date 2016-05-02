@@ -78,9 +78,11 @@ public class SerialArduino
         }
     }
 
-    public string ReadFromArduino(string variable, int timeout = 10)
+    public string ReadFromArduino(string message = null, int timeout = 10)
     {
-        WriteToArduino(variable);
+        if(message != "" || message != null)
+            WriteToArduino(message);
+
         serial.ReadTimeout = timeout;
         serial.DiscardInBuffer();
         serial.DiscardOutBuffer();
@@ -100,21 +102,6 @@ public class SerialArduino
         {
             Debug.Log(e);
             Close();
-            return null;
-        }
-       
-    }
-
-    public string WriteToArduinoThenRead(string message, int timeout = 10)
-    {
-        serial.WriteLine(message);
-        serial.ReadTimeout = timeout;
-        try
-        {
-            return serial.ReadLine();
-        }
-        catch (TimeoutException)
-        {
             return null;
         }
     }
