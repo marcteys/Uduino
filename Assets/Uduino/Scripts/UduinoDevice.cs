@@ -5,7 +5,7 @@ namespace Uduino
 {
     public class UduinoDevice : SerialArduino
     {
-        public bool read = false;
+        public string read = null;
 
         public UduinoDevice(string port, int baudrate = 9600)
             : base(port, baudrate)

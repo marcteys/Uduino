@@ -15,10 +15,9 @@ public class ReadSensor : MonoBehaviour
         u.OnValueReceived += OnValueReceived;
     }
 
-	
 	void Update ()
 	{
-
+        u.Read("myArduino","myVar");
 	}
 
     void OnValueReceived(object data)

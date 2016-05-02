@@ -15,6 +15,7 @@ namespace Uduino
         // TODO : Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
 
+
         public delegate void OnValueReceivedEvent(object data);
         public event OnValueReceivedEvent OnValueReceived;
 
@@ -40,8 +41,46 @@ namespace Uduino
                 return;
             }
             DiscoverPorts();
+            if(readOnThread) StartThread();
         }
-      
+
+
+        public bool readOnThread = false;
+        private System.Threading.Thread _Thread = null;
+        private bool readAllPorts = true;
+        void StartThread()
+        {
+            try
+            {
+                _Thread = new System.Threading.Thread(ReadPorts);
+                 _Thread.Start();
+            }
+            catch (System.Threading.ThreadStateException e)
+            {
+                Debug.LogError(e);
+            }
+        }
+        /// <summary>
+        ///  Thread function
+        /// </summary>
+        public void ReadPorts()
+        {
+            while (readAllPorts)
+            {
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                {
+                    if (uduino.Value.read != null)
+                    {
+                        string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
+                        uduino.Value.read = null;
+                        if (data != null || data != "")
+                        {
+                            OnValueReceived((object)data);
+                        }
+                    }
+                }
+            }
+        }
 
         void Discover(string[] portNames)
         {
@@ -55,7 +94,6 @@ namespace Uduino
                 {
                     if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
                     {
-                        //serialObject.WriteToArduino("I");
                         //Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
                         string reading = uduinoDevice.ReadFromArduino("IDENTITY", 100);
                         if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
@@ -80,7 +118,7 @@ namespace Uduino
         void ArduinoFound(string name, UduinoDevice uduinoDevice)
         {
             uduinoDevices.Add(name, uduinoDevice);
-            StartCoroutine(ReadSerial(name, "lol"));
+             if (!readOnThread) StartCoroutine(ReadSerial(name));
             Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
         }
 
@@ -122,40 +160,29 @@ namespace Uduino
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         public void SendCommand(string target, string message)
         {
             uduinoDevices[target].WriteToArduino(message);
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /*
-        public string Read(string target, string variable = null, int timeout = 100)
-        {
-            return uduinoDevices[target].ReadFromArduino(variable, timeout);
-        }
-        */
 
         public void Read(string target, string variable = null, int timeout = 100)
         {
-            uduinoDevices[target].read = true;
+            uduinoDevices[target].read = variable;
         }
 
 
-        public IEnumerator ReadSerial(string target, string variable)
+        public IEnumerator ReadSerial(string target)
         {
             while (true)
             {
-                if (uduinoDevices[target].read)
+                if (uduinoDevices[target].read != null)
                 {
-                    uduinoDevices[target].read = false;
-                    string data = uduinoDevices[target].ReadFromArduino(variable, 1);
+                    string data = uduinoDevices[target].ReadFromArduino(uduinoDevices[target].read, 50);
+                    uduinoDevices[target].read = null;
+
                     yield return null;
-                    if (data != null)
+                    if (data != null || data != "")
                     {
                         OnValueReceived((object)data);
                     }
@@ -169,6 +196,11 @@ namespace Uduino
 
         public void OnDisable()
         {
+            if (readOnThread)
+            {
+                readAllPorts = false;
+                _Thread.Abort();
+            }
             CloseAllPorts();
         }
 
