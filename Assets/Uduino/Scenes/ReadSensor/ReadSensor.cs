@@ -19,21 +19,6 @@ public class ReadSensor : MonoBehaviour
 	void Update ()
 	{
 
-      //  u.Read("myArduino", "myVar", 50);
-
-        if (send == true)
-        {
-          //  Debug.Log(uduino.Read("myArduino", "myVar", 1000 / 120));
-            send = false;
-        }
-   //     uduino.SendCommand("myArduino", "R");
-    //  uduino.TRead("myArduino", "myVar");
-
-
-    //  u.ARead("myArduino");
-
-
-    //    Debug.Log(uduino.Read("myArduino",0));
 	}
 
     void OnValueReceived(object data)

@@ -2,6 +2,9 @@
 Uduino uduino("myArduino");
 
 int variable = 10;
+#include <SerialCommand.h>
+
+SerialCommand SCmd;   // The demo SerialCommand object
 
 void setup()
 {
@@ -13,12 +16,22 @@ void setup()
   uduino.addVariable("variable", variable);
  // uduino.addCommand("I", identityHandler);
   uduino.addCommand("PING", pong);
+  uduino.addCommand("Z", pong);
+  uduino.addCommand("LIGHT", light);
+  SCmd.addCommand("LIGHT", light);
 }
 
 void pong () {
   char *arg;
   arg = uduino.next();
-  Serial.println("lol");
+  Serial.println("caca");
+}
+
+void light() {
+    char *arg;
+   String msgString = String(arg);
+  if(msgString.toInt()==0) digitalWrite(13,LOW);
+  else digitalWrite(13,HIGH);
 }
 
 void identityHandler () {
@@ -37,9 +50,7 @@ void loop()
     uduino.readSerial();
     
   readSensor ();
-  delay(400);
-    digitalWrite(13,LOW);
-
+  delay(10);    
 }
 
 

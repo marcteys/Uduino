@@ -3,7 +3,6 @@ using System;
 using System.Collections;
 using System.IO.Ports;
 
-
 public class SerialArduino
 {
     public enum SerialStatus
@@ -26,8 +25,8 @@ public class SerialArduino
         this.Open();
         try
         {
-         //   _Thread = new System.Threading.Thread(Read);
-           // _Thread.Start();
+       //    _Thread = new System.Threading.Thread(Read);
+          // _Thread.Start();
         }
         catch (System.Threading.ThreadStateException e)
         {
@@ -38,7 +37,7 @@ public class SerialArduino
     public string tread = null;
     public bool running = true;
 
-    public string Read()
+    public string ReadPort()
     {
         while (running)
         {
@@ -60,6 +59,7 @@ public class SerialArduino
     {
         tread = variable;
     }
+
     public void Open()
     {
         try
@@ -209,7 +209,7 @@ public class SerialArduino
     {
         WriteToArduino("STOP");
         running = false;
-        _Thread.Abort();
+     //   _Thread.Abort();
         if (serial.IsOpen)
         {
             Debug.Log("Closing port : <color=#2196F3>[" + _port + "]</color>");

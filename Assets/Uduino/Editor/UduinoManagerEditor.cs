@@ -31,12 +31,9 @@ public class UduinoManagerEditor : Editor {
         {
             foreach (KeyValuePair<string, UduinoDevice> uduinoDevice in manager.uduinoDevices)
             {
-               
                  // lk.Draw();
-                      
              }
          }
-
 
 
         EditorGUILayout.Separator();
@@ -52,7 +49,7 @@ public class UduinoManagerEditor : Editor {
         }
         if (GUILayout.Button("Read Arduino"))
         {
-          //  Debug.Log(manager.Read(targetName));
+           manager.Read(targetName);
         }
         GUILayout.EndVertical();
 

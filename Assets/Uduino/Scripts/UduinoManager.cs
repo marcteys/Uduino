@@ -18,7 +18,6 @@ namespace Uduino
         public delegate void OnValueReceivedEvent(object data);
         public event OnValueReceivedEvent OnValueReceived;
 
-
         public static UduinoManager Instance
         {
             get {
@@ -141,47 +140,36 @@ namespace Uduino
         }
         */
 
-
         public void Read(string target, string variable = null, int timeout = 100)
         {
-          //  StartCoroutine(ReadSerial(target, variable));
+            uduinoDevices[target].read = true;
         }
 
-        public string lol = "caca";
 
-        public void ARead(string target, int timeout = 100)
+        public IEnumerator ReadSerial(string target, string variable)
         {
-            StartCoroutine
-            (
-                uduinoDevices[target].AsynchronousReadFromArduino
-                ( (object s) => lol = (string)s,     // Callback
-                    (string s) => Debug.Log(s),   // Error callback
-                    1f )                             // Timeout (seconds)
-            );
-        }
-
-        public string TRead(string target, string variable = null)
-        {
-         //   uduinoDevices[target].TReadFromArduino(variable);
-            return null;
+            while (true)
+            {
+                if (uduinoDevices[target].read)
+                {
+                    uduinoDevices[target].read = false;
+                    string data = uduinoDevices[target].ReadFromArduino(variable, 1);
+                    yield return null;
+                    if (data != null)
+                    {
+                        OnValueReceived((object)data);
+                    }
+                }
+                else
+                {
+                    yield return null;
+                }
+            }
         }
 
         public void OnDisable()
         {
             CloseAllPorts();
-        }
-      
-
-        public int nbrCoroutines = 0;
-        public IEnumerator ReadSerial(string target, string variable)
-        {
-            string data = uduinoDevices[target].ReadFromArduino(variable, 100);
-            if (data != null)
-            {
-               // OnValueReceived(uduinoDevices[target].ReadFromArduino(variable, 100));
-            }
-            //nbrCoroutines = 0;
-            yield return null;
         }
 
     }
