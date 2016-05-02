@@ -3,9 +3,10 @@ using System.Collections;
 
 namespace Uduino
 {
-    public class UduinoDevice
+    public class UduinoDevice : SerialArduino
     {
         private SerialArduino serialArduino;
+        public bool _readSerial = false;
 
         public UduinoDevice(SerialArduino sA)
         {
@@ -27,6 +28,15 @@ namespace Uduino
            // serialArduino.AsynchronousReadFromArduino(timeout);
         }
 
+        public string TReadFromArduino(string variable, int timeout = 10)
+        {
+            serialArduino.TRead(variable);
+
+            return "e";
+           // return serialArduino.TReadFromArduino(variable, timeout);
+        }
+
+        
 
         public string ReadFromArduino(string variable, int timeout = 10)
         {

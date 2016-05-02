@@ -50,6 +50,10 @@ public class UduinoManagerEditor : Editor {
         {
             manager.SendCommand(targetName, message);
         }
+        if (GUILayout.Button("Read Arduino"))
+        {
+          //  Debug.Log(manager.Read(targetName));
+        }
         GUILayout.EndVertical();
 
 

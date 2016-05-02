@@ -1,7 +1,7 @@
 #include<Uduino.h>
 Uduino uduino("myArduino");
 
-int variable;
+int variable = 10;
 
 void setup()
 {
@@ -10,15 +10,15 @@ void setup()
   Serial.begin(9600);
   while (!Serial);
 
-  uduino.addVariable("variable", 10);
-  uduino.addCommand("I", identityHandler);
+  uduino.addVariable("variable", variable);
+ // uduino.addCommand("I", identityHandler);
   uduino.addCommand("PING", pong);
 }
 
 void pong () {
   char *arg;
   arg = uduino.next();
-  Serial.print("lol");
+  Serial.println("lol");
 }
 
 void identityHandler () {

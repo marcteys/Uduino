@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
@@ -12,13 +13,15 @@ namespace Uduino
         // TODO : public values for the number of tries ?
         // TODO : Verbose mode
         // TODO : Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
-
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
+
+        public delegate void OnValueReceivedEvent(object data);
+        public event OnValueReceivedEvent OnValueReceived;
+
 
         public static UduinoManager Instance
         {
             get {
-           
                 return _instance;
             }
             set { _instance = value; }
@@ -39,6 +42,7 @@ namespace Uduino
             }
             DiscoverPorts();
         }
+      
 
         void Discover(string[] portNames)
         {
@@ -53,7 +57,8 @@ namespace Uduino
                     if (serialObject.getStatus() == SerialArduino.SerialStatus.OPEN)
                     {
                         //serialObject.WriteToArduino("I");
-                        string reading = serialObject.ReadFromArduino("I", 100);
+                        //Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
+                        string reading = serialObject.ReadFromArduino("IDENTITY", 100);
                         if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
                         {
                             this.ArduinoFound(reading.Split(new char[0])[1], serialObject);
@@ -61,7 +66,7 @@ namespace Uduino
                         }
                         else
                         {
-                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/50)");
+                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
                         }
                     }
                 } while (serialObject.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 50);
@@ -76,6 +81,7 @@ namespace Uduino
         void ArduinoFound(string name, SerialArduino serialArduino)
         {
             uduinoDevices.Add(name, new UduinoDevice(serialArduino));
+            StartCoroutine(ReadSerial(name, "lol"));
             Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + serialArduino.getPort() + "]</color> added to dictionnary");
         }
 
@@ -110,11 +116,11 @@ namespace Uduino
             {
                 Debug.Log("No port currently open");
             }
-            foreach (KeyValuePair<string, UduinoDevice> liv in uduinoDevices)
+            foreach (KeyValuePair<string, UduinoDevice> uduinio in uduinoDevices)
             {
-                SerialArduino device = liv.Value.getSerial();
+                SerialArduino device = uduinio.Value.getSerial();
                 string state = device.getStream().IsOpen ? "open " : "closed";
-                Debug.Log(device.getPort() + " (" + liv.Key + ")" + " is " + state);
+                Debug.Log(device.getPort() + " (" + uduinio.Key + ")" + " is " + state);
             }
         }
 
@@ -130,15 +136,22 @@ namespace Uduino
         /// <summary>
         /// 
         /// </summary>
+        /*
         public string Read(string target, string variable = null, int timeout = 100)
         {
             return uduinoDevices[target].ReadFromArduino(variable, timeout);
         }
+        */
 
+
+        public void Read(string target, string variable = null, int timeout = 100)
+        {
+          //  StartCoroutine(ReadSerial(target, variable));
+        }
 
         public string lol = "caca";
 
-        public  void ARead(string target, int timeout = 100)
+        public void ARead(string target, int timeout = 100)
         {
             StartCoroutine
             (
@@ -149,9 +162,30 @@ namespace Uduino
             );
         }
 
+        public string TRead(string target, string variable = null)
+        {
+            uduinoDevices[target].TReadFromArduino(variable);
+            return null;
+        }
+
         public void OnDisable()
         {
             CloseAllPorts();
         }
+
+      
+
+        public int nbrCoroutines = 0;
+        public IEnumerator ReadSerial(string target, string variable)
+        {
+            string data = uduinoDevices[target].ReadFromArduino(variable, 100);
+            if (data != null)
+            {
+                OnValueReceived(uduinoDevices[target].ReadFromArduino(variable, 100));
+            }
+            //nbrCoroutines = 0;
+            yield return null;
+        }
+
     }
 }
