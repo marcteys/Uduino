@@ -1,39 +1,37 @@
 #include<Uduino.h>
-//Uduino uduino("myArduino");
+Uduino uduino("myArduino");
 
 int variable = 10;
-#include <SerialCommand.h>
 
-SerialCommand SCmd;   // The demo SerialCommand object
+bool test = false;
 
 void setup()
 {
-      pinMode(13,OUTPUT);
-
+  pinMode(13,OUTPUT);
   Serial.begin(9600);
   while (!Serial);
-/*
-  uduino.addVariable("variable", variable);
- // uduino.addCommand("I", identityHandler);
   uduino.addCommand("PING", pong);
-  uduino.addCommand("Z", pong);
-  uduino.addCommand("LIGHT", light);*/
-  SCmd.addCommand("PING", pong);
-  SCmd.addCommand("LIGHT", light);
-    SCmd.addCommand("IDENTITY", identityHandler);
+  uduino.addCommand("LIGHT", light);
+  uduino.addCommand("SENSOR", GetVariable);
+}
 
+void GetVariable() {
+  Serial.println(variable);
+}
+
+void lol() {
+  Serial.println("test");
 }
 void identityHandler () {
   Serial.println("uduinoIdentity myArduino");
 }
 void pong () {
-
   Serial.println("pong");
 }
 
 void light() {
     char *arg;
-      arg = SCmd.next();
+      arg = uduino.next();
    String msgString = String(arg);
   if(msgString.toInt()==0) digitalWrite(13,LOW);
   else digitalWrite(13,HIGH);
@@ -44,9 +42,11 @@ void light() {
 void loop()
 {
    if (Serial.available() > 0)
-    SCmd.readSerial();
-    
-  delay(10);    
+    uduino.readSerial();
+
+  variable = random(10, 200);
+
+  delay(50);    
 }
 
 //TODO : en faire une méthode arduino

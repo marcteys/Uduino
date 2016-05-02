@@ -13,8 +13,8 @@ namespace Uduino
 
         }
 
-        public void SendCommand(char command) { WriteToArduino(command.ToString()); }
-        public void SendCommand(char command, int value) { WriteToArduino(command + " " + value); }
+        public void Write(string command) { WriteToArduino(command); }
+        public void SendCommand(string command, int value) { WriteToArduino(command + " " + value); }
         // TODO : refaire ça avec un nombre illimité de paramètre  // enelever "nb"  mais faire un length  de command ou value
         public void SendCommand(char[] command, int[] value, int nb)
         {
@@ -26,32 +26,6 @@ namespace Uduino
             buffer += '\n';
             WriteToArduino(buffer);
         }
-
-
-        /*
-
-        public void AsynchronousReadFromArduino(int timeout = 10)
-        {
-           // serialArduino.AsynchronousReadFromArduino(timeout);
-        }
-
-        public string TReadFromArduino(string variable, int timeout = 10)
-        {
-            serialArduino.TRead(variable);
-
-            return "e";
-           // return serialArduino.TReadFromArduino(variable, timeout);
-        }
-
-        
-
-        public string ReadFromArduino(string variable, int timeout = 10)
-        {
-            return serialArduino.ReadFromArduino(variable, timeout);
-        }
-
-
-   */
        
     }
 }

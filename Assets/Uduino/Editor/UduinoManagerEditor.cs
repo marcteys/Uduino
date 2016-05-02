@@ -27,13 +27,7 @@ public class UduinoManagerEditor : Editor {
             GUILayout.Button("No arduino connected", "OL Title");
             GUILayout.EndHorizontal();
         }
-        else
-        {
-            foreach (KeyValuePair<string, UduinoDevice> uduinoDevice in manager.uduinoDevices)
-            {
-                 // lk.Draw();
-             }
-         }
+      
 
 
         EditorGUILayout.Separator();
@@ -45,7 +39,7 @@ public class UduinoManagerEditor : Editor {
         message = EditorGUILayout.TextField("Test message: ", message);
         if (GUILayout.Button("Send test message"))
         {
-            manager.SendCommand(targetName, message);
+            manager.Write(targetName, message);
         }
         if (GUILayout.Button("Read Arduino"))
         {

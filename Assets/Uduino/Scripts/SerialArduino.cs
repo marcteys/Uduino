@@ -38,8 +38,7 @@ public class SerialArduino
         catch (Exception e)
         {
             serialStatus = SerialStatus.CLOSE;
-            Debug.Log(e);
-            Debug.Log("Error on port <color=#2196F3>[" + _port + "]</color>");
+            Debug.Log("Error on port <color=#2196F3>[" + _port + "]</color> : " + e);
         }
     }
 

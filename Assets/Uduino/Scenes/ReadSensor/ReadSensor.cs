@@ -6,8 +6,8 @@ using Uduino;
 public class ReadSensor : MonoBehaviour
 {
 
-    public bool send = false;
     UduinoManager u;
+    int pos = 0;
 
 	void Start ()
 	{
@@ -17,11 +17,12 @@ public class ReadSensor : MonoBehaviour
 
 	void Update ()
 	{
-        u.Read("myArduino","myVar");
+        u.Read("myArduino","SENSOR");
+        this.transform.position = new Vector3(pos, 0.0f, 0.0f);
 	}
 
-    void OnValueReceived(object data)
+    void OnValueReceived(string data)
     {
-        Debug.Log((string)data);
+        pos = int.Parse(data);
     }
 }
