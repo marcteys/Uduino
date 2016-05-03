@@ -5,8 +5,8 @@
  *  ================
  *       TODOs
  *  ================
- *  
- * Quand on "write", faire une option pour write sur toutes les arduinos (ou mettre target en facultatif ?)
+ *  UduinoManager.Instance.Read("sensorArduino", "SENSOR",2000); /// TIMEOUT NOT WORKING
+ *  Quand on "write", faire une option pour write sur toutes les arduinos (ou mettre target en facultatif ?)
  *  public values for the number of tries ?
  *  Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
  *  Function to discover manually a specific port ?
@@ -32,9 +32,11 @@ namespace Uduino
         public static UduinoManager Instance
         {
             get {
-                if (_instancse == null)
+                //UduinoManager Instance StackOverflowException 
+                UduinoManager[] uduinoManagers = FindObjectsOfType(typeof(UduinoManager)) as UduinoManager[];
+                if (uduinoManagers.Length == 0 )
                 {
-                    Debug.Log("UduinoManager not present on the current scene. Crating a new one.");
+                    Debug.Log("UduinoManager not present on the scene. Creating a new one.");
                     UduinoManager manager = new GameObject("UduinoManager").AddComponent<UduinoManager>();
                     _instance = manager;
                     return _instance;
@@ -46,7 +48,10 @@ namespace Uduino
                 if(UduinoManager.Instance == null)
                     _instance = value;
                 else
-                    Debug.Log("You can only use one UduinoManager. Destroying the new one atached to the GameObject " + value.gameObject.name);
+                {
+                    Debug.Log("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
+                    Destroy(value);
+                }
             }
         }
         private static UduinoManager _instance = null;
@@ -76,12 +81,12 @@ namespace Uduino
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
         [SerializeField]
-        private bool ReadOnThread = false;
+        private bool ReadOnThread = true;
 
         /// <summary>
         /// Debug infos in the console
         /// </summary>
-        public static bool DebugInfos = true;
+        public static bool DebugInfos = false;
 
         /// <summary>
         /// BaudRate
@@ -91,6 +96,8 @@ namespace Uduino
 
         void Awake()
         {
+            Instance = this;
+            if (Instance != this) return;
             DiscoverPorts();
             if(ReadOnThread) StartThread();
         }
@@ -136,7 +143,7 @@ namespace Uduino
                         }
                         else
                         {
-                            if (DebugInfos) Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
+                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
                         }
                     }
                 } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 10);
@@ -317,7 +324,7 @@ namespace Uduino
         {
             if (uduinoDevices.Count == 0)
             {
-                Debug.Log("All ports are now closed");
+                if(DebugInfos) Debug.Log("All ports are closed.");
             }
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)
@@ -333,9 +340,10 @@ namespace Uduino
             if (ReadOnThread)
             {
                 readAllPorts = false;
-                _Thread.Abort();
+                if(_Thread != null) _Thread.Abort();
+                _Thread = null;
             }
-            CloseAllPorts();
+            if(uduinoDevices.Count != 0) CloseAllPorts();
         }
 
     }
