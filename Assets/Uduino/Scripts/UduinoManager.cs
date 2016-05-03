@@ -1,21 +1,37 @@
-﻿using UnityEngine;
-using UnityEngine.Events;
+﻿/* 
+ * Uduino - Yet Another Arduin-Unity Library
+ * Version 0.0.1, 2016, Marc Teyssier
+ *  
+ * 
+ * TODO : 
+ *  - public values for the number of tries ?
+ *  - Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
+ *  - Function to discover manually a specific port ?
+ *  - Faire un script avec des "utils" our le OnValueReceived, comme parser un array de string, etc, convertir string to int, etc
+ */
+
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
-
-/*
-    TODO : Enum pour sélectionner le baudrAte (a faire sur l'éditor uniquement ? )
-    TODO : public values for the number of tries ?
-    TODO : Verbose mode
-    TODO : Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
-    TODO : Faire un script avec des "utils" our le OnValueReceived, comme parser un array de string, etc, convertir string to int, etc
- */
 
 namespace Uduino
 {
     public class UduinoManager : MonoBehaviour {
         
+        /// <summary>
+        /// Uduino manager instance
+        /// </summary>
+        /// <value>The unique Uduino Manager Instance</value>
+        public static UduinoManager Instance
+        {
+            get {
+                return _instance;
+            }
+            set { _instance = value; }
+        }
+        private static UduinoManager _instance = null;
+
         /// <summary>
         /// Dictionnary containing all the connected Arduino devices
         /// </summary>
@@ -47,22 +63,13 @@ namespace Uduino
         /// </summary>
         public static bool DebugInfos = false;
 
-        /// <summary>
-        /// Uduino manager instance
-        /// </summary>
-        /// <value>The unique Uduino Manager Instance</value>
-        public static UduinoManager Instance
-        {
-            get {
-                return _instance;
-            }
-            set { _instance = value; }
-        }
-        private static UduinoManager _instance = null;
+        [SerializeField]
+        private int baudRate = 9600;
 
+        
         void Awake()
         {
-            if (Instance == null)
+            if (Instance == null) // TODO : refaire ça dans le getter ou le seter, en créant un objet
             {
                 Instance = this;
             }
@@ -99,7 +106,7 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                UduinoDevice uduinoDevice = new UduinoDevice(portName, 9600);
+                UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
                 int tries = 0;
                 do
                 {
@@ -133,6 +140,7 @@ namespace Uduino
         /// <summary>
         /// Debug all ports state.
         /// TODO : Really neccessary ? They are always open...
+        /// TODO : A mettre dans les utils
         /// </summary>
         public void GetPortState()
         {
@@ -156,10 +164,8 @@ namespace Uduino
         /// <param name="timeout">Read Timeout, if defined </param>
         public void Read(string target, string variable = null, int timeout = 100)
         {
-            UduinoDevice uduino = null;
-            if (uduinoDevices.TryGetValue(target, out uduino))
-                uduino.read = variable;
-            else ErrorNotConnected(target);
+            if (UduinoTargetExists(target))
+                uduinoDevices[target].read = variable;
         }
 
         /// <summary>
@@ -167,22 +173,32 @@ namespace Uduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
-/// TODO : Overload this function !!
+        /// TODO : Overload this function !!
         public void Write(string target, string message)
         {
-            UduinoDevice uduino = null;
-            if (uduinoDevices.TryGetValue(target, out uduino))
-                uduino.WriteToArduino(message);
-            else ErrorNotConnected(target);
-        }
-
-        void ErrorNotConnected(string target)
-        {
-            if (DebugInfos) Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
+            if (UduinoTargetExists(target))
+                uduinoDevices[target].WriteToArduino(message);
         }
 
         /// <summary>
-        /// new thread
+        /// Verify if the target exists when we want to get a value
+        /// </summary>
+        /// <param name="target">Target Uduino Name</param>
+        /// <returns>Re</returns>
+        private bool UduinoTargetExists(string target)
+        {
+            UduinoDevice uduino = null;
+            if (uduinoDevices.TryGetValue(target, out uduino))
+                return true;
+            else
+            {
+                if (DebugInfos) Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Threading variables
         /// </summary>
         private System.Threading.Thread _Thread = null;
         private bool readAllPorts = true;
@@ -202,6 +218,7 @@ namespace Uduino
                 Debug.LogError(e);
             }
         }
+
         /// <summary>
         ///  Read the Serial Port data in a new thread.
         /// </summary>
