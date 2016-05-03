@@ -40,7 +40,12 @@ namespace Uduino
         /// Enable the reading of serial port in a different Thread.
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
-        public bool readOnThread = false;
+        public bool ReadOnThread = false;
+
+        /// <summary>
+        /// Debug infos in the console
+        /// </summary>
+        public static bool DebugInfos = false;
 
         /// <summary>
         /// Uduino manager instance
@@ -68,7 +73,7 @@ namespace Uduino
                 return;
             }
             DiscoverPorts();
-            if(readOnThread) StartThread();
+            if(ReadOnThread) StartThread();
         }
 
         /// <summary>
@@ -104,15 +109,15 @@ namespace Uduino
                         string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
                         if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
                         {
-
-                            uduinoDevices.Add(reading.Split(new char[0])[1], uduinoDevice); //Add the new device to the devices array
-                            if (!readOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                            Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                            string name = reading.Split(new char[0])[1];
+                            uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
+                            if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
+                            if (DebugInfos) Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                             break;
                         }
                         else
                         {
-                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
+                            if (DebugInfos) Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
                         }
                     }
                 } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 10);
@@ -137,8 +142,8 @@ namespace Uduino
             }
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
             {
-                string state = uduino.Value.isSerialOpen() ? "open " : "closed";
-                Debug.Log(uduino.Value.getPort() + " (" + uduino.Key + ")" + " is " + state);
+                string state = uduino.Value.serial.IsOpen ? "open " : "closed";
+                if (DebugInfos) Debug.Log("" + uduino.Value.getPort() + " (" + uduino.Key + ")" + " is " + state);
             }
         }
 
@@ -173,7 +178,7 @@ namespace Uduino
 
         void ErrorNotConnected(string target)
         {
-            Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
+            if (DebugInfos) Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
         }
 
         /// <summary>
@@ -225,12 +230,20 @@ namespace Uduino
         {
             while (true)
             {
-                if (uduinoDevices[target].read != null)
+                UduinoDevice uduino = null;
+                if (uduinoDevices.TryGetValue(target, out uduino))
                 {
-                    string data = uduinoDevices[target].ReadFromArduino(uduinoDevices[target].read, 50);
-                    uduinoDevices[target].read = null;
-                    yield return null;
-                    ReadData(data);
+                    if (uduino.read != null)
+                    {
+                        string data = uduino.ReadFromArduino(uduino.read, 50);
+                        uduino.read = null;
+                        yield return null;
+                        ReadData(data);
+                    }
+                    else
+                    {
+                        yield return null;
+                    }
                 }
                 else
                 {
@@ -272,7 +285,7 @@ namespace Uduino
 
         public void OnDisable()
         {
-            if (readOnThread)
+            if (ReadOnThread)
             {
                 readAllPorts = false;
                 _Thread.Abort();
