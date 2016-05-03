@@ -2,12 +2,14 @@
  * Uduino - Yet Another Arduin-Unity Library
  * Version 0.0.1, 2016, Marc Teyssier
  *  
+ *  ================
+ *       TODOs
+ *  ================
+ *  public values for the number of tries ?
+ *  Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
+ *  Function to discover manually a specific port ?
+ *  Faire un script avec des "utils" our le OnValueReceived, comme parser un array de string, etc, convertir string to int, etc
  * 
- * TODO : 
- *  - public values for the number of tries ?
- *  - Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
- *  - Function to discover manually a specific port ?
- *  - Faire un script avec des "utils" our le OnValueReceived, comme parser un array de string, etc, convertir string to int, etc
  */
 
 using UnityEngine;
@@ -56,17 +58,20 @@ namespace Uduino
         /// Enable the reading of serial port in a different Thread.
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
-        public bool ReadOnThread = false;
+        [SerializeField]
+        private bool ReadOnThread = false;
 
         /// <summary>
         /// Debug infos in the console
         /// </summary>
         public static bool DebugInfos = false;
 
+        /// <summary>
+        /// BaudRate
+        /// </summary>
         [SerializeField]
         private int baudRate = 9600;
 
-        
         void Awake()
         {
             if (Instance == null) // TODO : refaire ça dans le getter ou le seter, en créant un objet
@@ -89,9 +94,9 @@ namespace Uduino
         public void DiscoverPorts()
         {
         #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
-                    Discover(new string[] {"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4", "/dev/ttyUSB5"});
+            Discover(new string[] {"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4", "/dev/ttyUSB5"});
         #else
-                    Discover(SerialPort.GetPortNames());
+            Discover(SerialPort.GetPortNames());
         #endif
         }
 
@@ -169,7 +174,7 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Write a specific string in the serial of a given arduino
+        /// Write a command on the target arduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
@@ -178,6 +183,23 @@ namespace Uduino
         {
             if (UduinoTargetExists(target))
                 uduinoDevices[target].WriteToArduino(message);
+        }
+
+        /// <summary>
+        /// Overload @Write with a specific value  
+        /// </summary>
+        public void Write(string target, string command, int value) {
+            if (UduinoTargetExists(target))
+                uduinoDevices[target].WriteToArduino(command + " " + value);
+        }
+
+        /// <summary>
+        /// Overload @Write with a several commands and values  
+        /// </summary>
+        /// TODO : To improve
+        public void Write(string target, string[] command, int[] value, int nb) {
+            if (UduinoTargetExists(target))
+                uduinoDevices[target].AdvancedWriteToArduino(command, value,  nb);
         }
 
         /// <summary>
