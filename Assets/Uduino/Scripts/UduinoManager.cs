@@ -50,7 +50,7 @@ namespace Uduino
                 else
                 {
                     Debug.Log("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
-                    Destroy(value);
+                    DestroyImmediate(value);
                 }
             }
         }
@@ -97,7 +97,6 @@ namespace Uduino
         void Awake()
         {
             Instance = this;
-            if (Instance != this) return;
             DiscoverPorts();
             if(ReadOnThread) StartThread();
         }
