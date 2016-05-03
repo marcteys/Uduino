@@ -5,6 +5,8 @@
  *  ================
  *       TODOs
  *  ================
+ *  
+ * Quand on "write", faire une option pour write sur toutes les arduinos (ou mettre target en facultatif ?)
  *  public values for the number of tries ?
  *  Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
  *  Function to discover manually a specific port ?
@@ -22,15 +24,30 @@ namespace Uduino
     public class UduinoManager : MonoBehaviour {
         
         /// <summary>
-        /// Uduino manager instance
+        /// UduinoManager unique instance.
+        /// Create  a new instance if any UduinoManager is present on the scene.
+        /// Set the Uduinomanager only on the first time.
         /// </summary>
-        /// <value>The unique Uduino Manager Instance</value>
+        /// <value>UduinoManager static instance</value>
         public static UduinoManager Instance
         {
             get {
-                return _instance;
+                if (_instancse == null)
+                {
+                    Debug.Log("UduinoManager not present on the current scene. Crating a new one.");
+                    UduinoManager manager = new GameObject("UduinoManager").AddComponent<UduinoManager>();
+                    _instance = manager;
+                    return _instance;
+                }
+                else
+                    return _instance;
             }
-            set { _instance = value; }
+            set {
+                if(UduinoManager.Instance == null)
+                    _instance = value;
+                else
+                    Debug.Log("You can only use one UduinoManager. Destroying the new one atached to the GameObject " + value.gameObject.name);
+            }
         }
         private static UduinoManager _instance = null;
 
@@ -64,7 +81,7 @@ namespace Uduino
         /// <summary>
         /// Debug infos in the console
         /// </summary>
-        public static bool DebugInfos = false;
+        public static bool DebugInfos = true;
 
         /// <summary>
         /// BaudRate
@@ -74,16 +91,6 @@ namespace Uduino
 
         void Awake()
         {
-            if (Instance == null) // TODO : refaire ça dans le getter ou le seter, en créant un objet
-            {
-                Instance = this;
-            }
-            else if (Instance != null && Instance != this)
-            {
-                Debug.Log("You can only use one UduinoManager. Destroying the new one atached to the GameObject " + this.gameObject.name);
-                Destroy(this.gameObject);
-                return;
-            }
             DiscoverPorts();
             if(ReadOnThread) StartThread();
         }
@@ -174,11 +181,10 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Write a command on the target arduino
+        /// Write a command on an Arduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
-        /// TODO : Overload this function !!
         public void Write(string target, string message)
         {
             if (UduinoTargetExists(target))
@@ -186,7 +192,7 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Overload @Write with a specific value  
+        /// Write a command on an Arduino with a specific value  
         /// </summary>
         public void Write(string target, string command, int value) {
             if (UduinoTargetExists(target))
@@ -194,7 +200,7 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Overload @Write with a several commands and values  
+        /// Write a command on an Arduino with several commands and values
         /// </summary>
         /// TODO : To improve
         public void Write(string target, string[] command, int[] value, int nb) {
