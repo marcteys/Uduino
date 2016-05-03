@@ -74,6 +74,7 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message)
         {
+            if (message == null || message == "") return;
             try
             {
                 if (UduinoManager.DebugInfos) Debug.LogWarning("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
@@ -95,11 +96,10 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
-            if (message != "" || message != null)
-                WriteToArduino(message);
+            WriteToArduino(message);
 
             serial.ReadTimeout = timeout;
-            serial.DiscardInBuffer();
+            serial.DiscardInBuffer(); // TODO : To remove ?
             serial.DiscardOutBuffer();
 
             try

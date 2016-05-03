@@ -142,10 +142,10 @@ namespace Uduino
                         }
                         else
                         {
-                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/10)");
+                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/20)");
                         }
                     }
-                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 10);
+                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 20);
 
                 if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
                 {
@@ -177,12 +177,12 @@ namespace Uduino
         /// Send a read command to a specific arduino.
         /// A read command will be returned in the OnValueReceived() delegate function
         /// </summary>
-        /// <param name="target">Target device name</param>
+        /// <param name="target">Target device name. Not defined means read everything</param>
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         public void Read(string target, string variable = null, int timeout = 100)
         {
-            if (UduinoTargetExists(target))
+          if (UduinoTargetExists(target))
                 uduinoDevices[target].read = variable;
         }
 
