@@ -86,7 +86,7 @@ namespace Uduino
         /// <summary>
         /// Debug infos in the console
         /// </summary>
-        public static bool DebugInfos = false;
+        public static bool DebugInfos = true;
 
         /// <summary>
         /// BaudRate
@@ -226,7 +226,7 @@ namespace Uduino
                 return true;
             else
             {
-                if (DebugInfos) Debug.LogError("Error ! The object " + target + " cannot be found. Are you sur it is connected and correctly set up ?");
+                Debug.Log("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }

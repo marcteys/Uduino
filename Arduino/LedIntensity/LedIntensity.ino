@@ -6,8 +6,7 @@ int ledPin = 11;
 void setup()
 {
   Serial.begin(9600);
-  
- pinMode(13,OUTPUT);
+  pinMode(13,OUTPUT);
   uduino.addCommand("LIGHT", light);
 }
 
@@ -16,7 +15,6 @@ void light() {
   arg = uduino.next();
   analogWrite(11,uduino.charToInt(arg));
 }
-
 
 void loop()
 {

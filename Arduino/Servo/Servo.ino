@@ -4,11 +4,9 @@ Uduino uduino("servo");
 #include <Servo.h>
 Servo myservo;
 
-
 void setup()
 {
- Serial.begin(9600);
-
+  Serial.begin(9600);
   myservo.attach(9);
   uduino.addCommand("R", rotate);
 }
@@ -18,7 +16,6 @@ void rotate() {
   arg = uduino.next();
   myservo.write(uduino.charToInt(arg));
 }
-
 
 void loop()
 {

@@ -16,7 +16,7 @@ public class ReadSensor : MonoBehaviour
 
 	void Update ()
 	{
-        UduinoManager.Instance.Read("sensorArduino", "SENSOR",2000);
+        UduinoManager.Instance.Read("sensorArduino", "SENSOR", 2000);
         this.transform.position = new Vector3(sensor, 0.0f, 0.0f);
 	}
 
