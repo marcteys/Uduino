@@ -6,6 +6,7 @@ namespace Uduino
     public class UduinoDevice : SerialArduino
     {
         public string read = null;
+        public System.Action<string> callback = null;
 
         public UduinoDevice(string port, int baudrate = 9600)
             : base(port, baudrate)

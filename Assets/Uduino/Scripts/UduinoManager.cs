@@ -68,8 +68,6 @@ namespace Uduino
         public delegate void OnValueReceivedEvent(string data);
         public event OnValueReceivedEvent OnValueReceived;
 
-        // TODO for this two : crééer des helpers qui vont pouvoir filtrer par exemple [data]
-
         /// <summary>
         /// Create a delegate event to trigger the function OnExtendedValueReceivedEvent()
         /// </summary>
@@ -180,11 +178,29 @@ namespace Uduino
         /// <param name="target">Target device name. Not defined means read everything</param>
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
-        public void Read(string target, string variable = null, int timeout = 100)
+        /// <param name="callback">Action callback</param>
+        public void Read(string target, string variable = null, int timeout = 100, System.Action<string> action = null)
         {
-          if (UduinoTargetExists(target))
+            if (UduinoTargetExists(target))
+            {
                 uduinoDevices[target].read = variable;
+                uduinoDevices[target].callback = action;
+            }
         }
+
+        /*
+        /// <summary>
+        /// Send a read command to a specific arduino.
+        /// A read command will be returned in the OnValueReceived() delegate function
+        /// </summary>
+        /// <param name="target">Target device name. Not defined means read everything</param>
+        /// <param name="variable">Variable watched, if defined</param>
+        /// <param name="callback">Action callback</param>
+        public void Read(string target, string variable = null, System.Action<string> action = null)
+        {
+            Read(target, variable, callback: action);
+        }
+        */
 
         /// <summary>
         /// Write a command on an Arduino
@@ -266,7 +282,7 @@ namespace Uduino
                     {
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
                         uduino.Value.read = null;
-                        ReadData(data);
+                        ReadData(data, uduino.Value);
                     }
                 }
             }
@@ -289,7 +305,7 @@ namespace Uduino
                         string data = uduino.ReadFromArduino(uduino.read, 50);
                         uduino.read = null;
                         yield return null;
-                        ReadData(data);
+                        ReadData(data,uduino);
                     }
                     else
                     {
@@ -308,11 +324,13 @@ namespace Uduino
         /// TODO : Need extra work here
         /// </summary>
         /// <param name="data">Received data</param>
-        void ReadData(string data)
+        /// <param name="target">TODO : for the moment target is unused</param>
+        void ReadData(string data, UduinoDevice uduino = null)
         {
             if (data != null && data != "" && data != "Null")
             {
-                OnValueReceived(data);
+                if (uduino.callback != null) uduino.callback(data);
+                else OnValueReceived(data);
             }
         }
 
