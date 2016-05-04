@@ -3,13 +3,13 @@ using System.Collections;
 using UnityEngine.Events;
 using Uduino;
 
-public class MultipleArduinos : MonoBehaviour
+public class MultipleArduinosAction : MonoBehaviour
 {
 
     UduinoManager u;
     public int sensorOne = 0;
     public int sensorTwo = 0;
-
+   
 	void Update ()
 	{
         UduinoManager.Instance.Read("leo", "read", action:((string data) => sensorOne = int.Parse(data)));

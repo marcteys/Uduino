@@ -65,13 +65,14 @@ namespace Uduino
         /// Create a delegate event to trigger the function OnValueReceived()
         /// Takes one parameter, the returned data.
         /// </summary>
-        public delegate void OnValueReceivedEvent(string data);
+        public delegate void OnValueReceivedEvent(string data, string device);
         public event OnValueReceivedEvent OnValueReceived;
 
         /// <summary>
         /// Create a delegate event to trigger the function OnExtendedValueReceivedEvent()
         /// </summary>
-        public delegate void OnExtendedValueReceivedEvent(string[] data, string device, string vaiable);
+        /// TODO : REMOVE ?
+        public delegate void OnExtendedValueReceivedEvent(string data, string device);
         public event OnExtendedValueReceivedEvent OnExtendedValueReceived;
 
         /// <summary>
@@ -282,7 +283,7 @@ namespace Uduino
                     {
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
                         uduino.Value.read = null;
-                        ReadData(data, uduino.Value);
+                        ReadData(data, uduino.Key);
                     }
                 }
             }
@@ -305,7 +306,7 @@ namespace Uduino
                         string data = uduino.ReadFromArduino(uduino.read, 50);
                         uduino.read = null;
                         yield return null;
-                        ReadData(data,uduino);
+                        ReadData(data, target);
                     }
                     else
                     {
@@ -325,12 +326,13 @@ namespace Uduino
         /// </summary>
         /// <param name="data">Received data</param>
         /// <param name="target">TODO : for the moment target is unused</param>
-        void ReadData(string data, UduinoDevice uduino = null)
+        void ReadData(string data, string target = null)
         {
             if (data != null && data != "" && data != "Null")
             {
+                UduinoDevice uduino = uduinoDevices[target];
                 if (uduino.callback != null) uduino.callback(data);
-                else OnValueReceived(data);
+                else OnValueReceived(data, target);
             }
         }
 

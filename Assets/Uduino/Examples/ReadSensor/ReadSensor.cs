@@ -20,7 +20,7 @@ public class ReadSensor : MonoBehaviour
         this.transform.position = new Vector3(sensor, 0.0f, 0.0f);
 	}
 
-    void OnValueReceived(string data)
+    void OnValueReceived(string data, string device)
     {
         sensor = int.Parse(data);
     }
