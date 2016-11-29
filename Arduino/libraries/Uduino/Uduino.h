@@ -1,22 +1,13 @@
 /******************************************************************************* 
-UDUINO - An Arduino library to tokenize and parse commands received over
+Uduino - Uduino — Simple and robust Arduino-Unity communication
+Uduino - Copyright (C) 2016-2017 Marc Teyssier  <marc.teys@gmail.com>
+http://marcteyssier.com
+
+ArduinoSerialCommand - An Arduino library to tokenize and parse commands received over
 a serial port. 
 Copyright (C) 2011-2013 Steven Cogswell  <steven.cogswell@gmail.com>
 http://awtfy.com
 
-Version 20131021A.   
-
-Version History:
-May 11 2011 - Initial version
-May 13 2011 - Prevent overwriting bounds of UDUINOCallback[] array in addCommand()
-      defaultHandler() for non-matching commands
-Mar 2012 - Some const char * changes to make compiler happier about deprecated warnings.  
-           Arduino 1.0 compatibility (Arduino.h header) 
-Oct 2013 - UDUINO object can be created using a SoftwareSerial object, for SoftwareSerial
-           support.  Requires #include <SoftwareSerial.h> in your sketch even if you don't use 
-           a SoftwareSerial port in the project.  sigh.   See Example Sketch for usage. 
-Oct 2013 - Conditional compilation for the SoftwareSerial support, in case you really, really
-           hate it and want it removed.  
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -85,7 +76,8 @@ class Uduino
     void readSerial();    // Main entry point.  
     void addCommand(const char *, void(*)());   // Add commands to processing dictionary
     void addDefaultHandler(void (*function)());    // A handler to call when no valid command received. 
-  
+    int charToInt(char* arg); //COnverts char to int
+
     // Uduino specific commands
     char *getIdentity();
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)

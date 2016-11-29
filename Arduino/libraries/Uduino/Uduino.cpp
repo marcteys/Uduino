@@ -190,3 +190,10 @@ void Uduino::addDefaultHandler(void (*function)())
 {
   defaultHandler = function;
 }
+
+
+//Converts a char * to int
+int Uduino::charToInt(char* arg) {
+  String msgString = String(arg);
+  return msgString.toInt();
+}
