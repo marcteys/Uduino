@@ -1,7 +1,8 @@
-# Uduino — Simple and robust Arduino-Unity communication
+# Uduino — Simple and robust Arduino-Unity communication 
 -------
 
 **Uduino** is another Open Source plugin for Unity, which allow to communicate between a Arduino board with Unity. 
+
 
 ## Purpose & Target
 
@@ -20,7 +21,7 @@ You give a *unique name* to your arduino card, and declare which variable is rea
 
 ## Quick Start
 
-1. Import [uduino.unitypackage]() in your project
+1. Import [uduino.unitypackage](https://github.com/marcteys/Uduino/raw/master/uduino_1.0.unitypackage) in your project
 2. Add  the libraries `Uduino` and `SerialCommand`([link](https://github.com/scogswell/ArduinoSerialCommand)) to your Arduino `libraries` folder.
 3. On your Arduino project, add on the top of your code :
 ````arduino
@@ -43,13 +44,13 @@ public class ExampleScript : MonoBehaviour
 
 #### Unity
 
-Download [uduino.unitypackage]() and import it in your current project or open this repository with Unity Editor.
+Download [uduino.unitypackage](https://github.com/marcteys/Uduino/raw/master/uduino_1.0.unitypackage) and import it in your current project or open this repository with Unity Editor.
 
 #### Arduino
 
-The `Arduino` folder of this repo contains the Ùniduino`library and examples for Arduino, it can be merged with your Arduino user folder. Uduino is based on [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand) by [Steven Cogswell](https://github.com/scogswell/), released under GPL License. However this library is not needed to run Uduino.
+The `Arduino` folder of this repo contains the Ùniduino`library and examples for Arduino, it can be merged with your Arduino user folder.
 
-
+Uduino is partially based on [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand) by [Steven Cogswell](https://github.com/scogswell/), released under GPL License. However this library is not needed to run Uduino.
 
 
 ## Examples 
@@ -376,3 +377,5 @@ This is an experiment and feedback is welcome. I'll be very happy to have your c
 * Documentation: Explain uduino_hardwareonly mode 
 
 
+----
+Current Version : 1.0
