@@ -129,7 +129,7 @@ namespace Uduino
                 {
                     if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
                     {
-                        //Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
+                        // TODO : Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
                         string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
                         if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
                         {
@@ -322,7 +322,6 @@ namespace Uduino
 
         /// <summary>
         /// Parse the received data
-        /// TODO : Need extra work here
         /// </summary>
         /// <param name="data">Received data</param>
         /// <param name="target">TODO : for the moment target is unused</param>
