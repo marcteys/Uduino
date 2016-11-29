@@ -1,5 +1,5 @@
 #include<Uduino.h>
-Uduino uduino("servo");
+Uduino uduino("servoBoard");
 
 #include <Servo.h>
 Servo myservo;
@@ -21,4 +21,3 @@ void loop()
 {
   uduino.readSerial();
 }
-

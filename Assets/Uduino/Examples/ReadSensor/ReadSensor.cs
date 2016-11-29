@@ -1,27 +1,24 @@
 ﻿using UnityEngine;
 using System.Collections;
-using UnityEngine.Events;
 using Uduino;
 
 public class ReadSensor : MonoBehaviour
 {
 
     UduinoManager u;
-    public int sensor = 0;
 
-	void Start ()
-	{
-        UduinoManager.Instance.OnValueReceived += OnValueReceived;
+    void Awake()
+    {
+        UduinoManager.Instance.OnValueReceived += OnValueReceived; //Create the Delegate
     }
 
-	void Update ()
-	{
-        UduinoManager.Instance.Read("sensorArduino", "SENSOR", 2000);
-        this.transform.position = new Vector3(sensor, 0.0f, 0.0f);
-	}
+    void Update()
+    {
+        UduinoManager.Instance.Read("myArduinoName", "mySensor"); // Read every frame the value of the "mySensor" function on our board. 
+    }
 
     void OnValueReceived(string data, string device)
     {
-        sensor = int.Parse(data);
+        Debug.Log(int.Parse(data)); // Use the data as you want !
     }
 }

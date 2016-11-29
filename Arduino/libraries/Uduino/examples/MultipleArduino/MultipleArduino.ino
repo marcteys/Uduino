@@ -1,12 +1,12 @@
 #include<Uduino.h>
-Uduino uduino("test");
+Uduino uduino("myArduinoName");
 
 int variable = 10;
 
 void setup()
 {
   Serial.begin(9600);
-  uduino.addCommand("read", GetVariable);
+  uduino.addCommand("myVariable", GetVariable);
 }
 
 void GetVariable() {

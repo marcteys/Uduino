@@ -1,19 +1,17 @@
 #include<Uduino.h>
 Uduino uduino("ledIntensity");
 
-int ledPin = 11;
-
 void setup()
 {
   Serial.begin(9600);
-  pinMode(13,OUTPUT);
-  uduino.addCommand("LIGHT", light);
+  pinMode(11,OUTPUT);
+  uduino.addCommand("SetLight", SetLightValue); // The function to be executed when we receive the value from Unity
 }
 
-void light() {
-  char *arg;
-  arg = uduino.next();
-  analogWrite(11,uduino.charToInt(arg));
+void SetLightValue() {
+  char *arg; 
+  arg = uduino.next(); // The arg char buffer is read and stored 
+  analogWrite(11,uduino.charToInt(arg)); // The function uduino.charToInt(); converts a char* to a int
 }
 
 void loop()
@@ -23,4 +21,3 @@ void loop()
     
   delay(50);    
 }
-

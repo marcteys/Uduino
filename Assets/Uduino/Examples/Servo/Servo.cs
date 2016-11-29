@@ -6,25 +6,18 @@ public class Servo : MonoBehaviour {
 
     [Range(0, 180)]
     public int servoAngle = 0;
+    private int prevServoAngle = 0;
 
     void Update()
     {
         OptimizedWrite();
     }
 
-    //Regular send
-    void RegularWrite()
-    {
-        UduinoManager.Instance.Write("servo", "R", servoAngle);
-    }
-
-    //Optimized Send
-    private int prevServoAngle = 0;
     void OptimizedWrite()
     {
-        if (servoAngle != prevServoAngle)
+        if (servoAngle != prevServoAngle) // Use this condition to not write at each frame 
         {
-            UduinoManager.Instance.Write("servo", "R", servoAngle);
+            UduinoManager.Instance.Write("servoBoard", "R", servoAngle);
             prevServoAngle = servoAngle;
         }
     }
