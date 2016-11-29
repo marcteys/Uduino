@@ -217,18 +217,18 @@ namespace Uduino
         /// <summary>
         /// Write a command on an Arduino with a specific value  
         /// </summary>
-        public void Write(string target, string command, int value) {
+        public void Write(string target, string message, int value) {
             if (UduinoTargetExists(target))
-                uduinoDevices[target].WriteToArduino(command + " " + value);
+                uduinoDevices[target].WriteToArduino(message + " " + value);
         }
 
         /// <summary>
         /// Write a command on an Arduino with several commands and values
         /// </summary>
         /// TODO : To improve
-        public void Write(string target, string[] command, int[] value, int nb) {
+        public void Write(string target, string[] message, int[] values) {
             if (UduinoTargetExists(target))
-                uduinoDevices[target].AdvancedWriteToArduino(command, value,  nb);
+                uduinoDevices[target].AdvancedWriteToArduino(message, values);
         }
 
         /// <summary>

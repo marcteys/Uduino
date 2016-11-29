@@ -14,13 +14,12 @@ namespace Uduino
 
         }
 
-        // TODO : refaire ça avec un nombre illimité de paramètre  // enelever "nb"  mais faire un length  de command ou value
-        public void AdvancedWriteToArduino(string[] command, int[] value, int nb)
+        public void AdvancedWriteToArduino(string[] command, int[] value)
         {
             string buffer = "";
-            for (int i = 0; i < nb; i++)
+            for (int i = 0; i < value.Length; i++)
             {
-                buffer += command[i] + "" + value[i] + " ";
+                buffer += command[i] + " " + value[i] + " ";
             }
             buffer += '\n';
             WriteToArduino(buffer);

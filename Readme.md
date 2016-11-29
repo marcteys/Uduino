@@ -51,61 +51,112 @@ Download or clone the current repository. The repo is a Unity3D project and can 
 
 Download the Unity [Uduino Package]() and import it in your current project or open this project with Unity.
 
+
+
+## Examples 
+
+Examples can be found under `Assets\Uduino\Examples`. Their respective arduino code are on the library folders (`Arduino IDE\Examples\Uduino`). 
+
 ## Usage
 
 
-
-#### Arduino
-On the Arduino side, you have to define 
+### Read Analog value
+On the Arduino side, you have to define a name to your card. 
 The name of the arduino will be used
 
 ```arduino
-#include<Uduino.h>
-Uduino uduino("myArduinoName");
+#include<Uduino.h> //Add the reference to the library
+Uduino uduino("myArduinoName"); // Rename your object
 
 void setup()
 {
-  Serial.begin(9600);
-  uduino.addCommand("FUNCTION", ReadPin);
-}
-
-void ReadPin() {
-  Serial.println(analogRead(A0));
+  Serial.begin(9600); // Start Serial
 }
 
 void loop()
 {
    if (Serial.available() > 0)
     uduino.readSerial();
-
-  delay(10);    
+  Serial.print(analogRead(A0)); // Write the 
+  delay(100);
 }
 ```
 
 
 ```csharp
+using UnityEngine;
+using System.Collections;
+using Uduino;
+
+public class SimpleUduino : MonoBehaviour {
+
+    [Range(0, 255)]
+    public int intensity = 0;
+
+	void Update ()
+	{
+        UduinoManager.Instance.Write(""myArduinoName");
+	}
+}
 
 ```
 
 
-##Examples 
+## Arduino Methods
+
+| Name          | Description         |
+|---------------|---------------------|
+|`readSerial()`| Process Uduino every clock turn. Required in the `loop()` function. |
+| `addCommand(string, void)` | Attach a command to a specific function. The function will be triggerd when the event is called by Unity |
+|`clearBuffer()`| Clear Serial buffer|
+
+## Unity Mehods
+
+### Read(string target, string variable = null, int timeout = 100, System.Action<string> action = null)
+
+Send a read command to a specific Arduino board.
+A Read() command will be returned on the  OnValueReceived() delegate function
+        
+| Name          | Description         |
+|---------------|---------------------|
+|`target`| *System.String*<br> Target device name. Not defined means read everything |
+|`variable`| *System.String*<br>Variable watched, if defined|
+|`timeout`| *System.Integer*<br> Read Timeout, if defined |
+|`timeout`|System.Action<string> Action callback |
 
 
-## Methods
-
-### Read data from serial
 
 
-### Send a command to arduino
+### Write(string target, string message)
 
-Without parameter
-With parameter
+Write a command on an Arduino
+
+| Name          | Description         |
+|---------------|---------------------|
+|`target`| *System.String*<br> Target device name. Not defined means read everything |
+|`message`| *System.String*<br>Message to send to the Arduino board|
+
+### Write(string target, string message, int value)
+
+Write a command on an Arduino with a specific value 
+
+| Name          | Description         |
+|---------------|---------------------|
+|`target`| *System.String*<br> Target device name. Not defined means read everything |
+|`message`| *System.String*<br>Message to send to the Arduino board|
+|`value`|*System.Integer*<br>Value associated with the message|
+
+### Write(string target, string[] message, int[] value)
+
+| Name          | Description         |
+|---------------|---------------------|
+|`target`| *System.String*<br> Target device name. Not defined means read everything |
+|`message`| *System.String[]*<br>Messages to send to the Arduino board|
+|`values`|*System.Integer[]*<br>List of values to be sent. Value #is associated with message #|
 
 
+####Returns
 
-
-## FAQ
-- 
 
 ## Contribution
 
@@ -117,4 +168,6 @@ This is an experiment and feedback is welcome. I'll be very happy to have your c
 
 
 ## Todo
-* Create a global #SerialDebug value on Unity.   
+* Create a "simple" Sketch
+* Create a global #SerialDebug value on Unity.
+* Introduce a custom delay, to avoid blocking situations ?

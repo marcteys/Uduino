@@ -89,7 +89,6 @@ class Uduino
     // Uduino specific commands
     char *getIdentity();
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)
-    void addVariable(const char *, int *);   // Add float
 
 
   private:
