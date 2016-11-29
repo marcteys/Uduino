@@ -72,8 +72,9 @@ Here is your todo-list of what you should always do to have Uduino working.
 
 ### Simple Read (Arduino to Unity)
 
-Read the value of a sensor conected to A0.
+Read the value of a sensor conected to the pin A0 of the board. 
 
+#### SimpleUduino.ino (Arduino)
 ```arduino
 #include<Uduino.h>
 Uduino uduino("myArduinoName"); // Declare and name your object
@@ -94,7 +95,7 @@ void loop()
 }
 ```
 
-
+#### SimpleUduino.cs (Unity)
 ```csharp
 using UnityEngine;
 using System.Collections;
@@ -102,12 +103,12 @@ using Uduino;
 
 public class SimpleUduino : MonoBehaviour {
 
-    UduinoManager u;
+   UduinoManager u;
 
   void Awake ()
   {
         UduinoManager.Instance.OnValueReceived += OnValueReceived; //Create the Delegate
-    }
+  }
 
   void Update ()
   {
@@ -118,22 +119,124 @@ public class SimpleUduino : MonoBehaviour {
     {
         Debug.Log(int.Parse(data)); // Use the data as you want !
     }
-
 }
-
 ```
 Note : To retreive the data on Unity without creating any freeze of your application, you need to create a new [delegate](#Why-using-delegates) function.
 
 
-### Simple Write (Uniy to Arduino)
+### Simple Write (Unity to Arduino)
 
-Write the PWM value 
+Send a PWM value from unity to arduino, to light set the light intensity of a LED. 
+
+#### ledIntensity.ino (Arduino)
+```arduino
+#include<Uduino.h>
+Uduino uduino("ledIntensity");
+
+void setup()
+{
+  Serial.begin(9600);
+  pinMode(11,OUTPUT);
+  uduino.addCommand("SetLight", SetLightValue); // The function to be executed when we receive the value from Unity
+}
+
+void SetLightValue() {
+  char *arg; 
+  arg = uduino.next(); // The arg char buffer is read and stored 
+  analogWrite(11,uduino.charToInt(arg)); // The function uduino.charToInt(); converts a char* to a int
+}
+
+void loop()
+{
+   if (Serial.available() > 0)
+    uduino.readSerial();
+    
+  delay(50);    
+}
+```
+
+#### SendLedIntensity.cs (Unity)
+```csharp
+using UnityEngine;
+using System.Collections;
+using Uduino;
+
+public class SendLedIntensity : MonoBehaviour {
+    [Range(0, 255)]
+    public int intensity = 0;
+
+  void Update ()
+  {
+        UduinoManager.Instance.Write("ledIntensity", "SetLight", intensity);
+  }
+}
+```
+
+
+### Multi arduino boards
+
+Uduino also works when multiple boards are connected to the same computer. For that, be sure to write a different board name for each Arduino board.
+
+#### MultipleArduinos.cs (Unity)
+
+```csharp
+using UnityEngine;
+using System.Collections;
+using UnityEngine.Events; //Todo : to remove !
+using Uduino;
+
+public class MultipleArduinosExtended : MonoBehaviour
+{
+    UduinoManager u;
+    int sensorOne = 0;
+    int sensorTwo = 0;
+
+    void Start()
+    {
+        UduinoManager.Instance.OnValueReceived += OnValuesReceived;
+    }
+
+  void Update ()
+  {
+        UduinoManager.Instance.Read("myArduinoBoard", "mySensor");
+        UduinoManager.Instance.Read("myOtherArduino", "myOtherSensor");
+    }
+
+    void OnValuesReceived(string data, string device)
+    {
+        if (device == "myArduinoBoard") sensorOne = int.Parse(data);
+        else if (device == "myOtherArduino") sensorTwo = int.Parse(data);
+    }
+}
+``` 
+
+### Reading in one line
+
+Rather than declaring a delegate function (mainly for prototyping), the `c#` language allows to declare on-the-fly actions. It can reduce the reading code to a simple line :
+
+#### UduinoShortCall.cs (Unity)
+```csharp 
+using UnityEngine;
+using System.Collections;
+using UnityEngine.Events; ; //Todo : to remove !
+using Uduino;
+
+public class UduinoShortCall : MonoBehaviour
+{
+    UduinoManager u;
+    public int sensorOne = 0;
+   
+  void Update ()
+  {
+        UduinoManager.Instance.Read("myArduinoBoard", "mySensor", action:((string data) => sensorOne = int.Parse(data)));
+    }
+}
+```
 
 
 ## Why using delegates 
 
 A function trying to read the of a Serial port pauses its execution until the reading is complete. If the reading never happens... the software crash !  Because Unity is mono-thread, opening a new thread to do some other calculations might not be safe. However, Uduino has a thread safe function to read and write on the serial port. The values retreived has to be transmitted from on thred to another, and we use *delegates* to do that. You can then use safely `UduinoManager.Instance.Read(..)` in your script. 
-
 
 
 ## Arduino Methods
@@ -186,7 +289,6 @@ Write a command on an Arduino with a specific value
 |`target`| *System.String*<br> Target device name. Not defined means read everything |
 |`message`| *System.String[]*<br>Messages to send to the Arduino board|
 |`values`|*System.Integer[]*<br>List of values to be sent. Value #is associated with message #|
-
 
 
 ### GetPortState()
