@@ -8,9 +8,16 @@ using Uduino;
 public class UduinoManagerEditor : Editor {
 
 	public string targetName = "myArduinoName";
-    public string message = "PING";
+    public string message = "";
+    LogLevel debugLevel;
 
     UduinoManager manager = null;
+
+    void OnEnable()
+    {
+       // UduinoManager.debugLevel = debugLevel;
+       // Debug.Log("caca");
+    }
 
     public override void OnInspectorGUI()
     {
@@ -18,10 +25,7 @@ public class UduinoManagerEditor : Editor {
 
         DrawDefaultInspector();
 
-        GUILayout.BeginVertical();
-        UduinoManager.debugLevel = (Uduino.LogLevel)EditorGUILayout.EnumPopup("Debug Level", UduinoManager.debugLevel);
-        GUILayout.EndVertical();
-
+        Log.SetLogLevel(manager.debugLevel);
 
         EditorGUILayout.Separator();
 
@@ -41,9 +45,9 @@ public class UduinoManagerEditor : Editor {
             foreach (KeyValuePair<string, UduinoDevice> uduino in manager.uduinoDevices)
             {
                 GUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("Arduino Name:", uduino.Key);
-                EditorGUILayout.LabelField("Last read value:", uduino.Value.read);
-                EditorGUILayout.LabelField("Last sent value:", uduino.Value.write);
+                EditorGUILayout.LabelField("Arduino Name", uduino.Key);
+                EditorGUILayout.LabelField("Last message", uduino.Value.read);
+                EditorGUILayout.LabelField("Last sent value", uduino.Value.write);
                 GUILayout.EndVertical();
             }
         }
@@ -53,8 +57,8 @@ public class UduinoManagerEditor : Editor {
         GUILayout.Button("Debug", "OL Title");
         GUILayout.EndHorizontal();
         GUILayout.BeginVertical("Box");
-        targetName = EditorGUILayout.TextField("Arduino Name: ", targetName);
-        message = EditorGUILayout.TextField("Test message: ", message);
+        targetName = EditorGUILayout.TextField("Arduino Name", targetName);
+        message = EditorGUILayout.TextField("Test message", message);
         if (GUILayout.Button("Send test message"))
         {
             manager.Write(targetName, message);
@@ -92,6 +96,9 @@ public class UduinoManagerEditor : Editor {
             clearMethod.Invoke(null, null);
         }
         GUILayout.EndVertical();
+
+        if (GUI.changed)
+            EditorUtility.SetDirty(target);
 
     }
 

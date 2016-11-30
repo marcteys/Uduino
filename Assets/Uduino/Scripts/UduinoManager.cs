@@ -1,6 +1,6 @@
 ﻿/* 
  * Uduino - Yet Another Arduin-Unity Library
- * Version 1.0, 2016, Marc Teyssier
+ * Version 1.1, 2016, Marc Teyssier
  *  
  *  ================
  *       TODOs
@@ -82,21 +82,18 @@ namespace Uduino
         private bool ReadOnThread = true;
 
         /// <summary>
-        /// Debug infos in the console
-        /// </summary>
-        [SerializeField]
-        public static LogLevel debugLevel = LogLevel.INFO;
-
-
-        /// <summary>
         /// BaudRate
         /// </summary>
         [SerializeField]
         private int baudRate = 9600;
 
+        [SerializeField]
+        public LogLevel debugLevel;
+
         void Awake()
         {
             Instance = this;
+            Log.SetLogLevel(debugLevel);
             DiscoverPorts();
             if(ReadOnThread) StartThread();
         }
@@ -106,6 +103,7 @@ namespace Uduino
         /// </summary>
         public void DiscoverPorts()
         {
+            CloseAllPorts();
         #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
 			Discover(GetUnixPortNames());
         #else
@@ -156,7 +154,7 @@ namespace Uduino
                             string name = reading.Split(new char[0])[1];
                             uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                             if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                            Log.Info("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                            Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                             break;
                         }
                         else

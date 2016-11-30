@@ -6,7 +6,7 @@
 
 ## Purpose & Target
 
-This project was created after too much frustration on how to properly connected Unity & Arduino. During past past experiences I was facing some problems: difficulties to detect a specific Arduino board when several are connected, small freeze when reading analog pins, no direct feedbacks when writing arduino, and most important : **not human-readable**.
+This project was created after too much frustration on how to properly connected Unity & Arduino. During past past experiences I was facing some problems: difficulties to detect a specific Arduino board when several are connected, freeze and crash when communicating with serial ports, and many more...
 
 All existing projects mixing Arduino and Unity where either not cross-platform,  too complex and complicated (using Firmata to control a LED !? Hell no! ), not compatible with all the libraries or simply not stable enough. What we really need is a simple Arduino file and simple c# functions to read analog pin or write instructions. 
 
@@ -15,20 +15,20 @@ All existing projects mixing Arduino and Unity where either not cross-platform, 
 
 ### How simple ?
 
-You give a *unique name* to your arduino card, and declare which variable is readable. For example I want to access `mySensor` on the arduino board named `myArduinoName`.  Then on Unity, you can access to this value by using `UduinoManager.Instance.Read("myArduinoName", "mySensor");`. Uduino is handling the Serial connection between the software and the hardware !
+You give a *unique name* to your arduino board, and declare which variable is readable. For example I want to access `mySensor` on the arduino board named `myArduinoName`.  On Unity, this value is accessible by using `UduinoManager.Instance.Read("myArduinoName", "mySensor");`. Uduino is handling the detection of the boards and the serial connection between the software and the hardware !
 
 
 
 ## Quick Start
 
-1. Import [uduino.unitypackage](https://github.com/marcteys/Uduino/raw/master/uduino_1.0.unitypackage) in your project
-2. Add  the libraries `Uduino` and `SerialCommand`([link](https://github.com/scogswell/ArduinoSerialCommand)) to your Arduino `libraries` folder.
-3. On your Arduino project, add on the top of your code :
-````arduino
+1 . Import [uduino.unitypackage][package] in your project
+2 . Add the library `Uduino` from the `Arduino` folder to your local Arduino `libraries` folder.
+3 . On your Arduino project, add on the top of your code :
+```arduino
 #include<Uduino.h>
 Uduino uduino("myArduinoName"); // "myArduinoName" is your object's name !
-````
-4. On your main Unity script, initialize Uduino:
+```
+4 . On your main Unity script, initialize Uduino:
 ```csharp
 using Uduino; // adding the NameSpace
 
@@ -38,19 +38,32 @@ public class ExampleScript : MonoBehaviour
     void Start() ... // continue your code
 }
 ```
-5. Add the [methods](#Unity-Methods), and you're good to go !
+5 . Add the reading/writing [methods](#Unity-Methods), and you're good to go !
 
 ## Setup
 
 #### Unity
 
-Download [uduino.unitypackage](https://github.com/marcteys/Uduino/raw/master/uduino_1.0.unitypackage) and import it in your current project or open this repository with Unity Editor.
+Download [uduino.unitypackage][package] and import it in your current project or open this repository with Unity Editor.
 
 #### Arduino
 
-The `Arduino` folder of this repo contains the Ùniduino`library and examples for Arduino, it can be merged with your Arduino user folder.
+The `Arduino` folder in this repo contains `Uduino`library and examples for Arduino. Merge it with your local Arduino folder.
 
-Uduino is partially based on [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand) by [Steven Cogswell](https://github.com/scogswell/), released under GPL License. However this library is not needed to run Uduino.
+*Uduino is partially based on [SerialCommand](https://github.com/scogswell/ArduinoSerialCommand) by [Steven Cogswell](https://github.com/scogswell/), released under GPL License. However this library is not needed to run Uduino.*
+
+## Features
+
+<img align="right" src="http://marcteyssier.com/data/uduino/uduino-panel.png">
+
+### Version 1.1 : Debug panel and Log levels !
+
+This new version has two new features, the **custom editor panel** and a **custom Logger**.
+
+The debug panel is automatically attached to `UduinoManager.cs`. It displays all connected boards, with their name, last messages received and sent.
+__Uduino now works also in *editor mode*__, you can detect the connected boards and send custom messages to try your arduino code. 
+
+With the custom logger you can chose how much messages you want to be displayed on the console. Feature helpful for debugging, the settings can be changed in the custom inspector.
 
 
 ## Examples 
@@ -59,21 +72,21 @@ Examples can be found under `Assets\Uduino\Examples`. Their respective arduino c
 
 ### Usage
 
-Here is your todo-list of what you should always do to have Uduino working. 
+Here is the steps to have Uduino working. 
 
 #### Arduino 
 1. Add `#include<Uduino.h>`as dependency
-2. Instanciate Uduino and define the name of your board : `Uduino uduino("sensorArduino");` 
+2. Instantiate Uduino and define the name of your board : `Uduino uduino("sensorArduino");` 
 3. Add new commands in Setup()
 4. Update Uduino in the loop. `if (Serial.available() > 0) uduino.readSerial();`
 
 #### Unity
 1. Add he namespace `using Uduino`at the to of your script
-2. Declate `UduinoManager u;` as new variable (*note: The Instance is created the First time you call Uduino.Instance . It's  recommanded to declare it as variable to find you connected boards on start.*)
+2. Declare `UduinoManager u;` as new variable (*note: The Instance is created the First time you call Uduino.Instance . It's recommended to declare it as variable to find you connected boards on start.*)
 
 ### Simple Read (Arduino to Unity)
 
-Read the value of a sensor conected to the pin A0 of the board. 
+Read the value of a sensor connected to the pin *A0* of the board. 
 
 #### ReadSensor.ino (Arduino)
 ```arduino
@@ -122,7 +135,7 @@ public class ReadSensor : MonoBehaviour {
     }
 }
 ```
-Note : To retreive the data on Unity without creating any freeze of your application, you need to create a new [delegate](#Why-using-delegates) function.
+Note : To retrieve the data on Unity without creating any freeze of your application, you need to create a new [delegate](#Why-using-delegates) function.
 
 
 ### Simple Write (Unity to Arduino)
@@ -176,7 +189,7 @@ public class SendLedIntensity : MonoBehaviour {
 
 ### Multi arduino boards
 
-Uduino also works when multiple boards are connected to the same computer. For that, be sure to write a different board name for each Arduino board.
+Uduino works with multiple boards connected to the computer. Be sure to set a different board name for each Arduino board.
 
 #### MultipleArduino.cs (Unity)
 
@@ -213,9 +226,8 @@ public class MultipleArduino: MonoBehaviour
 
 ### Working with external libraries
 
-Unlike other Unity/Arduino plugins  using Firmata, Uduino is compatible with any other Arduino libraries ! Example below with Arduino's `Servo` library. 
+Unlike other Unity/Arduino plugins, Uduino is compatible with any other Arduino libraries ! Example below with Arduino's `Servo` library. 
 
-#### Servo.cs (Unity)
 
 ####Servo.ino (Arduino)
 ```arduino
@@ -263,7 +275,7 @@ public class Servo : MonoBehaviour {
 
     void OptimizedWrite()
     {
-        if (servoAngle != prevServoAngle) // Use this condition to not write at each frame 
+        if (servoAngle != prevServoAngle) // Condition to not send data each frame 
         {
             UduinoManager.Instance.Write("servoBoard", "R", servoAngle);
             prevServoAngle = servoAngle;
@@ -279,26 +291,20 @@ Rather than declaring a delegate function (mainly for prototyping), the `c#` lan
 
 #### OneLineRead.cs (Unity)
 ```csharp 
-using UnityEngine;
-using System.Collections;
-using Uduino;
-
-public class UduinoShortCall : MonoBehaviour
-{
-    UduinoManager u;
-    public int sensorOne = 0;
+  // ...
+  public int sensorOne = 0;
    
   void Update ()
   {
         UduinoManager.Instance.Read("myArduinoBoard", "mySensor", action:((string data) => sensorOne = int.Parse(data)));
-    }
+  }
 }
 ```
 
 
 ## Why using delegates 
 
-A function trying to read the of a Serial port pauses its execution until the reading is complete. If the reading never happens... the software crash !  Because Unity is mono-thread, opening a new thread to do some other calculations might not be safe. However, Uduino has a thread safe function to read and write on the serial port. The values retreived has to be transmitted from on thred to another, and we use *delegates* to do that. You can then use safely `UduinoManager.Instance.Read(..)` in your script. 
+A function trying to read the of a Serial port pauses its execution until the reading is complete. If the reading never happens... the software crash !  Because Unity is mono-thread, opening a new thread to do some other calculations might not be safe. However, Uduino has a thread safe function to read and write on the serial port. The values retrieved are transmitted from the side thread to the main, and we use *delegates* to do that. You can then use safely `UduinoManager.Instance.Read(..)` in your script. 
 
 
 ## Arduino Methods
@@ -315,7 +321,7 @@ A function trying to read the of a Serial port pauses its execution until the re
 ### Read(target, variable = null, timeout = 100, action = null)
 
 Send a read command to a specific Arduino board.
-A Read() command will be returned on the  OnValueReceived() delegate function
+A Read() command will be returned on the  OnValueReceived() delegate function.
         
 | Name          | Description         |
 |---------------|---------------------|
@@ -345,6 +351,7 @@ Write a command on an Arduino with a specific value
 |`value`|*System.Integer*<br>Value associated with the message|
 
 ### Write(target, message[], value[])
+Send multiple messages with different values.
 
 | Name          | Description         |
 |---------------|---------------------|
@@ -357,8 +364,57 @@ Write a command on an Arduino with a specific value
 
 Debug.Log() the status of all connected Serial Ports devices. 
 
+
+### CloseAllPorts();
+
+Close all opened serial ports.
+
+## Unity custom Logger Methods
+
+To simplify the debug of serial communication, a custom Logger is available. 
+
+### Log.Info(message), Log.Warning(message), Log.Error(message)
+
+Custom logger with priorities. The level can be set on the inspector or at runtime with `Log.SetPriority(level)`
+
+| Name          | Description         |
+|---------------|---------------------|
+|`message`| *System.String*<br>Message to debug|
+
+
+### Log.SetPriority(level)
+
+Define the logger priority. 
+
+| Name          | Description         |
+|---------------|---------------------|
+|`level`| *Uduino.Level {INFO, WARNING, ERROR, NONE} *<br>Level of prioriy.|
+
+
+
+## Uduino Utils Methods
+
+
+## Update Uduino
+
+1. Delete `Assets\Uduino` in your Unity project and replace it with the [last version][package].
+2. Replace`libraries\Uduino`folder in your local `Arduino`folder by the new one on this repo. 
+
+
+
 ## FAQ
 
+#### Nothing is happening, what is wrong ?
+
+Be sure that Uduino custom [debug levels](#), is set not set to "NONE". If so, Uduino will hide all the messages in the console, including some important messages (*"Arduino found"*, etc ).
+
+#### Should I attach UduinoManager.cs to a game object
+
+It's not mandatory. If the script is not attached to any game object of your scene, the first call of `UduinoManager.Instance` will create a new game object. 
+
+#### Something else is wrong
+
+You can explain your problem on a new [issue](https://github.com/marcteys/Uduino/issues).
 
 ## Contribution
 
@@ -369,13 +425,18 @@ Uduino is an [**OPEN Open Source Project**](http://openopensource.org/). This me
 This is an experiment and feedback is welcome. I'll be very happy to have your contribution on this library. If you create something interesting with uduino, add it to the examples folder, submit a pull-request, and we'll take a look.
 
 
+----------
+
+
 ## Todo
 * Unity: Arduino: Create a "simple" Sketch
-* Unity: Create a global #SerialDebug valu.
 * Unity: Write(string target, string[] message, int[] value) could take a 2D array as parameter ?
 * Arduino: Introduce a custom delay, to avoid blocking situations ?
-* Documentation: Explain uduino_hardwareonly mode 
+* Documentation: Explain Arduino uduino_hardwareonly mode 
 
 
 ----
-Current Version : 1.0
+Current Version: 1.1
+Last stable update: Nov 30 2016
+
+[package]: https://github.com/marcteys/Uduino/raw/master/uduino_1.1.unitypackage

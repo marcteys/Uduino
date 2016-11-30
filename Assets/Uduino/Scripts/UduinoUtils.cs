@@ -2,14 +2,6 @@
 
 public static class UduinoUtils {
 
-
-    public static Vector3 ToVector3(this string str, char separator) {
-        //explode un aray par le separator
-        return Vector3.zero;
-    }
-
-
-
     public static int ToArduinoInt(this int value, int valueMin, int valueMax)
     {
         float floatVal = value;
@@ -32,7 +24,6 @@ public static class UduinoUtils {
     /// <returns>New value mapped between low2 and high2float</returns>
     public static float Map(this float value, float low1, float high1, float low2, float high2)
     {
-
         float val = low2 + (value - low1) * (high2 - low2) / (high1 - low1);
         //if (val > high2) val = high2;
         return val;
