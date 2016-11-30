@@ -106,11 +106,31 @@ namespace Uduino
         public void DiscoverPorts()
         {
         #if UNITY_STANDALONE_OSX || UNITY_EDITOR_OSX
-            Discover(new string[] {"/dev/ttyUSB0", "/dev/ttyUSB1", "/dev/ttyUSB2", "/dev/ttyUSB3", "/dev/ttyUSB4", "/dev/ttyUSB5"});
+			Discover(GetUnixPortNames());
         #else
             Discover(SerialPort.GetPortNames());
         #endif
         }
+
+		/// <summary>
+		/// Get the ports names if the system is on unix
+		/// </summary>
+		private string[] GetUnixPortNames ()
+		{
+			int p = (int)System.Environment.OSVersion.Platform;
+			List<string> serial_ports = new List<string> ();
+
+			if (p == 4 || p == 128 || p == 6) {
+				string[] ttys = System.IO.Directory.GetFiles ("/dev/", "tty.*");
+				return ttys;
+				foreach (string dev in ttys) {
+					if (dev.StartsWith ("/dev/tty.*")) // tester si on peut pas faire startwith usb                    if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"                if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
+						serial_ports.Add (dev);
+				
+				}
+			} 
+			return serial_ports.ToArray();
+		}
 
         /// <summary>
         /// Discover all active serial ports connected.
@@ -119,10 +139,11 @@ namespace Uduino
         /// <param name="portNames">All Serial Ports names, dependings of the current OS</param>
         void Discover(string[] portNames)
         {
-            if (portNames.Length == 0) Debug.Log("Are you sure your arduino is connected ?");
+            if (portNames.Length == 0) Debug.LogError("Found 0 ports open. Are you sure your arduino is connected ?");
 
             foreach (string portName in portNames)
             {
+				Debug.Log (portName);
                 UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
                 int tries = 0;
                 do
@@ -243,6 +264,7 @@ namespace Uduino
                 return true;
             else
             {
+				//TODO: Restart a loop to find all objects
                 Debug.Log("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }

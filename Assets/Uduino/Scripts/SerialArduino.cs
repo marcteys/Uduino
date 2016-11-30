@@ -36,7 +36,10 @@ namespace Uduino
         {
             try
             {
-                serial = new SerialPort("\\\\.\\" + _port, _baudrate);
+				#if UNITY_STANDALONE_WIN
+					_port = "\\\\.\\" + _port;
+				#endif
+				serial = new SerialPort( _port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
                 serial.Close();
                 serial.Open();
@@ -78,7 +81,7 @@ namespace Uduino
             try
             {
                 if (UduinoManager.DebugInfos) Debug.LogWarning("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
-                serial.WriteLine(message);
+                serial.Write(message + "\r\n");
                 serial.BaseStream.Flush();
             }
             catch (Exception e)

@@ -7,7 +7,7 @@ using Uduino;
 [CustomEditor(typeof(UduinoManager))]
 public class UduinoManagerEditor : Editor {
 
-    public string targetName = "myArduino";
+	public string targetName = "myArduinoName";
     public string message = "PING";
     UduinoManager manager = null;
 
