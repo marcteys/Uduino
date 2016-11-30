@@ -1,16 +1,15 @@
 ﻿/* 
  * Uduino - Yet Another Arduin-Unity Library
- * Version 0.0.1, 2016, Marc Teyssier
+ * Version 1.0, 2016, Marc Teyssier
  *  
  *  ================
  *       TODOs
  *  ================
- *  UduinoManager.Instance.Read("sensorArduino", "SENSOR",2000); /// TIMEOUT NOT WORKING
- *  Quand on "write", faire une option pour write sur toutes les arduinos (ou mettre target en facultatif ?)
- *  public values for the number of tries ?
- *  Quand on le call et qu'il n'ets pas instancié, l'instancier sur la  scène
+ *  UduinoManager.Instance.Read("sensorArduino", "SENSOR", 2000); -> Verifiy that the timeout is working
+ *  Option to "write" on all arduino when no one is specified (set the param as option)
+ *  Public values for the number of tries ?
  *  Function to discover manually a specific port ?
- *  Faire un script avec des "utils" our le OnValueReceived, comme parser un array de string, etc, convertir string to int, etc
+ *  TODO : Create a "utils" script, with some helper functions (ex conver a string to int, send an array of string, etc)
  * 
  */
 
@@ -85,7 +84,9 @@ namespace Uduino
         /// <summary>
         /// Debug infos in the console
         /// </summary>
-        public static bool DebugInfos = true;
+        [SerializeField]
+        public static LogLevel debugLevel = LogLevel.INFO;
+
 
         /// <summary>
         /// BaudRate
@@ -124,9 +125,8 @@ namespace Uduino
 				string[] ttys = System.IO.Directory.GetFiles ("/dev/", "tty.*");
 				return ttys;
 				foreach (string dev in ttys) {
-					if (dev.StartsWith ("/dev/tty.*")) // tester si on peut pas faire startwith usb                    if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"                if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
+					if (dev.StartsWith ("/dev/tty.*")) // TODO : Test if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 						serial_ports.Add (dev);
-				
 				}
 			} 
 			return serial_ports.ToArray();
@@ -139,11 +139,10 @@ namespace Uduino
         /// <param name="portNames">All Serial Ports names, dependings of the current OS</param>
         void Discover(string[] portNames)
         {
-            if (portNames.Length == 0) Debug.LogError("Found 0 ports open. Are you sure your arduino is connected ?");
+            if (portNames.Length == 0) Log.Error("Found 0 ports open. Are you sure your arduino is connected ?");
 
             foreach (string portName in portNames)
             {
-				Debug.Log (portName);
                 UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
                 int tries = 0;
                 do
@@ -157,18 +156,19 @@ namespace Uduino
                             string name = reading.Split(new char[0])[1];
                             uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                             if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                            if (DebugInfos) Debug.Log("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                            Log.Info("Object <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                             break;
                         }
                         else
                         {
-                            Debug.LogWarning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/20)");
+                            Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/20)");
                         }
                     }
                 } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 20);
 
                 if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
                 {
+                    //TODO : Debug.LogError
                     uduinoDevice.Close();
                     uduinoDevice = null;
                 }
@@ -178,18 +178,18 @@ namespace Uduino
         /// <summary>
         /// Debug all ports state.
         /// TODO : Really neccessary ? They are always open...
-        /// TODO : A mettre dans les utils
+        /// TODO : Put that in the utils.cs ? 
         /// </summary>
         public void GetPortState()
         {
             if (uduinoDevices.Count == 0)
             {
-                Debug.Log("No port currently open");
+                Log.Error("No port currently open");
             }
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
             {
                 string state = uduino.Value.serial.IsOpen ? "open " : "closed";
-                if (DebugInfos) Debug.Log("" + uduino.Value.getPort() + " (" + uduino.Key + ")" + " is " + state);
+                Log.Info("" + uduino.Value.getPort() + " (" + uduino.Key + ")" + " is " + state);
             }
         }
 
@@ -209,20 +209,6 @@ namespace Uduino
                 uduinoDevices[target].callback = action;
             }
         }
-
-        /*
-        /// <summary>
-        /// Send a read command to a specific arduino.
-        /// A read command will be returned in the OnValueReceived() delegate function
-        /// </summary>
-        /// <param name="target">Target device name. Not defined means read everything</param>
-        /// <param name="variable">Variable watched, if defined</param>
-        /// <param name="callback">Action callback</param>
-        public void Read(string target, string variable = null, System.Action<string> action = null)
-        {
-            Read(target, variable, callback: action);
-        }
-        */
 
         /// <summary>
         /// Write a command on an Arduino
@@ -265,7 +251,7 @@ namespace Uduino
             else
             {
 				//TODO: Restart a loop to find all objects
-                Debug.Log("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
+                Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }
@@ -288,7 +274,8 @@ namespace Uduino
             }
             catch (System.Threading.ThreadStateException e)
             {
-                Debug.LogError(e);
+                //TODO : Parse the errors and display a correct message
+                Log.Error(e);
             }
         }
 
@@ -364,7 +351,7 @@ namespace Uduino
         {
             if (uduinoDevices.Count == 0)
             {
-                if(DebugInfos) Debug.Log("All ports are closed.");
+                 Log.Info("All ports are closed.");
             }
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)

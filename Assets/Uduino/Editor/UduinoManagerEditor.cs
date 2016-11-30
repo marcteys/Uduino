@@ -9,6 +9,7 @@ public class UduinoManagerEditor : Editor {
 
 	public string targetName = "myArduinoName";
     public string message = "PING";
+
     UduinoManager manager = null;
 
     public override void OnInspectorGUI()
@@ -17,18 +18,20 @@ public class UduinoManagerEditor : Editor {
 
         DrawDefaultInspector();
 
+        GUILayout.BeginVertical();
+        UduinoManager.debugLevel = (Uduino.LogLevel)EditorGUILayout.EnumPopup("Debug Level", UduinoManager.debugLevel);
+        GUILayout.EndVertical();
+
+
         EditorGUILayout.Separator();
 
-        //http://blog.sina.com.cn/s/blog_647422b90101de8x.html
 
         if (manager.uduinoDevices.Count == 0)
         {
             GUILayout.BeginHorizontal();
             GUILayout.Button("No arduino connected", "OL Title");
             GUILayout.EndHorizontal();
-        }
-      
-
+        } 
 
         EditorGUILayout.Separator();
         GUILayout.BeginHorizontal();

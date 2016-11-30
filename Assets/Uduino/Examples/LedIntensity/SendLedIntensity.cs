@@ -9,6 +9,7 @@ public class SendLedIntensity : MonoBehaviour
 
     void Update()
     {
-        UduinoManager.Instance.Write("ledIntensity", "SetLight", intensity);
+        Debug.Log(UduinoManager.debugLevel);
+        //UduinoManager.Instance.Write("ledIntensity", "SetLight", intensity);
     }
 }

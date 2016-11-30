@@ -36,20 +36,20 @@ namespace Uduino
         {
             try
             {
-				#if UNITY_STANDALONE_WIN
-					_port = "\\\\.\\" + _port;
+				#if UNITY_STANDALONE
+				//	_port = "\\\\.\\" + _port; // TODO : For com port greater than 8 !
 				#endif
 				serial = new SerialPort( _port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
-                if (UduinoManager.DebugInfos) Debug.LogWarning("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
+                Log.Warning("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
             }
             catch (Exception e)
             {
                 serialStatus = SerialStatus.CLOSE;
-                if (UduinoManager.DebugInfos) Debug.Log("Error on port <color=#2196F3>[" + _port + "]</color> : " + e);
+                Log.Error("Error on port <color=#2196F3>[" + _port + "]</color> : " + e);
             }
         }
 
@@ -80,14 +80,14 @@ namespace Uduino
             if (message == null || message == "") return;
             try
             {
-                if (UduinoManager.DebugInfos) Debug.LogWarning("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
+                Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
                 serial.Write(message + "\r\n");
                 serial.BaseStream.Flush();
             }
             catch (Exception e)
             {
                 Close();
-                if (UduinoManager.DebugInfos) Debug.Log(e);
+                Log.Error(e);
             }
         }
 
@@ -118,7 +118,7 @@ namespace Uduino
             }
             catch (Exception e)
             {
-                if (UduinoManager.DebugInfos) Debug.Log(e);
+                Log.Error(e);
                 Close();
                 return null;
             }
@@ -131,14 +131,14 @@ namespace Uduino
         {
             if (serial.IsOpen)
             {
-                if (UduinoManager.DebugInfos) Debug.Log("Closing port : <color=#2196F3>[" + _port + "]</color>");
+                Log.Warning("Closing port : <color=#2196F3>[" + _port + "]</color>");
                 serial.Close();
                 serialStatus = SerialStatus.CLOSE;
                 serial = null;
             }
             else
             {
-                if (UduinoManager.DebugInfos) Debug.Log(_port + " already closed.");
+                Log.Warning(_port + " already closed.");
             }
         }
 
