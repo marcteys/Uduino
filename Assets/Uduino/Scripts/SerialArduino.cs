@@ -89,6 +89,15 @@ namespace Uduino
                 Close();
                 Log.Error(e);
             }
+            WritingSuccess(message);
+        }
+
+        /// <summary>
+        /// Callback function when a message is written 
+        /// </summary>
+        /// <param name="message">Message successfully writen</param>
+        public virtual void WritingSuccess(string message)
+        {
         }
 
         /// <summary>

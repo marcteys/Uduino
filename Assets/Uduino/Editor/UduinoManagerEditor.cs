@@ -31,14 +31,29 @@ public class UduinoManagerEditor : Editor {
             GUILayout.BeginHorizontal();
             GUILayout.Button("No arduino connected", "OL Title");
             GUILayout.EndHorizontal();
-        } 
+        }
+        else
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Button(manager.uduinoDevices.Count + " Arduino connected", "OL Title");
+            GUILayout.EndHorizontal();
+
+            foreach (KeyValuePair<string, UduinoDevice> uduino in manager.uduinoDevices)
+            {
+                GUILayout.BeginVertical("Box");
+                EditorGUILayout.LabelField("Arduino Name:", uduino.Key);
+                EditorGUILayout.LabelField("Last read value:", uduino.Value.read);
+                EditorGUILayout.LabelField("Last sent value:", uduino.Value.write);
+                GUILayout.EndVertical();
+            }
+        }
 
         EditorGUILayout.Separator();
         GUILayout.BeginHorizontal();
         GUILayout.Button("Debug", "OL Title");
         GUILayout.EndHorizontal();
         GUILayout.BeginVertical("Box");
-        targetName = EditorGUILayout.TextField("Object Name: ", targetName);
+        targetName = EditorGUILayout.TextField("Arduino Name: ", targetName);
         message = EditorGUILayout.TextField("Test message: ", message);
         if (GUILayout.Button("Send test message"))
         {
@@ -77,7 +92,6 @@ public class UduinoManagerEditor : Editor {
             clearMethod.Invoke(null, null);
         }
         GUILayout.EndVertical();
-
 
     }
 
