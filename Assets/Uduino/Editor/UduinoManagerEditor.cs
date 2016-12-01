@@ -22,13 +22,34 @@ public class UduinoManagerEditor : Editor {
     public override void OnInspectorGUI()
     {
         if (manager == null) manager = (UduinoManager)target;
+        Log.SetLogLevel(manager.debugLevel);
+
+            if (!UduinoPanel.IsOpen)
+            {
+                DrawFullInspector();
+            }
+            else
+            {
+                /*
+                GUILayout.BeginHorizontal();
+                EditorGUILayout.LabelField("Panel open");
+                GUILayout.EndHorizontal();*/
+                //   EditorUtility.SetDirty(target);
+            }
+
+        /*
+        if (GUI.changed)
+            EditorUtility.SetDirty(target);*/
+    }
+
+  
+
+    public void DrawFullInspector()
+    {
 
         DrawDefaultInspector();
 
-        Log.SetLogLevel(manager.debugLevel);
-
         EditorGUILayout.Separator();
-
 
         if (manager.uduinoDevices.Count == 0)
         {
@@ -65,7 +86,7 @@ public class UduinoManagerEditor : Editor {
         }
         if (GUILayout.Button("Read Arduino"))
         {
-           manager.Read(targetName);
+            manager.Read(targetName);
         }
         GUILayout.EndVertical();
 
@@ -75,6 +96,15 @@ public class UduinoManagerEditor : Editor {
         GUILayout.Button("Advanced", "OL Title");
         GUILayout.EndHorizontal();
         GUILayout.BeginVertical("Box");
+
+
+        if (GUILayout.Button("Open Uduino Panel"))
+        {
+            UduinoPanel window = (UduinoPanel)EditorWindow.GetWindow(typeof(UduinoPanel));
+            window.Init();
+            return;
+        }
+        EditorGUILayout.Separator();
 
         if (GUILayout.Button("Discover ports"))
         {
@@ -96,9 +126,10 @@ public class UduinoManagerEditor : Editor {
             clearMethod.Invoke(null, null);
         }
         GUILayout.EndVertical();
+    }
 
-        if (GUI.changed)
-            EditorUtility.SetDirty(target);
+    public void DrawPanelMessage()
+    {
 
     }
 
