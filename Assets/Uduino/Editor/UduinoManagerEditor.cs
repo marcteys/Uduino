@@ -4,19 +4,81 @@ using System.Collections.Generic;
 using UnityEditor;
 using Uduino;
 
+
+[SerializeField]
+public class Pin
+{
+    public UduinoPanel.PinMode pinMode = UduinoPanel.PinMode.Output;
+    public int sendValue = 0;
+    public string arduino = "";
+    public string lastReadValue = "";
+
+    private int currentPin = 13;
+    private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
+
+    public Pin(string arduinoParent)
+    {
+
+    }
+
+    public void Draw()
+    {
+        GUILayout.BeginHorizontal();
+        currentPin = EditorGUILayout.Popup(currentPin, allPin, GUILayout.Width(50f));
+        pinMode = (UduinoPanel.PinMode)EditorGUILayout.EnumPopup(pinMode, GUILayout.Width(100f));
+        GUILayout.BeginHorizontal();
+
+        switch (pinMode)
+        {
+            case UduinoPanel.PinMode.Output:
+                if (GUILayout.Button("HIGH", EditorStyles.miniButtonLeft)) sendValue = 255;
+                if (GUILayout.Button("LOW", EditorStyles.miniButtonRight)) sendValue = 0;
+                break;
+            case UduinoPanel.PinMode.Input:
+                EditorGUILayout.LabelField("Digital read:", GUILayout.MaxWidth(100f));
+                break;
+            case UduinoPanel.PinMode.PWM:
+                sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
+                break;
+            case UduinoPanel.PinMode.Analog:
+                EditorGUILayout.LabelField("Analog read:", GUILayout.MaxWidth(100f));
+                break;
+        }
+        GUILayout.EndHorizontal();
+
+        if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.MaxWidth(20f)))
+        {
+            UduinoManagerEditor.Instance.RemovePin(this);
+        }
+
+        GUILayout.EndHorizontal();
+    }
+}
+
+
+
+
 [CustomEditor(typeof(UduinoManager))]
 public class UduinoManagerEditor : Editor {
 
-	public string targetName = "myArduinoName";
+    public static UduinoManagerEditor Instance { get; private set; }
+    public static bool IsOpen
+    {
+        get { return Instance != null; }
+    }
+    public string targetName = "myArduinoName";
     public string message = "";
     LogLevel debugLevel;
 
     UduinoManager manager = null;
 
+    public List<Pin> pins = new List<Pin>();
+
+
     void OnEnable()
     {
-       // UduinoManager.debugLevel = debugLevel;
-       // Debug.Log("caca");
+        Instance = this;
+        Repaint();
     }
 
     public override void OnInspectorGUI()
@@ -24,19 +86,53 @@ public class UduinoManagerEditor : Editor {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
 
-            if (!UduinoPanel.IsOpen)
+
+
+        DrawFullInspector();
+
+        EditorGUILayout.Separator();
+        GUILayout.BeginHorizontal();
+        GUILayout.Button("Pin", "OL Title", GUILayout.MaxWidth(56f));
+        GUILayout.Button("Mode", "OL Title", GUILayout.MaxWidth(105f));
+        GUILayout.Button("Action", "OL Title");
+        GUILayout.Button("×", "OL Title", GUILayout.MaxWidth(25f));
+        GUILayout.EndHorizontal();
+
+        foreach (Pin pin in pins.ToArray())
+        {
+            pin.Draw();
+        }
+
+        if (GUILayout.Button("Test a pin"))
+        {
+            pins.Add(new Pin("lol"));
+        }
+
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.LabelField("Arduino Name");
+        GUILayout.BeginVertical();
+
+        EditorGUILayout.LabelField("Last message");
+        GUILayout.EndVertical();
+
+        EditorGUILayout.LabelField("Last sent value");
+        GUILayout.EndVertical();
+
+        /*
+        if (!UduinoPanel.IsOpen)
             {
-                DrawFullInspector();
-            }
-            else
+            DrawFullInspector();
+
+        }
+        else
             {
-                /*
                 GUILayout.BeginHorizontal();
                 EditorGUILayout.LabelField("Panel open");
-                GUILayout.EndHorizontal();*/
+                GUILayout.EndHorizontal();
                 //   EditorUtility.SetDirty(target);
             }
-
+            */
         /*
         if (GUI.changed)
             EditorUtility.SetDirty(target);*/
@@ -131,6 +227,18 @@ public class UduinoManagerEditor : Editor {
     public void DrawPanelMessage()
     {
 
+    }
+
+    public void RemovePin(Pin pin)
+    {
+        pins.Remove(pin);
+        /*
+        pins.Find(pin);
+        for (int i = pins.Count; i <= 0 ;i--)
+        {
+          //  (RemoveAt(position);
+
+        }*/
     }
 
 }
