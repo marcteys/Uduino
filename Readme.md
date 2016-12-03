@@ -404,6 +404,9 @@ Define the logger priority.
 
 ## FAQ
 
+#### I experience the error : *The type or namespace name `Ports' does not exist in the namespace `System.IO'*
+Be sure to set the API Compatibility level to **.NET 2.0** (and not .NEt 2.0 Subset). This setting is located under `Edit\Project settings\Player`. 
+
 #### Nothing is happening, what is wrong ?
 
 Be sure that Uduino custom [debug levels](#), is set not set to "NONE". If so, Uduino will hide all the messages in the console, including some important messages (*"Arduino found"*, etc ).
