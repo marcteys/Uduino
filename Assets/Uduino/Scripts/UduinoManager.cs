@@ -87,8 +87,16 @@ namespace Uduino
         [SerializeField]
         private int baudRate = 9600;
 
+        /// <summary>
+        /// Log level
+        /// </summary>
         [SerializeField]
         public LogLevel debugLevel;
+
+        /// <summary>
+        /// Number of tries to discover the attached serial ports
+        /// </summary>
+        private int discoverTries = 5;
 
         void Awake()
         {
@@ -159,10 +167,10 @@ namespace Uduino
                         }
                         else
                         {
-                            Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/20)");
+                            Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/"+ discoverTries+")");
                         }
                     }
-                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < 20);
+                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < discoverTries);
 
                 if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
                 {

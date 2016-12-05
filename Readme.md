@@ -21,9 +21,9 @@ You give a *unique name* to your arduino board, and declare which variable is re
 
 ## Quick Start
 
-1 . Import [uduino.unitypackage][package] in your project
-2 . Add the library `Uduino` from the `Arduino` folder to your local Arduino `libraries` folder.
-3 . On your Arduino project, add on the top of your code :
+1 . Import [uduino.unitypackage][package] in your project<br>
+2 . Add the library `Uduino` from the `Arduino` folder to your local Arduino `libraries` folder.<br>
+3 . On your Arduino project, add on the top of your code :<br>
 ```arduino
 #include<Uduino.h>
 Uduino uduino("myArduinoName"); // "myArduinoName" is your object's name !
@@ -404,6 +404,9 @@ Define the logger priority.
 
 ## FAQ
 
+#### I experience the error : *The type or namespace name `Ports' does not exist in the namespace `System.IO'*
+Be sure to set the API Compatibility level to **.NET 2.0** (and not .NEt 2.0 Subset). This setting is located under `Edit\Project settings\Player`. 
+
 #### Nothing is happening, what is wrong ?
 
 Be sure that Uduino custom [debug levels](#), is set not set to "NONE". If so, Uduino will hide all the messages in the console, including some important messages (*"Arduino found"*, etc ).
@@ -436,7 +439,7 @@ This is an experiment and feedback is welcome. I'll be very happy to have your c
 
 
 ----
-Current Version: 1.1
+Current Version: 1.1 <br>
 Last stable update: Nov 30 2016
 
 [package]: https://github.com/marcteys/Uduino/raw/master/uduino_1.1.unitypackage
