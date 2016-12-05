@@ -8,17 +8,49 @@ using Uduino;
 [SerializeField]
 public class Pin
 {
-    public UduinoPanel.PinMode pinMode = UduinoPanel.PinMode.Output;
-    public int sendValue = 0;
+    private UduinoManagerEditor manager;
+
     public string arduino = "";
     public string lastReadValue = "";
 
-    private int currentPin = 13;
     private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
 
-    public Pin(string arduinoParent)
-    {
+    public UduinoPanel.PinMode pinMode = UduinoPanel.PinMode.Output;
+    private UduinoPanel.PinMode prevPinMode = UduinoPanel.PinMode.Output;
 
+    public int currentPin = 13;
+    private int prevPin = 13;
+
+    public int sendValue = 0;
+    private int prevSendValue = 0;
+
+
+    public Pin(UduinoManagerEditor m, string arduinoParent)
+    {
+        manager = m;
+        arduino = arduinoParent;
+        SendMessage("setMode " + currentPin + " " + (int)pinMode);
+
+    }
+
+    void SendMessage(string message)
+    {
+        manager.SendMessage(arduino, message);
+    }
+
+    void CheckChanges()
+    {
+        if(currentPin != prevPin)
+        {
+            SendMessage("setMode " + currentPin + " " + (int)pinMode);
+            prevPin = currentPin;
+        }
+
+        if(pinMode != prevPinMode)
+        {
+            SendMessage("setMode "+ currentPin + " " + (int)pinMode);
+            prevPinMode = pinMode;
+        }
     }
 
     public void Draw()
@@ -26,6 +58,7 @@ public class Pin
         GUILayout.BeginHorizontal();
         currentPin = EditorGUILayout.Popup(currentPin, allPin, GUILayout.Width(50f));
         pinMode = (UduinoPanel.PinMode)EditorGUILayout.EnumPopup(pinMode, GUILayout.Width(100f));
+        CheckChanges();
         GUILayout.BeginHorizontal();
 
         switch (pinMode)
@@ -50,8 +83,19 @@ public class Pin
         {
             UduinoManagerEditor.Instance.RemovePin(this);
         }
+        //Send  the message
+        if(prevSendValue != sendValue)
+        {
+            SendMessage("writePin " + currentPin + " " + sendValue);
+            prevSendValue = sendValue;
+        }
 
         GUILayout.EndHorizontal();
+    }
+
+    public void Destroy()
+    {
+        SendMessage("writePin " + currentPin + " 0");
     }
 }
 
@@ -86,38 +130,7 @@ public class UduinoManagerEditor : Editor {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
 
-
-
         DrawFullInspector();
-
-        EditorGUILayout.Separator();
-        GUILayout.BeginHorizontal();
-        GUILayout.Button("Pin", "OL Title", GUILayout.MaxWidth(56f));
-        GUILayout.Button("Mode", "OL Title", GUILayout.MaxWidth(105f));
-        GUILayout.Button("Action", "OL Title");
-        GUILayout.Button("×", "OL Title", GUILayout.MaxWidth(25f));
-        GUILayout.EndHorizontal();
-
-        foreach (Pin pin in pins.ToArray())
-        {
-            pin.Draw();
-        }
-
-        if (GUILayout.Button("Test a pin"))
-        {
-            pins.Add(new Pin("lol"));
-        }
-
-        GUILayout.BeginVertical();
-
-        EditorGUILayout.LabelField("Arduino Name");
-        GUILayout.BeginVertical();
-
-        EditorGUILayout.LabelField("Last message");
-        GUILayout.EndVertical();
-
-        EditorGUILayout.LabelField("Last sent value");
-        GUILayout.EndVertical();
 
         /*
         if (!UduinoPanel.IsOpen)
@@ -138,7 +151,6 @@ public class UduinoManagerEditor : Editor {
             EditorUtility.SetDirty(target);*/
     }
 
-  
 
     public void DrawFullInspector()
     {
@@ -150,22 +162,110 @@ public class UduinoManagerEditor : Editor {
         if (manager.uduinoDevices.Count == 0)
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "OL Title");
+
+            GUILayout.Button("No arduino connected", "MeTransitionBlock");
             GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Button("No arduino connected", "GroupBox");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "GroupBox");
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "MeTransOffLeft");
+            GUILayout.Button("No arduino connected", "MeTransOffRight");
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ObjectFieldThumb");
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "PreToolbar");
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ProfilerBadge");
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ProgressBarBack");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ProjectBrowserHeaderBgMiddle");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "RectangleToolHBar");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ShurikenEmitterTitle");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "SelectionRect");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "RectangleToolSelection");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "RectangleToolSelection");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "WindowBackground");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "U2D.createRect");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "TE toolbarbutton");
+            GUILayout.EndHorizontal();
+            GUILayout.BeginHorizontal();
+            GUILayout.Button("No arduino connected", "ShurikenModuleTitle");
+            GUILayout.EndHorizontal();
+
+
         }
         else
         {
             GUILayout.BeginHorizontal();
-            GUILayout.Button(manager.uduinoDevices.Count + " Arduino connected", "OL Title");
+            GUILayout.Button(manager.uduinoDevices.Count + " Arduino connected", "button");
             GUILayout.EndHorizontal();
 
+            //TODO : Compact that in another function
             foreach (KeyValuePair<string, UduinoDevice> uduino in manager.uduinoDevices)
             {
                 GUILayout.BeginVertical("Box");
                 EditorGUILayout.LabelField("Arduino Name", uduino.Key);
-                EditorGUILayout.LabelField("Last message", uduino.Value.read);
-                EditorGUILayout.LabelField("Last sent value", uduino.Value.write);
+                EditorGUILayout.LabelField("Last read message", uduino.Value.lastRead);
+                EditorGUILayout.LabelField("Last sent value", uduino.Value.lastWrite);
+                //Todo: auto read
                 GUILayout.EndVertical();
+
+
+                EditorGUILayout.Separator();
+                GUILayout.BeginHorizontal();
+                GUILayout.Button("Pin", "OL Box", GUILayout.MaxWidth(56f));
+                GUILayout.Button("Mode", "OL Title", GUILayout.MaxWidth(105f));
+                GUILayout.Button("Action", "OL Title");
+                GUILayout.Button("×", "OL Title", GUILayout.MaxWidth(25f));
+                GUILayout.EndHorizontal();
+
+                foreach (Pin pin in pins.ToArray())
+                {
+                    pin.Draw();
+                }
+
+                if (GUILayout.Button("Test a pin"))
+                {
+                    pins.Add(new Pin(this, uduino.Key));
+                }
+
             }
         }
 
@@ -182,6 +282,11 @@ public class UduinoManagerEditor : Editor {
         }
         if (GUILayout.Button("Read Arduino"))
         {
+            manager.Read(targetName);
+        }
+        if (GUILayout.Button("Writeread Arduino"))
+        {
+            manager.Write(targetName, message);
             manager.Read(targetName);
         }
         GUILayout.EndVertical();
@@ -222,6 +327,14 @@ public class UduinoManagerEditor : Editor {
             clearMethod.Invoke(null, null);
         }
         GUILayout.EndVertical();
+
+        //TODO : Needed to update when message sent/received. This uses a lot of passes. Maybe change that, do a variable to check if a new value is here
+        EditorUtility.SetDirty(target);
+    }
+
+    public void SendMessage(string targetBoard, string message)
+    {
+        manager.Write(targetBoard, message);
     }
 
     public void DrawPanelMessage()
@@ -231,14 +344,8 @@ public class UduinoManagerEditor : Editor {
 
     public void RemovePin(Pin pin)
     {
+        pin.Destroy();
         pins.Remove(pin);
-        /*
-        pins.Find(pin);
-        for (int i = pins.Count; i <= 0 ;i--)
-        {
-          //  (RemoveAt(position);
-
-        }*/
     }
 
 }

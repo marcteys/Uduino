@@ -345,6 +345,7 @@ namespace Uduino
             if (data != null && data != "" && data != "Null")
             {
                 UduinoDevice uduino = uduinoDevices[target];
+                uduino.lastRead = data;
                 if (uduino.callback != null) uduino.callback(data);
                 else OnValueReceived(data, target);
             }

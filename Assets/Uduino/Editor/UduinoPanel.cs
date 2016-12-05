@@ -75,23 +75,6 @@ public class UduinoPanel : EditorWindow
 
         managerEditor.DrawDefaultInspector();
 
-        EditorGUILayout.Separator();
-        GUILayout.BeginHorizontal();
-        GUILayout.Button("Pin", "OL Title",GUILayout.MaxWidth(56f));
-        GUILayout.Button("Mode", "OL Title", GUILayout.MaxWidth(105f));
-        GUILayout.Button("Action", "OL Title");
-        GUILayout.Button("×", "OL Title", GUILayout.MaxWidth(25f));
-        GUILayout.EndHorizontal();
-
-        foreach (Pin pin in pins.ToArray())
-        {
-            pin.Draw();
-        }
-
-        if (GUILayout.Button("Test a pin"))
-        {
-            pins.Add(new Pin("lol"));
-        }
 
         GUILayout.BeginVertical();
 
@@ -109,12 +92,5 @@ public class UduinoPanel : EditorWindow
     public void RemovePin(Pin pin)
     {
         pins.Remove(pin);
-        /*
-        pins.Find(pin);
-        for (int i = pins.Count; i <= 0 ;i--)
-        {
-          //  (RemoveAt(position);
-
-        }*/
     }
 }
