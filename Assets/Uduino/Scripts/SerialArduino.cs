@@ -36,11 +36,12 @@ namespace Uduino
         {
             try
             {
-				#if UNITY_STANDALONE
-				//	_port = "\\\\.\\" + _port; // TODO : For com port greater than 8 !
-				#endif
-				serial = new SerialPort( _port, _baudrate, Parity.None, 8, StopBits.One);
+                #if UNITY_STANDALONE
+                //	_port = "\\\\.\\" + _port; // TODO : For com port greater than 8 !
+                #endif
+                serial = new SerialPort(_port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
+                serial.WriteTimeout = 100;
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
@@ -48,8 +49,8 @@ namespace Uduino
             }
             catch (Exception e)
             {
-                serialStatus = SerialStatus.CLOSE;
                 Log.Error("Error on port <color=#2196F3>[" + _port + "]</color> : " + e);
+                serialStatus = SerialStatus.CLOSE;
             }
         }
 
@@ -77,17 +78,24 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message)
         {
-            if (message == null || message == "") return;
+            if (message == null || message == "" || !serial.IsOpen) return;
             try
             {
                 Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
-                serial.Write(message + "\r\n");
-                serial.BaseStream.Flush();
+                try
+                {
+                    serial.WriteLine(message + "\r\n");
+                    serial.BaseStream.Flush();
+                }
+                catch (System.IO.IOException e) {
+                    Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
+                    Close();
+                }
             }
             catch (Exception e)
             {
-                Close();
                 Log.Error(e);
+                Close();
             }
             WritingSuccess(message);
         }
@@ -109,6 +117,8 @@ namespace Uduino
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
             WriteToArduino(message);
+
+            if (serial == null) return null;
 
             serial.ReadTimeout = timeout;
             serial.DiscardInBuffer(); // TODO : To remove ?
@@ -138,7 +148,7 @@ namespace Uduino
         /// </summary>
         public void Close()
         {
-            if (serial.IsOpen)
+            if (serial != null && serial.IsOpen)
             {
                 Log.Warning("Closing port : <color=#2196F3>[" + _port + "]</color>");
                 serial.Close();
