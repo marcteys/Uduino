@@ -96,7 +96,7 @@ namespace Uduino
         /// <summary>
         /// Number of tries to discover the attached serial ports
         /// </summary>
-        private int discoverTries = 5;
+        private int discoverTries = 20;
 
         void Awake()
         {

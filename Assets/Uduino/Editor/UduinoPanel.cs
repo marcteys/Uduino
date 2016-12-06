@@ -8,15 +8,7 @@ using Uduino;
 
 public class UduinoPanel : EditorWindow
 {
-    //Pin stuff
-    public enum PinMode
-    {
-        Output,
-        Input, 
-        PWM, 
-        Analog
-    }
-
+   
 
     public List<Pin> pins = new List<Pin>();
 
