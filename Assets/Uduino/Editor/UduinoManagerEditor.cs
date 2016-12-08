@@ -125,12 +125,57 @@ public class UduinoManagerEditor : Editor {
         Repaint();
     }
 
+    bool test = true;
+
+    Color headerColor = new Color(0.65f, 0.65f, 0.65f, 1);
+    Color backgroundColor = new Color(0.75f, 0.75f, 0.75f);
+
+
     public override void OnInspectorGUI()
     {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
 
         DrawFullInspector();
+
+
+        //Colors
+        if (!EditorGUIUtility.isProSkin)
+        {
+            headerColor = new Color(165 / 255f, 165 / 255f, 165 / 255f, 1);
+            backgroundColor = new Color(193 / 255f, 193 / 255f, 193 / 255f, 1);
+        }
+        else
+        {
+            headerColor = new Color(41 / 255f, 41 / 255f, 41 / 255f, 1);
+            backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
+        }
+
+
+        test = DrawHeaderTitle("Tool Properties", test, headerColor);
+        if (test)
+        {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("Paint Mode: ", GUILayout.ExpandWidth(false));
+            GUILayout.EndHorizontal();
+        }
+
+
+        EditorGUILayout.BeginVertical();
+        GUILayout.Space(5);
+        EditorGUILayout.BeginVertical("HelpBox");
+        EditorGUILayout.BeginHorizontal("HelpBox");
+        GUILayout.FlexibleSpace();
+        GUILayout.Label("GUISkin - " , EditorStyles.boldLabel);
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndHorizontal();
+
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace();
+        EditorGUILayout.EndHorizontal();
+        EditorGUILayout.EndVertical();
+        EditorGUILayout.EndVertical();
+
 
         /*
         if (!UduinoPanel.IsOpen)
@@ -149,6 +194,36 @@ public class UduinoManagerEditor : Editor {
         /*
         if (GUI.changed)
             EditorUtility.SetDirty(target);*/
+    }
+
+
+    public void DrawHeaderTitle(string title, Color backgroundColor)
+    {
+        GUILayout.Space(0);
+        GUI.color = backgroundColor;
+        GUI.Box(new Rect(1, GUILayoutUtility.GetLastRect().y + 4, 100.0f, 27), "");
+        GUI.color = Color.white;
+        GUILayout.Space(4);
+        GUILayout.Label(title, EditorStyles.largeLabel);
+    }
+
+    public bool DrawHeaderTitle(string title, bool foldoutProperty, Color backgroundColor)
+    {
+        GUILayout.Space(0);
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        GUI.Box(new Rect(1, lastRect.y + 4, 100.0f, 27), "");
+        lastRect = GUILayoutUtility.GetLastRect();
+        EditorGUI.DrawRect(new Rect(lastRect.x, lastRect.y + 5f, 100.0f + 1, 25f), headerColor);
+        GUI.Label(new Rect(lastRect.x, lastRect.y + 10, 100.0f, 25), title);
+        GUI.color = Color.clear;
+        if (GUI.Button(new Rect(0, lastRect.y + 4, 100.0f, 27), ""))
+        {
+            foldoutProperty = !foldoutProperty;
+        }
+        GUI.color = Color.white;
+        GUILayout.Space(30);
+        if (foldoutProperty) { GUILayout.Space(5); }
+        return foldoutProperty;
     }
 
 
