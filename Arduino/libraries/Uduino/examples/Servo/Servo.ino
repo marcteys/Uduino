@@ -8,16 +8,21 @@ void setup()
 {
   Serial.begin(9600);
   myservo.attach(9);
+   myservo.write(90);
   uduino.addCommand("R", rotate);
 }
 
 void rotate() {
   char *arg;
   arg = uduino.next();
-  myservo.write(uduino.charToInt(arg));
+  myservo.write(atoi(arg));
 }
 
 void loop()
 {
-  uduino.readSerial();
+  if (Serial.available() > 0)
+    uduino.readSerial();
+
+  delay(15);    
+
 }

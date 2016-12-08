@@ -8,6 +8,16 @@ using Uduino;
 [SerializeField]
 public class Pin
 {
+    //Pin stuff
+    public enum PinMode
+    {
+        Output,
+        PWM,
+        Analog,
+        Input_pullup,
+        Servo
+    }
+
     private UduinoManagerEditor manager;
 
     public string arduino = "";
@@ -15,8 +25,8 @@ public class Pin
 
     private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
 
-    public UduinoPanel.PinMode pinMode = UduinoPanel.PinMode.Output;
-    private UduinoPanel.PinMode prevPinMode = UduinoPanel.PinMode.Output;
+    public PinMode pinMode = PinMode.Output;
+    private PinMode prevPinMode = PinMode.Output;
 
     public int currentPin = 13;
     private int prevPin = 13;
@@ -57,23 +67,26 @@ public class Pin
     {
         GUILayout.BeginHorizontal();
         currentPin = EditorGUILayout.Popup(currentPin, allPin, GUILayout.Width(50f));
-        pinMode = (UduinoPanel.PinMode)EditorGUILayout.EnumPopup(pinMode, GUILayout.Width(100f));
+        pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, GUILayout.Width(100f));
         CheckChanges();
         GUILayout.BeginHorizontal();
 
         switch (pinMode)
         {
-            case UduinoPanel.PinMode.Output:
+            case PinMode.Output:
                 if (GUILayout.Button("HIGH", EditorStyles.miniButtonLeft)) sendValue = 255;
                 if (GUILayout.Button("LOW", EditorStyles.miniButtonRight)) sendValue = 0;
                 break;
-            case UduinoPanel.PinMode.Input:
+            case PinMode.Input_pullup:
                 EditorGUILayout.LabelField("Digital read:", GUILayout.MaxWidth(100f));
                 break;
-            case UduinoPanel.PinMode.PWM:
+            case PinMode.PWM:
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
                 break;
-            case UduinoPanel.PinMode.Analog:
+            case PinMode.Servo:
+                sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
+                break;
+            case PinMode.Analog:
                 EditorGUILayout.LabelField("Analog read:", GUILayout.MaxWidth(100f));
                 break;
         }
@@ -236,6 +249,7 @@ public class UduinoManagerEditor : Editor {
 
         if (manager.uduinoDevices.Count == 0)
         {
+            
             GUILayout.BeginHorizontal();
 
             GUILayout.Button("No arduino connected", "MeTransitionBlock");
@@ -245,14 +259,9 @@ public class UduinoManagerEditor : Editor {
             GUILayout.Button("No arduino connected", "GroupBox");
             GUILayout.EndHorizontal();
 
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "GroupBox");
-
-            GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
             GUILayout.Button("No arduino connected", "MeTransOffLeft");
-            GUILayout.Button("No arduino connected", "MeTransOffRight");
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
@@ -261,50 +270,15 @@ public class UduinoManagerEditor : Editor {
             GUILayout.EndHorizontal();
 
             GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "PreToolbar");
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "ProfilerBadge");
-
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
             GUILayout.Button("No arduino connected", "ProgressBarBack");
             GUILayout.EndHorizontal();
             GUILayout.BeginHorizontal();
+            GUIStyle localStyle = new GUIStyle(GUI.skin.label);
+            localStyle.normal.textColor = Color.red;
+
+            GUILayout.Button("No arduino connected", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(56f));
             GUILayout.Button("No arduino connected", "ProjectBrowserHeaderBgMiddle");
             GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "RectangleToolHBar");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "ShurikenEmitterTitle");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "SelectionRect");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "RectangleToolSelection");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "RectangleToolSelection");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "WindowBackground");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "U2D.createRect");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "TE toolbarbutton");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "ShurikenModuleTitle");
-            GUILayout.EndHorizontal();
-
-
         }
         else
         {
@@ -325,10 +299,10 @@ public class UduinoManagerEditor : Editor {
 
                 EditorGUILayout.Separator();
                 GUILayout.BeginHorizontal();
-                GUILayout.Button("Pin", "OL Box", GUILayout.MaxWidth(56f));
-                GUILayout.Button("Mode", "OL Title", GUILayout.MaxWidth(105f));
-                GUILayout.Button("Action", "OL Title");
-                GUILayout.Button("×", "OL Title", GUILayout.MaxWidth(25f));
+                GUILayout.Button("Pin", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(56f));
+                GUILayout.Button("Mode", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(105f));
+                GUILayout.Button("Action", "ProjectBrowserHeaderBgMiddle");
+                GUILayout.Button("×", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(25f));
                 GUILayout.EndHorizontal();
 
                 foreach (Pin pin in pins.ToArray())
