@@ -131,25 +131,28 @@ public class UduinoManagerEditor : Editor {
 
     public List<Pin> pins = new List<Pin>();
 
+    Color headerColor = new Color(0.65f, 0.65f, 0.65f, 1);
+    Color backgroundColor = new Color(0.75f, 0.75f, 0.75f);
+    Color defaultButtonColor;
+
+    bool defaultPanel = true;
+    bool arduinoPanel = true;
+    bool advancedPanel = true;
+    bool debugPanel = false;
+
 
     void OnEnable()
     {
+        defaultButtonColor = GUI.backgroundColor;
         Instance = this;
         Repaint();
+        manager.DiscoverPorts();
     }
-
-    bool test = true;
-
-    Color headerColor = new Color(0.65f, 0.65f, 0.65f, 1);
-    Color backgroundColor = new Color(0.75f, 0.75f, 0.75f);
-
 
     public override void OnInspectorGUI()
     {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
-
-        DrawFullInspector();
 
 
         //Colors
@@ -164,160 +167,161 @@ public class UduinoManagerEditor : Editor {
             backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
         }
 
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace(); // Nededed for lastRect
+        EditorGUILayout.EndHorizontal();
 
-        test = DrawHeaderTitle("Tool Properties", test, headerColor);
-        if (test)
+        DrawLogo();
+      
+        EditorGUILayout.BeginHorizontal();
+        GUILayout.FlexibleSpace(); // Nededed for lastRect
+        EditorGUILayout.EndHorizontal();
+
+        defaultPanel = DrawHeaderTitle("Uduino Settings", defaultPanel, headerColor);
+        if (defaultPanel)
         {
+            DrawDefaultInspector();
             GUILayout.BeginHorizontal();
             GUILayout.Label("Paint Mode: ", GUILayout.ExpandWidth(false));
             GUILayout.EndHorizontal();
         }
 
-
-        EditorGUILayout.BeginVertical();
-        GUILayout.Space(5);
-        EditorGUILayout.BeginVertical("HelpBox");
-        EditorGUILayout.BeginHorizontal("HelpBox");
-        GUILayout.FlexibleSpace();
-        GUILayout.Label("GUISkin - " , EditorStyles.boldLabel);
-        GUILayout.FlexibleSpace();
-        EditorGUILayout.EndHorizontal();
-
-        EditorGUILayout.BeginHorizontal();
-        GUILayout.FlexibleSpace();
-        EditorGUILayout.EndHorizontal();
-        EditorGUILayout.EndVertical();
-        EditorGUILayout.EndVertical();
-
-
-        /*
-        if (!UduinoPanel.IsOpen)
-            {
-            DrawFullInspector();
-
-        }
-        else
-            {
-                GUILayout.BeginHorizontal();
-                EditorGUILayout.LabelField("Panel open");
-                GUILayout.EndHorizontal();
-                //   EditorUtility.SetDirty(target);
-            }
-            */
-        /*
-        if (GUI.changed)
-            EditorUtility.SetDirty(target);*/
-    }
-
-
-    public void DrawHeaderTitle(string title, Color backgroundColor)
-    {
-        GUILayout.Space(0);
-        GUI.color = backgroundColor;
-        GUI.Box(new Rect(1, GUILayoutUtility.GetLastRect().y + 4, 100.0f, 27), "");
-        GUI.color = Color.white;
-        GUILayout.Space(4);
-        GUILayout.Label(title, EditorStyles.largeLabel);
-    }
-
-    public bool DrawHeaderTitle(string title, bool foldoutProperty, Color backgroundColor)
-    {
-        GUILayout.Space(0);
-        Rect lastRect = GUILayoutUtility.GetLastRect();
-        GUI.Box(new Rect(1, lastRect.y + 4, 100.0f, 27), "");
-        lastRect = GUILayoutUtility.GetLastRect();
-        EditorGUI.DrawRect(new Rect(lastRect.x, lastRect.y + 5f, 100.0f + 1, 25f), headerColor);
-        GUI.Label(new Rect(lastRect.x, lastRect.y + 10, 100.0f, 25), title);
-        GUI.color = Color.clear;
-        if (GUI.Button(new Rect(0, lastRect.y + 4, 100.0f, 27), ""))
+        arduinoPanel = DrawHeaderTitle("Adruino", arduinoPanel, headerColor);
+        if (arduinoPanel)
         {
-            foldoutProperty = !foldoutProperty;
+            ArduinoSetings();
         }
-        GUI.color = Color.white;
-        GUILayout.Space(30);
-        if (foldoutProperty) { GUILayout.Space(5); }
-        return foldoutProperty;
+
+
+        advancedPanel = DrawHeaderTitle("Advanced", advancedPanel, headerColor);
+        if (advancedPanel)
+        {
+            AdvancedSettings();
+        }
+
+        debugPanel = DrawHeaderTitle("Debug", debugPanel, headerColor);
+        if (debugPanel)
+        {
+            DebugSettings();
+        }
+
+        //TODO : Needed to update when message sent/received. This uses a lot of passes. Maybe change that, do a variable to check if a new value is here
+        EditorUtility.SetDirty(target);
     }
 
 
-    public void DrawFullInspector()
+    public void ArduinoSetings()
     {
-
-        DrawDefaultInspector();
-
-        EditorGUILayout.Separator();
 
         if (manager.uduinoDevices.Count == 0)
         {
-            
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Button("No arduino connected", "MeTransitionBlock");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-
-            GUILayout.Button("No arduino connected", "GroupBox");
-            GUILayout.EndHorizontal();
-
 
             GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "MeTransOffLeft");
-            GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "ObjectFieldThumb");
+            GUILayout.FlexibleSpace();
+            GUILayout.Button("No arduino connected", "Box", GUILayout.ExpandWidth(true));
+            GUILayout.FlexibleSpace();
 
             GUILayout.EndHorizontal();
-
-            GUILayout.BeginHorizontal();
-            GUILayout.Button("No arduino connected", "ProgressBarBack");
-            GUILayout.EndHorizontal();
-            GUILayout.BeginHorizontal();
-            GUIStyle localStyle = new GUIStyle(GUI.skin.label);
-            localStyle.normal.textColor = Color.red;
-
-            GUILayout.Button("No arduino connected", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(56f));
-            GUILayout.Button("No arduino connected", "ProjectBrowserHeaderBgMiddle");
-            GUILayout.EndHorizontal();
-        }
-        else
+         }
+       else
         {
-            GUILayout.BeginHorizontal();
-            GUILayout.Button(manager.uduinoDevices.Count + " Arduino connected", "button");
-            GUILayout.EndHorizontal();
+           // GUILayout.BeginHorizontal();
+          //  GUILayout.Label(manager.uduinoDevices.Count + " Arduino connected", EditorStyles.boldLabel);
+          //  GUILayout.EndHorizontal();
 
             //TODO : Compact that in another function
             foreach (KeyValuePair<string, UduinoDevice> uduino in manager.uduinoDevices)
             {
+                var boldtext = new GUIStyle(GUI.skin.label);
+                boldtext.fontStyle = FontStyle.Bold;
+                boldtext.alignment = TextAnchor.UpperCenter;
+                SetGUIBackgroundColor("#4FC3F7");
+                GUILayout.BeginVertical("Box",  GUILayout.ExpandWidth(true));
+                GUILayout.FlexibleSpace();
+                GUILayout.Label(uduino.Key, boldtext);
+                GUILayout.FlexibleSpace();
+                GUILayout.EndVertical();
+                SetGUIBackgroundColor();
+
+
                 GUILayout.BeginVertical("Box");
-                EditorGUILayout.LabelField("Arduino Name", uduino.Key);
                 EditorGUILayout.LabelField("Last read message", uduino.Value.lastRead);
                 EditorGUILayout.LabelField("Last sent value", uduino.Value.lastWrite);
                 //Todo: auto read
-                GUILayout.EndVertical();
 
 
                 EditorGUILayout.Separator();
                 GUILayout.BeginHorizontal();
-                GUILayout.Button("Pin", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(56f));
-                GUILayout.Button("Mode", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(105f));
-                GUILayout.Button("Action", "ProjectBrowserHeaderBgMiddle");
-                GUILayout.Button("×", "ProjectBrowserHeaderBgMiddle", GUILayout.MaxWidth(25f));
+                GUILayout.Button("Pin", "OL Titleleft", GUILayout.MaxWidth(56f));
+                GUILayout.Button("Mode", "OL Titlemid", GUILayout.MaxWidth(105f));
+                GUILayout.Button("Action", "OL Titlemid", GUILayout.ExpandWidth(true));
+                GUILayout.Button("×", "OL Titleright", GUILayout.MaxWidth(25f));
                 GUILayout.EndHorizontal();
+
+                if(pins.Count == 0)
+                {
+
+                } else
+                {
+
+                }
+                GUILayout.BeginVertical("Box");
+
+
 
                 foreach (Pin pin in pins.ToArray())
                 {
                     pin.Draw();
                 }
+                GUILayout.EndVertical();
 
-                if (GUILayout.Button("Test a pin"))
+                GUILayout.BeginHorizontal("TE Toolbar", GUILayout.ExpandWidth(true));
+                GUILayout.EndHorizontal();
+
+                
+
+                if (GUILayout.Button("Test a pin", GUILayout.ExpandWidth(true)))
                 {
                     pins.Add(new Pin(this, uduino.Key));
                 }
 
+                GUILayout.EndVertical();
+
             }
         }
 
+
+        DrawLine(12,0,45);
+
+        GUILayout.BeginHorizontal();
+     //   GUILayout.BeginHorizontal("IN Title");
+
+        GUILayout.BeginVertical();
+        SetGUIBackgroundColor("#4FC3F7");
+        if (GUILayout.Button("Discover ports"))
+        {
+            manager.DiscoverPorts();
+        }
+        GUILayout.EndVertical();
+
+        GUILayout.BeginVertical();
+        SetGUIBackgroundColor("#ef5350");
+        if (GUILayout.Button("Close ports"))
+        {
+            manager.CloseAllPorts();
+        }
+        SetGUIBackgroundColor();
+
+        GUILayout.EndVertical();
+
+        GUILayout.EndHorizontal();
+
+        EditorGUILayout.Separator();
+
+    }
+
+    public void DebugSettings()
+    {
         EditorGUILayout.Separator();
         GUILayout.BeginHorizontal();
         GUILayout.Button("Debug", "OL Title");
@@ -339,46 +343,101 @@ public class UduinoManagerEditor : Editor {
             manager.Read(targetName);
         }
         GUILayout.EndVertical();
+    }
 
+    public void AdvancedSettings()
+    {
 
-        EditorGUILayout.Separator();
-        GUILayout.BeginHorizontal();
-        GUILayout.Button("Advanced", "OL Title");
-        GUILayout.EndHorizontal();
-        GUILayout.BeginVertical("Box");
-
-
-        if (GUILayout.Button("Open Uduino Panel"))
-        {
-            UduinoPanel window = (UduinoPanel)EditorWindow.GetWindow(typeof(UduinoPanel));
-            window.Init();
-            return;
-        }
-        EditorGUILayout.Separator();
-
-        if (GUILayout.Button("Discover ports"))
-        {
-            manager.DiscoverPorts();
-        }
+        GUILayout.BeginHorizontal("window");
+        GUILayout.BeginVertical();
         if (GUILayout.Button("Get port state"))
         {
             manager.GetPortState();
         }
-        if (GUILayout.Button("Close ports"))
-        {
-            manager.CloseAllPorts();
-        }
-        EditorGUILayout.Separator();
         if (GUILayout.Button("Clear console"))
         {
             var logEntries = System.Type.GetType("UnityEditorInternal.LogEntries,UnityEditor.dll");
             var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             clearMethod.Invoke(null, null);
         }
-        GUILayout.EndVertical();
 
-        //TODO : Needed to update when message sent/received. This uses a lot of passes. Maybe change that, do a variable to check if a new value is here
-        EditorUtility.SetDirty(target);
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
+    }
+
+
+
+
+    public void DrawBox(int marginTop, int marginBottom, int height)
+    {
+        EditorGUILayout.Separator();
+        GUILayout.Space(marginTop);
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        GUILayout.Space(marginBottom);
+    }
+
+
+    public void DrawLine(int marginTop, int marginBottom, int height)
+    {
+        EditorGUILayout.Separator();
+
+        /*            GUILayout.BeginHorizontal("sv_iconselector_sep");
+            GUILayout.EndHorizontal();
+*/
+        GUILayout.Space(marginTop);
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        GUI.Box(new Rect(0f, lastRect.y + 4, Screen.width, height),"");
+        GUILayout.Space(marginBottom);
+    }
+
+    public void DrawLogo()
+    {
+        Texture tex = (Texture)EditorGUIUtility.Load("Assets/Uduino/Editor/Resources/logo.png");
+        GUILayout.Space(0);
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        GUI.Box(new Rect(1, lastRect.y + 4, Screen.width, 27), tex);
+        lastRect = GUILayoutUtility.GetLastRect();
+        Color bgColor = new Color();
+        ColorUtility.TryParseHtmlString("#2EB4BE", out bgColor);
+        EditorGUI.DrawRect(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 80f), bgColor);
+        GUI.DrawTexture(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 80f), tex, ScaleMode.ScaleToFit);
+        GUI.color = Color.white;
+        GUILayout.Space(80f);
+    }
+
+    public bool DrawHeaderTitle(string title, bool foldoutProperty, Color backgroundColor)
+    {
+        GUILayout.Space(0);
+        Rect lastRect = GUILayoutUtility.GetLastRect();
+        GUI.Box(new Rect(1, lastRect.y + 4, Screen.width, 27), "");
+        lastRect = GUILayoutUtility.GetLastRect();
+        EditorGUI.DrawRect(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 25f), headerColor);
+        GUI.Label(new Rect(lastRect.x, lastRect.y + 10, Screen.width, 25), title);
+        GUI.color = Color.clear;
+        if (GUI.Button(new Rect(0, lastRect.y + 4, Screen.width, 27), ""))
+        {
+            foldoutProperty = !foldoutProperty;
+        }
+        GUI.color = Color.white;
+        GUILayout.Space(30);
+        if (foldoutProperty) { GUILayout.Space(5); }
+        return foldoutProperty;
+    }
+
+    void SetGUIBackgroundColor(string hex)
+    {
+        Color color = new Color();
+        ColorUtility.TryParseHtmlString(hex, out color);
+        GUI.backgroundColor = color;
+    }
+
+    void SetGUIBackgroundColor(Color color)
+    {
+        GUI.backgroundColor = color;
+    }
+    void SetGUIBackgroundColor()
+    {
+        GUI.backgroundColor = defaultButtonColor;
     }
 
     public void SendMessage(string targetBoard, string message)
