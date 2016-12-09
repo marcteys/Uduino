@@ -79,13 +79,22 @@ namespace Uduino
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
         [SerializeField]
-        private bool ReadOnThread = true;
+        private bool readOnThread = true;
+        public bool ReadOnThread
+        {
+            get { return readOnThread; }
+            set { readOnThread = value; }
+        }
 
         /// <summary>
         /// BaudRate
         /// </summary>
         [SerializeField]
         private int baudRate = 9600;
+        public int BaudRate {
+            get { return baudRate; }
+            set { baudRate = value; }
+        }
 
         /// <summary>
         /// Log level
@@ -97,13 +106,28 @@ namespace Uduino
         /// Number of tries to discover the attached serial ports
         /// </summary>
         private int discoverTries = 20;
+        public int DiscoverTries
+        {
+            get { return discoverTries; }
+            set { discoverTries = value; }
+        }
+
+        /// <summary>
+        /// Number of tries to discover the attached serial ports
+        /// </summary>
+        private string[] blackListedPorts = new string[0];
+        public string[] BlackListedPorts
+        {
+            get { return blackListedPorts; }
+            set { blackListedPorts = value; }
+        }
 
         void Awake()
         {
             Instance = this;
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
-            if(ReadOnThread) StartThread();
+            if(readOnThread) StartThread();
         }
 
         /// <summary>
@@ -149,6 +173,8 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
+                if (System.Array.Exists(blackListedPorts, element => element == portName))
+                    return;
                 UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
                 int tries = 0;
                 do
@@ -161,7 +187,7 @@ namespace Uduino
                         {
                             string name = reading.Split(new char[0])[1];
                             uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
-                            if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
+                            if (!readOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                             Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                             break;
                         }
@@ -371,13 +397,18 @@ namespace Uduino
 
         public void OnDisable()
         {
-            if (ReadOnThread)
+            if (readOnThread)
             {
-                readAllPorts = false;
-                if(_Thread != null) _Thread.Abort();
-                _Thread = null;
+                DisableThread();
             }
             if(uduinoDevices.Count != 0) CloseAllPorts();
+        }
+
+        void DisableThread()
+        {
+            readAllPorts = false;
+            if (_Thread != null) _Thread.Abort();
+            _Thread = null;
         }
 
     }
