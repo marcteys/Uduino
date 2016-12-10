@@ -149,35 +149,45 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
-                int tries = 0;
-                do
-                {
-                    if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
-                    {
-                        // TODO : Changer ça et faire un read async, qui prend comme callback l'initialisation de Uniduino
-                        string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
-                        if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity") 
-                        {
-                            string name = reading.Split(new char[0])[1];
-                            uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
-                            if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                            Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
-                            break;
-                        }
-                        else
-                        {
-                            Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying (" + tries + "/"+ discoverTries+")");
-                        }
-                    }
-                } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < discoverTries);
+                StartCoroutine(FindBoardPort(portName));
+            }
+        }
 
-                if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
+        /// <summary>
+        /// Find a board connected to a specific port
+        /// </summary>
+        /// <param name="portName">Port open</param>
+        IEnumerator FindBoardPort(string portName)
+        {
+            UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
+            int tries = 0;
+            do
+            {
+                if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
                 {
-                    //TODO : Debug.LogError
-                    uduinoDevice.Close();
-                    uduinoDevice = null;
+                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
+                    if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
+                    {
+                        string name = reading.Split(new char[0])[1];
+                        uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
+                        if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
+                        Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                        break;
+                    }
+                    else
+                    {
+                        Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
+                    }
                 }
+                yield return 0;    //Wait one frame
+
+            } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < discoverTries);
+
+            if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
+            {
+                //TODO : Debug.LogError
+                uduinoDevice.Close();
+                uduinoDevice = null;
             }
         }
 
