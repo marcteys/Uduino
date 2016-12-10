@@ -1,8 +1,7 @@
 // Uduino Test board
 
 #include<Uduino.h>
-Uduino uduino("testBoard"); // Declare and name your object
-
+Uduino uduino("uduinoBoard"); // Declare and name your object
 
 // Servo
 #include <Servo.h>
@@ -33,8 +32,6 @@ typedef struct _servoWrapper {
 
 static ServoWrapper Servos[MAXSERVOS];
 
-
-
 void setup()
 {
   Serial.begin(9600);
@@ -42,7 +39,6 @@ void setup()
   uduino.addCommand("writePin", WritePin);
   uduino.addCommand("readPin", ReadPin);
 }
-
 
 void SetMode() {
   int pinToMap;
@@ -77,10 +73,9 @@ void SetMode() {
         break;
     }
   }
-
   //uduino.charToInt(arg)
-
 }
+
 
 void WritePin() {
   int pinToMap;
@@ -102,7 +97,6 @@ void WritePin() {
       analogWrite(pinToMap, value);
     }
   }
-
 }
 
 void ReadPin() {

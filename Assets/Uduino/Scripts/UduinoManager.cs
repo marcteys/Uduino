@@ -106,6 +106,7 @@ namespace Uduino
         /// Number of tries to discover the attached serial ports
         /// </summary>
         private int discoverTries = 20;
+        [SerializeField]
         public int DiscoverTries
         {
             get { return discoverTries; }
@@ -115,13 +116,20 @@ namespace Uduino
         /// <summary>
         /// Number of tries to discover the attached serial ports
         /// </summary>
+        /*
         private string[] blackListedPorts = new string[0];
         public string[] BlackListedPorts
         {
             get { return blackListedPorts; }
             set { blackListedPorts = value; }
         }
-
+        */
+        public List<string> blackListedPorts = new List<string>();
+        public List<string> BlackListedPorts {
+            get { return blackListedPorts; }
+            set { blackListedPorts = value; }
+        }
+        
         void Awake()
         {
             Instance = this;
@@ -173,8 +181,12 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                if (System.Array.Exists(blackListedPorts, element => element == portName))
-                    return;
+                if (blackListedPorts.Exists(element => element == portName))
+                {
+                    Log.Info("Port <color=#2196F3>[" + portName + "]</color> is blacklisted");
+                    continue;
+                } 
+
                 UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
                 int tries = 0;
                 do

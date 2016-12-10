@@ -131,7 +131,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2f5a4e52dfc3107499249fb2d34a1bae, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ReadOnThread: 1
+  readOnThread: 1
   baudRate: 9600
   debugLevel: 0
 --- !u!1 &1706900757
