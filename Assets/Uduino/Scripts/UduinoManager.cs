@@ -20,8 +20,20 @@ using System.IO.Ports;
 
 namespace Uduino
 {
+    public enum PinMode
+    {
+        Output,
+        PWM,
+        Analog,
+        Input_pullup,
+        Servo
+    }
+
+    public enum AnalogPin { A0 = 12, A1 = 10, A2 = 3, A3 = 1, A4 = 2, A5 = 4 }
+
+
     public class UduinoManager : MonoBehaviour {
-        
+
         /// <summary>
         /// UduinoManager unique instance.
         /// Create  a new instance if any UduinoManager is present on the scene.
@@ -68,13 +80,6 @@ namespace Uduino
         public event OnValueReceivedEvent OnValueReceived;
 
         /// <summary>
-        /// Create a delegate event to trigger the function OnExtendedValueReceivedEvent()
-        /// </summary>
-        /// TODO : REMOVE ?
-        public delegate void OnExtendedValueReceivedEvent(string data, string device);
-        public event OnExtendedValueReceivedEvent OnExtendedValueReceived;
-
-        /// <summary>
         /// Enable the reading of serial port in a different Thread.
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
@@ -113,17 +118,6 @@ namespace Uduino
             set { discoverTries = value; }
         }
 
-        /// <summary>
-        /// Number of tries to discover the attached serial ports
-        /// </summary>
-        /*
-        private string[] blackListedPorts = new string[0];
-        public string[] BlackListedPorts
-        {
-            get { return blackListedPorts; }
-            set { blackListedPorts = value; }
-        }
-        */
         public List<string> blackListedPorts = new List<string>();
         public List<string> BlackListedPorts {
             get { return blackListedPorts; }
@@ -162,10 +156,12 @@ namespace Uduino
 			if (p == 4 || p == 128 || p == 6) {
 				string[] ttys = System.IO.Directory.GetFiles ("/dev/", "tty.*");
 				return ttys;
+                //TODO : Test on MacOS
+                /*
 				foreach (string dev in ttys) {
 					if (dev.StartsWith ("/dev/tty.*")) // TODO : Test if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 						serial_ports.Add (dev);
-				}
+				}*/
 			} 
 			return serial_ports.ToArray();
 		}
@@ -241,6 +237,16 @@ namespace Uduino
             }
         }
 
+
+
+        /// <summary>
+        /// Init a pin
+        /// </summary>
+        public void InitPin(int pin, PinMode mode)
+        {
+
+        }
+
         /// <summary>
         /// Send a read command to a specific arduino.
         /// A read command will be returned in the OnValueReceived() delegate function
@@ -249,13 +255,27 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target, string variable = null, int timeout = 100, System.Action<string> action = null)
+        public void Read(string target = null, string variable = null, int timeout = 100, System.Action<string> action = null)
         {
             if (UduinoTargetExists(target))
             {
                 uduinoDevices[target].read = variable;
                 uduinoDevices[target].callback = action;
             }
+            else
+            {
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                {
+                    uduinoDevices[target].read = variable;
+                    uduinoDevices[target].callback = action;
+
+                }
+            }
+        }
+
+        public void Read(int pin, System.Action<string> action = null)
+        {
+
         }
 
         /// <summary>
@@ -263,26 +283,37 @@ namespace Uduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
-        public void Write(string target, string message)
+        public void Write(string target = null, string message = null)
         {
             if (UduinoTargetExists(target))
                 uduinoDevices[target].WriteToArduino(message);
+            else
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    uduinoDevices[target].WriteToArduino(message);
         }
 
         /// <summary>
         /// Write a command on an Arduino with a specific value  
         /// </summary>
-        public void Write(string target, string message, int value) {
+        /// <param name="target">Target device</param>
+        /// <param name="message">Message to write in the serial</param>
+        /// <param name="value">Optional value</param>
+        public void Write(string target = null, string message = null, int value = 0) {
             if (UduinoTargetExists(target))
-                uduinoDevices[target].WriteToArduino(message + " " + value);
+                uduinoDevices[target].WriteToArduino(message, value);
+            else
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    uduinoDevices[target].WriteToArduino(message,value);
         }
 
         /// <summary>
         /// Write a command on an Arduino with several commands and values
         /// </summary>
         /// TODO : To improve
-        public void Write(string target, string[] message, int[] values) {
+        public void Write(string target = null, string[] message = null, int[] values = null) {
             if (UduinoTargetExists(target))
+                uduinoDevices[target].AdvancedWriteToArduino(message, values);
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 uduinoDevices[target].AdvancedWriteToArduino(message, values);
         }
 

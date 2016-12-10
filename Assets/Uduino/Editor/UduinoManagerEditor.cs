@@ -9,15 +9,6 @@ using Uduino;
 public class Pin
 {
     //Pin stuff
-    public enum PinMode
-    {
-        Output,
-        PWM,
-        Analog,
-        Input_pullup,
-        Servo
-    }
-
     private UduinoManagerEditor manager;
 
     public string arduino = "";
@@ -64,7 +55,7 @@ public class Pin
 
     public void Draw()
     {
-        #if UNIDY_EDITOR
+        #if UNITY_EDITOR
         GUILayout.BeginHorizontal();
         currentPin = EditorGUILayout.Popup(currentPin, allPin, "ToolbarDropDown", GUILayout.MaxWidth(40));
         pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, "ToolbarDropDown", GUILayout.MaxWidth(55));

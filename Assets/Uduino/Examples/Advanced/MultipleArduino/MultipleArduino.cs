@@ -17,6 +17,8 @@ public class MultipleArduino : MonoBehaviour
     {
         UduinoManager.Instance.Read("myArduinoName", "myVariable");
         UduinoManager.Instance.Read("myOtherArduino", "mySensor");
+        Log.Info(sensorOne);
+        Log.Info(sensorTwo);
     }
 
     void OnValuesReceived(string data, string device)

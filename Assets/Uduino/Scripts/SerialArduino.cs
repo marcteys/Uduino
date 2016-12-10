@@ -76,8 +76,10 @@ namespace Uduino
         /// Write a message to a serial port
         /// </summary>
         /// <param name="message">Message to write on this arduino serial</param>
-        public void WriteToArduino(string message)
+        public void WriteToArduino(string message, object value = null)
         {
+            if (value != null)
+                message = " " + value.ToString();
             if (serial == null || !serial.IsOpen || message == null || message == "" ) return;
             try
             {

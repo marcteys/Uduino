@@ -9,6 +9,6 @@ public class UduinoShortCall : MonoBehaviour
 
     void Update()
     {
-        UduinoManager.Instance.Read("myArduinoBoard", "mySensor", action: ((string data) => sensorOne = int.Parse(data)));
+        UduinoManager.Instance.Read("myArduinoBoard", "mySensor", action: (string data) => sensorOne = int.Parse(data));
     }
 }
