@@ -64,20 +64,23 @@ public class Pin
 
     public void Draw()
     {
+      //  GUILayout.BeginVertical("TE Toolbar", GUILayout.Height(105f));
         GUILayout.BeginHorizontal();
-        currentPin = EditorGUILayout.Popup(currentPin, allPin, GUILayout.Width(50f));
-        pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, GUILayout.Width(100f));
+        currentPin = EditorGUILayout.Popup(currentPin, allPin, "ToolbarDropDown", GUILayout.MaxWidth(40));
+        pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, "ToolbarDropDown", GUILayout.MaxWidth(55));
         CheckChanges();
         GUILayout.BeginHorizontal();
+
+        EditorGUIUtility.fieldWidth -= 22;
 
         switch (pinMode)
         {
             case PinMode.Output:
-                if (GUILayout.Button("HIGH", EditorStyles.miniButtonLeft)) sendValue = 255;
-                if (GUILayout.Button("LOW", EditorStyles.miniButtonRight)) sendValue = 0;
+                if (GUILayout.Button("HIGH", "toolbarButton")) sendValue = 255;
+                if (GUILayout.Button("LOW", "toolbarButton")) sendValue = 0;
                 break;
             case PinMode.Input_pullup:
-                EditorGUILayout.LabelField("Digital read:", GUILayout.MaxWidth(100f));
+                EditorGUILayout.LabelField("Digital read:");
                 break;
             case PinMode.PWM:
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
@@ -86,23 +89,26 @@ public class Pin
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
                 break;
             case PinMode.Analog:
-                EditorGUILayout.LabelField("Analog read:", GUILayout.MaxWidth(100f));
+                EditorGUILayout.LabelField("Analog read:");
                 break;
         }
-        GUILayout.EndHorizontal();
+        EditorGUIUtility.fieldWidth += 22;
 
-        if (GUILayout.Button("-", EditorStyles.miniButton, GUILayout.MaxWidth(20f)))
+        if (GUILayout.Button("-", "toolbarButton", GUILayout.Width(22)))
         {
             UduinoManagerEditor.Instance.RemovePin(this);
         }
+        GUILayout.EndHorizontal();
+
         //Send  the message
-        if(prevSendValue != sendValue)
+        if (prevSendValue != sendValue)
         {
             SendMessage("writePin " + currentPin + " " + sendValue);
             prevSendValue = sendValue;
         }
 
         GUILayout.EndHorizontal();
+      //  GUILayout.EndVertical();
     }
 
     public void Destroy()
@@ -131,22 +137,58 @@ public class UduinoManagerEditor : Editor {
 
     bool defaultPanel = true;
     bool arduinoPanel = true;
-    bool advancedPanel = true;
-    bool blacklistedFoldout = true;
+    bool advancedPanel = false;
+    bool blacklistedFoldout = false;
 
     //Style-related
     Color headerColor = new Color(0.65f, 0.65f, 0.65f, 1);
     //Color backgroundColor = new Color(0.75f, 0.75f, 0.75f);
     Color defaultButtonColor;
 
-    GUIStyle boldtext;
+    GUIStyle boldtext = null;
+    GUIStyle olLight = null;
+    GUIStyle olInput = null;
 
     void OnEnable()
     {
-        defaultButtonColor = GUI.backgroundColor;
         Instance = this;
+        SetColorAndStyles();
         Repaint();
-      //  manager.DiscoverPorts();
+        manager.DiscoverPorts();
+    }
+
+    void SetColorAndStyles()
+    {
+        //Color and GUI
+        defaultButtonColor = GUI.backgroundColor;
+        if (!EditorGUIUtility.isProSkin)
+        {
+            headerColor = new Color(165 / 255f, 165 / 255f, 165 / 255f, 1);
+            //  backgroundColor = new Color(193 / 255f, 193 / 255f, 193 / 255f, 1);
+        }
+        else
+        {
+            headerColor = new Color(41 / 255f, 41 / 255f, 41 / 255f, 1);
+            //    backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
+        }
+
+        if (boldtext == null)
+        {
+            boldtext = new GUIStyle(GUI.skin.label);
+            boldtext.fontStyle = FontStyle.Bold;
+            boldtext.alignment = TextAnchor.UpperCenter;
+
+            olLight = new GUIStyle("OL Titleleft");
+            olLight.fontStyle = FontStyle.Normal;
+            olLight.font = GUI.skin.button.font;
+            olLight.fontSize = 9;
+            olLight.alignment = TextAnchor.MiddleCenter;
+
+            olInput = new GUIStyle("TE toolbar");
+            olInput.fontStyle = FontStyle.Bold;
+            olInput.fontSize = 10;
+            olInput.alignment = TextAnchor.MiddleLeft;
+        }
     }
 
     public override void OnInspectorGUI()
@@ -154,23 +196,6 @@ public class UduinoManagerEditor : Editor {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
 
-
-        //Set the Style
-        if (!EditorGUIUtility.isProSkin)
-        {
-            headerColor = new Color(165 / 255f, 165 / 255f, 165 / 255f, 1);
-          //  backgroundColor = new Color(193 / 255f, 193 / 255f, 193 / 255f, 1);
-        }
-        else
-        {
-            headerColor = new Color(41 / 255f, 41 / 255f, 41 / 255f, 1);
-        //    backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
-        }
-
-
-        boldtext = new GUIStyle(GUI.skin.label);
-        boldtext.fontStyle = FontStyle.Bold;
-        boldtext.alignment = TextAnchor.UpperCenter;
 
         DrawLogo();
 
@@ -187,7 +212,6 @@ public class UduinoManagerEditor : Editor {
             manager.BaudRate = EditorGUILayout.IntField("Baud Rate", manager.BaudRate );
             manager.ReadOnThread = EditorGUILayout.Toggle("Read on threads", manager.ReadOnThread);
             EditorGUI.indentLevel--;
-
             EditorGUILayout.Separator();
         }
 
@@ -242,34 +266,17 @@ public class UduinoManagerEditor : Editor {
                 if (uduino.Key == "testBoard") // Display the informations for testBoard
                 {
                     GUILayout.BeginHorizontal();
-                    GUILayout.Label("Pin", "OL Titleleft", GUILayout.MaxWidth(56f));
-                    GUILayout.Label("Mode", "OL Titlemid", GUILayout.MaxWidth(105f));
+                    GUILayout.Label("Pin", "OL Titleleft", GUILayout.MaxWidth(40f));
+                    GUILayout.Label("Mode", "OL Titlemid", GUILayout.MaxWidth(55f));
                     GUILayout.Label("Action", "OL Titlemid", GUILayout.ExpandWidth(true));
-                    GUILayout.Label("×", "OL Titleright", GUILayout.MaxWidth(25f));
+                    GUILayout.Label("×", "OL Titleright", GUILayout.Width(22f));
                     GUILayout.EndHorizontal();
 
-                    if (pins.Count == 0)
-                    {
-
-                    }
-                    else
-                    {
-
-                    }
-
-
                     foreach (Pin pin in pins.ToArray())
-                    {
-                        GUILayout.BeginVertical("TE Toolbar", GUILayout.Height(105f));
                         pin.Draw();
-                        GUILayout.EndVertical();
-                    }
 
-
-                    if (GUILayout.Button("Test a pin", "TE toolbarbutton", GUILayout.ExpandWidth(true)))
-                    {
+                    if (GUILayout.Button("Add a pin", "TE toolbarbutton", GUILayout.ExpandWidth(true)))
                         pins.Add(new Pin(this, uduino.Key));
-                    }
                 }
                 else // If it's a "Normal" Arduino
                 {
@@ -281,7 +288,6 @@ public class UduinoManagerEditor : Editor {
                     }
                 }
                 GUILayout.EndVertical();
-
             }
         }
 
@@ -304,7 +310,6 @@ public class UduinoManagerEditor : Editor {
             manager.CloseAllPorts();
         }
         SetGUIBackgroundColor();
-
         GUILayout.EndVertical();
 
         GUILayout.EndHorizontal();
@@ -315,93 +320,75 @@ public class UduinoManagerEditor : Editor {
 
     public void AdvancedSettings()
     {
-        GUILayout.BeginVertical();
         GUILayout.Label("Discovery settings", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
 
-        manager.DiscoverTries = EditorGUILayout.IntField("Discovery tries", manager.DiscoverTries);
+        manager.DiscoverTries = EditorGUILayout.IntField("Number of tries", manager.DiscoverTries);
 
-        blacklistedFoldout = Foldout(blacklistedFoldout, "Blacklisted ports", true, EditorStyles.foldout);
+        blacklistedFoldout = EditorGUI.Foldout(GUILayoutUtility.GetRect(40f, 40f, 16f, 16f, EditorStyles.foldout), blacklistedFoldout, "Blacklisted ports", true, EditorStyles.foldout);
         if (blacklistedFoldout)
         {
 
             GUILayout.BeginVertical();
 
-
-
             GUILayout.BeginHorizontal();
             GUILayout.Space(EditorGUI.indentLevel * 15 + 4); ;
 
-            GUILayout.Label("Serial port", "OL Titleleft", GUILayout.Width(Screen.width / 1.5f));
-            GUILayout.Label("Action", "OL Titleleft");
+            GUILayout.Label("Serial port", "OL Titleleft");
+            GUILayout.Label("", "OL Titleright", GUILayout.MaxWidth(35));
             GUILayout.EndHorizontal();
 
             foreach (string blackList in manager.BlackListedPorts)
             {
                 GUILayout.BeginHorizontal();
                 GUILayout.Space(EditorGUI.indentLevel * 15 + 4);
-                GUILayout.Label(blackList,"OL Titleleft", GUILayout.Width(Screen.width / 1.5f));
-                if (GUILayout.Button("-", "OL Titleright"))
+                GUILayout.Label(blackList, olLight);
+                if (GUILayout.Button("×", "OL Titleright", GUILayout.MaxWidth(35)))
                 {
                     manager.BlackListedPorts.Remove(blackList);
                     return;
                 }
                 GUILayout.EndHorizontal();
-
             }
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(EditorGUI.indentLevel * 15 + 4);
-            EditorGUI.indentLevel--;
-
-            newBlackListedPort = EditorGUILayout.TextField("", "TE toolbar", newBlackListedPort, GUILayout.Width(Screen.width/1.5f));
-            if (GUILayout.Button("Add", "TE Toolbarbutton", GUILayout.ExpandWidth(true)))
+            EditorGUI.indentLevel--;            
+            newBlackListedPort = EditorGUILayout.TextField("", newBlackListedPort, olInput, GUILayout.ExpandWidth(true));
+            if (GUILayout.Button("Add", "TE Toolbarbutton", GUILayout.MaxWidth(35)))
             {
                 if (newBlackListedPort == "") return;
                 manager.BlackListedPorts.Add(newBlackListedPort);
             }
             GUILayout.EndHorizontal();
-
-           GUILayout.EndVertical();
-
+            GUILayout.EndVertical();
         }
 
-        GUILayout.EndVertical();
-
-
-        GUILayout.BeginVertical();
-        GUILayout.Label("Discovery settings", EditorStyles.boldLabel);
+        GUILayout.Label("Debug", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+      //  SetGUIBackgroundColor("#4FC3F7");
         if (GUILayout.Button("Get port state"))
         {
             manager.GetPortState();
         }
-        GUILayout.EndHorizontal();
+        GUILayout.EndVertical();
 
-        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+      //  SetGUIBackgroundColor("#ef5350");
         if (GUILayout.Button("Clear console"))
         {
             var logEntries = System.Type.GetType("UnityEditorInternal.LogEntries,UnityEditor.dll");
             var clearMethod = logEntries.GetMethod("Clear", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
             clearMethod.Invoke(null, null);
         }
+       // SetGUIBackgroundColor();
+        GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
-        GUILayout.EndVertical();
-    }
+        EditorGUILayout.Separator();
 
-
-    public static bool Foldout(bool foldout, GUIContent content, bool toggleOnLabelClick, GUIStyle style)
-    {
-        Rect position = GUILayoutUtility.GetRect(40f, 40f, 16f, 16f, style);
-        // EditorGUI.kNumberW == 40f but is internal
-        return EditorGUI.Foldout(position, foldout, content, toggleOnLabelClick, style);
-    }
-
-    public static bool Foldout(bool foldout, string content, bool toggleOnLabelClick, GUIStyle style)
-    {
-        return Foldout(foldout, new GUIContent(content), toggleOnLabelClick, style);
     }
 
     public void DrawLine(int marginTop, int marginBottom, int height)
