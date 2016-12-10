@@ -6,7 +6,10 @@ namespace Uduino
     public class UduinoDevice : SerialArduino
     {
         public string read = null;
-        public string write = null;
+
+        public string lastRead = null;
+        public string lastWrite = null;
+
         public System.Action<string> callback = null;
 
         public UduinoDevice(string port, int baudrate = 9600)
@@ -28,7 +31,7 @@ namespace Uduino
 
         public override void WritingSuccess(string message)
         {
-            write = message;
+            lastWrite = message;
         }
     }
 }

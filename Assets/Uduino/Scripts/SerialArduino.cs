@@ -78,7 +78,7 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message)
         {
-            if (message == null || message == "" || !serial.IsOpen) return;
+            if (serial == null || !serial.IsOpen || message == null || message == "" ) return;
             try
             {
                 Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");

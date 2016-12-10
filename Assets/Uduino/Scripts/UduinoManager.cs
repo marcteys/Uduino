@@ -79,13 +79,22 @@ namespace Uduino
         /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
         [SerializeField]
-        private bool ReadOnThread = true;
+        private bool readOnThread = true;
+        public bool ReadOnThread
+        {
+            get { return readOnThread; }
+            set { readOnThread = value; }
+        }
 
         /// <summary>
         /// BaudRate
         /// </summary>
         [SerializeField]
         private int baudRate = 9600;
+        public int BaudRate {
+            get { return baudRate; }
+            set { baudRate = value; }
+        }
 
         /// <summary>
         /// Log level
@@ -96,14 +105,37 @@ namespace Uduino
         /// <summary>
         /// Number of tries to discover the attached serial ports
         /// </summary>
-        private int discoverTries = 5;
+        private int discoverTries = 20;
+        [SerializeField]
+        public int DiscoverTries
+        {
+            get { return discoverTries; }
+            set { discoverTries = value; }
+        }
 
+        /// <summary>
+        /// Number of tries to discover the attached serial ports
+        /// </summary>
+        /*
+        private string[] blackListedPorts = new string[0];
+        public string[] BlackListedPorts
+        {
+            get { return blackListedPorts; }
+            set { blackListedPorts = value; }
+        }
+        */
+        public List<string> blackListedPorts = new List<string>();
+        public List<string> BlackListedPorts {
+            get { return blackListedPorts; }
+            set { blackListedPorts = value; }
+        }
+        
         void Awake()
         {
             Instance = this;
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
-            if(ReadOnThread) StartThread();
+            if(readOnThread) StartThread();
         }
 
         /// <summary>
@@ -355,6 +387,7 @@ namespace Uduino
             if (data != null && data != "" && data != "Null")
             {
                 UduinoDevice uduino = uduinoDevices[target];
+                uduino.lastRead = data;
                 if (uduino.callback != null) uduino.callback(data);
                 else OnValueReceived(data, target);
             }
@@ -380,13 +413,18 @@ namespace Uduino
 
         public void OnDisable()
         {
-            if (ReadOnThread)
+            if (readOnThread)
             {
-                readAllPorts = false;
-                if(_Thread != null) _Thread.Abort();
-                _Thread = null;
+                DisableThread();
             }
             if(uduinoDevices.Count != 0) CloseAllPorts();
+        }
+
+        void DisableThread()
+        {
+            readAllPorts = false;
+            if (_Thread != null) _Thread.Abort();
+            _Thread = null;
         }
 
     }
