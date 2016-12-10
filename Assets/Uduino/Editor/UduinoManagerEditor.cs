@@ -64,7 +64,7 @@ public class Pin
 
     public void Draw()
     {
-      //  GUILayout.BeginVertical("TE Toolbar", GUILayout.Height(105f));
+        #if UNIDY_EDITOR
         GUILayout.BeginHorizontal();
         currentPin = EditorGUILayout.Popup(currentPin, allPin, "ToolbarDropDown", GUILayout.MaxWidth(40));
         pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, "ToolbarDropDown", GUILayout.MaxWidth(55));
@@ -108,7 +108,8 @@ public class Pin
         }
 
         GUILayout.EndHorizontal();
-      //  GUILayout.EndVertical();
+        #endif
+
     }
 
     public void Destroy()
@@ -411,10 +412,10 @@ public class UduinoManagerEditor : Editor {
         lastRect = GUILayoutUtility.GetLastRect();
         Color bgColor = new Color();
         ColorUtility.TryParseHtmlString("#cde4e0", out bgColor);
-        EditorGUI.DrawRect(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 80f), bgColor);
-        GUI.DrawTexture(new Rect(Screen.width/2 - tex.width/2, lastRect.y + 20, tex.width, tex.height), tex, ScaleMode.ScaleToFit);
+        EditorGUI.DrawRect(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 60f), bgColor);
+        GUI.DrawTexture(new Rect(Screen.width/2 - tex.width/2, lastRect.y + 10, tex.width, tex.height), tex, ScaleMode.ScaleToFit);
         GUI.color = Color.white;
-        GUILayout.Space(80f);
+        GUILayout.Space(60f);
     }
 
     public bool DrawHeaderTitle(string title, bool foldoutProperty, Color backgroundColor)
