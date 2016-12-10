@@ -152,32 +152,29 @@ public class UduinoManagerEditor : Editor {
     void OnEnable()
     {
         Instance = this;
-        SetColorAndStyles();
-        Repaint();
-        manager.DiscoverPorts();
     }
 
     void SetColorAndStyles()
     {
-        //Color and GUI
-        defaultButtonColor = GUI.backgroundColor;
-        if (!EditorGUIUtility.isProSkin)
+        if(boldtext == null)
         {
-            headerColor = new Color(165 / 255f, 165 / 255f, 165 / 255f, 1);
-            //  backgroundColor = new Color(193 / 255f, 193 / 255f, 193 / 255f, 1);
-        }
-        else
-        {
-            headerColor = new Color(41 / 255f, 41 / 255f, 41 / 255f, 1);
-            //    backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
-        }
+            //Color and GUI
+            defaultButtonColor = GUI.backgroundColor;
+            if (!EditorGUIUtility.isProSkin)
+            {
+                headerColor = new Color(165 / 255f, 165 / 255f, 165 / 255f, 1);
+                //  backgroundColor = new Color(193 / 255f, 193 / 255f, 193 / 255f, 1);
+            }
+            else
+            {
+                headerColor = new Color(41 / 255f, 41 / 255f, 41 / 255f, 1);
+                //    backgroundColor = new Color(56 / 255f, 56 / 255f, 56 / 255f, 1);
+            }
 
-        if (boldtext == null)
-        {
             boldtext = new GUIStyle(GUI.skin.label);
             boldtext.fontStyle = FontStyle.Bold;
             boldtext.alignment = TextAnchor.UpperCenter;
-
+            
             olLight = new GUIStyle("OL Titleleft");
             olLight.fontStyle = FontStyle.Normal;
             olLight.font = GUI.skin.button.font;
@@ -196,6 +193,7 @@ public class UduinoManagerEditor : Editor {
         if (manager == null) manager = (UduinoManager)target;
         Log.SetLogLevel(manager.debugLevel);
 
+        SetColorAndStyles();
 
         DrawLogo();
 
@@ -406,15 +404,15 @@ public class UduinoManagerEditor : Editor {
         GUILayout.FlexibleSpace(); // Nededed for lastRect
         EditorGUILayout.EndHorizontal();
 
-        Texture tex = (Texture)EditorGUIUtility.Load("Assets/Uduino/Editor/Resources/logo.png");
+        Texture tex = (Texture)EditorGUIUtility.Load("Assets/Uduino/Editor/Resources/uduino-logo.png");
         GUILayout.Space(0);
         Rect lastRect = GUILayoutUtility.GetLastRect();
         GUI.Box(new Rect(1, lastRect.y + 4, Screen.width, 27), tex);
         lastRect = GUILayoutUtility.GetLastRect();
         Color bgColor = new Color();
-        ColorUtility.TryParseHtmlString("#2EB4BE", out bgColor);
+        ColorUtility.TryParseHtmlString("#cde4e0", out bgColor);
         EditorGUI.DrawRect(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 80f), bgColor);
-        GUI.DrawTexture(new Rect(lastRect.x - 15, lastRect.y + 5f, Screen.width + 1, 80f), tex, ScaleMode.ScaleToFit);
+        GUI.DrawTexture(new Rect(Screen.width/2 - tex.width/2, lastRect.y + 20, tex.width, tex.height), tex, ScaleMode.ScaleToFit);
         GUI.color = Color.white;
         GUILayout.Space(80f);
     }
