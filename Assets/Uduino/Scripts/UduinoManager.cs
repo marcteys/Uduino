@@ -298,7 +298,7 @@ namespace Uduino
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
         /// <param name="value">Optional value</param>
-        public void Write(string target = null, string message = null, int value = 0) {
+        public void Write(string target, string message, int value) {
             if (UduinoTargetExists(target))
                 uduinoDevices[target].WriteToArduino(message, value);
             else
