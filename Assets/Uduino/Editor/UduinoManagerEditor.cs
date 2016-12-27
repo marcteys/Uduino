@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using System.Net;
+using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEditor;
@@ -100,7 +102,6 @@ public class Pin
 
         GUILayout.EndHorizontal();
         #endif
-
     }
 
     public void Destroy()
@@ -108,8 +109,6 @@ public class Pin
         SendMessage("writePin " + currentPin + " 0");
     }
 }
-
-
 
 
 [CustomEditor(typeof(UduinoManager))]
@@ -140,6 +139,10 @@ public class UduinoManagerEditor : Editor {
     GUIStyle boldtext = null;
     GUIStyle olLight = null;
     GUIStyle olInput = null;
+
+    //Setings - Todo : could do better
+    bool isUpToDate = false;
+    bool isUpToDateChecked = false;
 
     void OnEnable()
     {
@@ -377,6 +380,44 @@ public class UduinoManagerEditor : Editor {
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
+
+        GUILayout.Label("Update Uduino", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+        GUILayout.BeginHorizontal();
+        GUILayout.BeginVertical();
+        EditorGUI.indentLevel--;
+        EditorGUI.indentLevel--;
+        EditorGUI.indentLevel--;
+        EditorGUILayout.HelpBox("Current version: " + UduinoVersion.getVersion(), MessageType.None);
+
+        GUILayout.EndVertical();
+
+        GUILayout.BeginVertical();
+        // SetGUIBackgroundColor("#4FC3F7");
+        if (GUILayout.Button("Check for update"))
+        {
+            string url = "http://marcteyssier.com/data/uduino/last-version.txt";
+            WebRequest myRequest = WebRequest.Create(url);
+            WebResponse myResponse = myRequest.GetResponse();
+            Stream myStream = myResponse.GetResponseStream();
+            StreamReader myReader = new StreamReader(myStream);
+            string s = myReader.ReadToEnd();
+            myReader.Close();
+            isUpToDateChecked = true;
+            if (s == UduinoVersion.getVersion()) isUpToDate = true;
+            else isUpToDate = false;
+        }
+
+        // SetGUIBackgroundColor();
+        GUILayout.EndVertical();
+        GUILayout.EndHorizontal();
+        if(isUpToDateChecked)
+        {
+            if (isUpToDate) EditorGUILayout.HelpBox("Uduino is up to date", MessageType.Info, true);
+            else EditorGUILayout.HelpBox("Uduino is not up to date. Download the last version on the Asset Store." , MessageType.Error, true);
+
+        }
+
         EditorGUILayout.Separator();
 
     }
@@ -454,4 +495,5 @@ public class UduinoManagerEditor : Editor {
         pin.Destroy();
         pins.Remove(pin);
     }
+
 }

@@ -1,6 +1,6 @@
 ﻿/* 
  * Uduino - Yet Another Arduin-Unity Library
- * Version 1.1, 2016, Marc Teyssier
+ * Version 1.2, Jan 2017, Marc Teyssier
  *  
  *  ================
  *       TODOs
@@ -472,5 +472,22 @@ namespace Uduino
             _Thread = null;
         }
 
+    }
+
+    public static class UduinoVersion
+    {
+        static int major = 1;
+        static int minor = 2;
+        static string update = "Jan 2017";
+
+        public static string getVersion()
+        {
+            return major + "." + minor;
+        }
+
+        public static string lastUpdate()
+        {
+            return update;
+        }
     }
 }
