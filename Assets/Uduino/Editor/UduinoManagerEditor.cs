@@ -253,7 +253,7 @@ public class UduinoManagerEditor : Editor {
                 GUILayout.Label("Send commands", EditorStyles.boldLabel);
 
                 GUILayout.BeginVertical("Box");
-                if (uduino.Key == "testBoard") // Display the informations for testBoard
+                if (uduino.Key == "uduinoBoard") // Display the informations for default Uduino Board
                 {
                     GUILayout.BeginHorizontal();
                     GUILayout.Label("Pin", "OL Titleleft", GUILayout.MaxWidth(40f));

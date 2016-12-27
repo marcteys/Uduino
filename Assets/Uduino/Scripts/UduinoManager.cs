@@ -156,7 +156,7 @@ namespace Uduino
 			if (p == 4 || p == 128 || p == 6) {
 				string[] ttys = System.IO.Directory.GetFiles ("/dev/", "tty.*");
 				return ttys;
-                //TODO : Test on MacOS
+                //TODO : Test on Linux and MacOS
                 /*
 				foreach (string dev in ttys) {
 					if (dev.StartsWith ("/dev/tty.*")) // TODO : Test if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
@@ -200,6 +200,7 @@ namespace Uduino
                         uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                        uduinoDevice.UduinoFound();
                         break;
                     }
                     else
@@ -207,13 +208,12 @@ namespace Uduino
                         Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
                 }
-                yield return 0;    //Wait one frame
-
+                yield return new WaitForSeconds(0.1f);    //Wait one frame
             } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < discoverTries);
 
-            if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.UNDEF || uduinoDevice.getStatus() == SerialArduino.SerialStatus.CLOSE)
+            if(uduinoDevice.getStatus() != SerialArduino.SerialStatus.FOUND)
             {
-                //TODO : Debug.LogError
+                Log.Error("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Closing.");
                 uduinoDevice.Close();
                 uduinoDevice = null;
             }
@@ -266,16 +266,19 @@ namespace Uduino
             {
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
-                    uduinoDevices[target].read = variable;
-                    uduinoDevices[target].callback = action;
-
+                    uduino.Value.read = variable;
+                    uduino.Value.callback = action;
                 }
             }
         }
 
         public void Read(int pin, System.Action<string> action = null)
         {
-
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+            {
+                uduino.Value.ReadFromArduino();
+                uduino.Value.callback = action;
+            }
         }
 
         /// <summary>
@@ -289,7 +292,18 @@ namespace Uduino
                 uduinoDevices[target].WriteToArduino(message);
             else
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    uduinoDevices[target].WriteToArduino(message);
+                    uduino.Value.WriteToArduino(message);
+        }
+
+        /// <summary>
+        /// Write a command on an Arduino
+        /// </summary>
+        /// <param name="target">Target device</param>
+        /// <param name="message">Message to write in the serial</param>
+        public void Write(int pin, float floatVal = -1f)
+        {
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                uduino.Value.WriteToArduino(Mathf.Round(floatVal).ToString());
         }
 
         /// <summary>
@@ -303,7 +317,7 @@ namespace Uduino
                 uduinoDevices[target].WriteToArduino(message, value);
             else
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    uduinoDevices[target].WriteToArduino(message,value);
+                    uduino.Value.WriteToArduino(message,value);
         }
 
         /// <summary>
@@ -314,7 +328,7 @@ namespace Uduino
             if (UduinoTargetExists(target))
                 uduinoDevices[target].AdvancedWriteToArduino(message, values);
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                uduinoDevices[target].AdvancedWriteToArduino(message, values);
+                uduino.Value.AdvancedWriteToArduino(message, values);
         }
 
         /// <summary>

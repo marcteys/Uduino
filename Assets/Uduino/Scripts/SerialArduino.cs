@@ -11,6 +11,7 @@ namespace Uduino
         {
             UNDEF,
             OPEN,
+            FOUND,
             CLOSE
         };
 
@@ -36,8 +37,8 @@ namespace Uduino
         {
             try
             {
-                #if UNITY_STANDALONE
-                //	_port = "\\\\.\\" + _port; // TODO : For com port greater than 8 !
+                #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+                _port = "\\\\.\\" + _port;
                 #endif
                 serial = new SerialPort(_port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
@@ -143,6 +144,15 @@ namespace Uduino
                 Close();
                 return null;
             }
+        }
+
+
+        /// <summary>
+        /// A board with Uduino is found 
+        /// </summary>
+        public void UduinoFound()
+        {
+            serialStatus = SerialStatus.FOUND;
         }
 
         /// <summary>
