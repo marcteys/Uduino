@@ -240,11 +240,23 @@ namespace Uduino
 
 
         /// <summary>
-        /// Init a pin
+        /// Init a pin 
         /// </summary>
+        /// <param name="pin">Pin to init</param>
+        /// <param name="mode">PinMode to init pin</param>
         public void InitPin(int pin, PinMode mode)
         {
 
+        }
+
+        /// <summary>
+        /// Init a pin
+        /// </summary>
+        /// <param name="pin">Pin to init</param>
+        /// <param name="mode">PinMode to init pin</param>
+        public void InitPin(AnalogPin pin, PinMode mode)
+        {
+            InitPin((int)pin, mode);
         }
 
         /// <summary>
