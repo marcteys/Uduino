@@ -144,9 +144,14 @@ public class UduinoManagerEditor : Editor {
     bool isUpToDate = false;
     bool isUpToDateChecked = false;
 
+    public string[] baudRates = new string[] { "4800", "9600", "19200", "57600", "115200" };
+    int prevBaudRateIndex = 1;
+    public int baudRateIndex = 1;
+
     void OnEnable()
     {
         Instance = this;
+        baudRateIndex = System.Array.IndexOf(baudRates, manager.BaudRate.ToString());
     }
 
     void SetColorAndStyles()
@@ -202,7 +207,16 @@ public class UduinoManagerEditor : Editor {
             GUILayout.Label("Arduino", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-            manager.BaudRate = EditorGUILayout.IntField("Baud Rate", manager.BaudRate );
+           // manager.BaudRate = EditorGUILayout.IntField("Baud Rate", manager.BaudRate );
+            baudRateIndex  = EditorGUILayout.Popup("Baud Rate", baudRateIndex,  baudRates);
+            if(prevBaudRateIndex != baudRateIndex)
+            {
+                int result = 9600;
+                int.TryParse(baudRates[baudRateIndex], out result);
+                manager.BaudRate = result;
+                prevBaudRateIndex = baudRateIndex;
+            }
+            
             manager.ReadOnThread = EditorGUILayout.Toggle("Read on threads", manager.ReadOnThread);
             EditorGUI.indentLevel--;
             EditorGUILayout.Separator();

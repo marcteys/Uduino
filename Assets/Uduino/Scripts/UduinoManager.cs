@@ -226,7 +226,7 @@ namespace Uduino
             int tries = 0;
             do
             {
-                if (uduinoDevice.getStatus() == SerialArduino.SerialStatus.OPEN)
+                if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
                     string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
@@ -244,9 +244,9 @@ namespace Uduino
                     }
                 }
                 yield return new WaitForSeconds(0.1f);    //Wait one frame
-            } while (uduinoDevice.getStatus() != SerialArduino.SerialStatus.UNDEF && tries++ < discoverTries);
+            } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
 
-            if(uduinoDevice.getStatus() != SerialArduino.SerialStatus.FOUND)
+            if(uduinoDevice.getStatus() != SerialStatus.FOUND)
             {
                 Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Closing.");
                 uduinoDevice.Close();
