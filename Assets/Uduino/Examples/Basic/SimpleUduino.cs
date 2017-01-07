@@ -22,7 +22,6 @@ public class SimpleUduino : MonoBehaviour {
 
     void Update () {
         UduinoManager.Instance.Read(sensorPin, (string s) => sensorValue = int.Parse(s));
-        Debug.Log(sensorValue);
        UduinoManager.Instance.Write(servoPin, 15);
     }
 }

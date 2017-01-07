@@ -18,7 +18,6 @@ All existing projects mixing Arduino and Unity where either not cross-platform, 
 You give a *unique name* to your arduino board, and declare which variable is readable. For example I want to access `mySensor` on the arduino board named `myArduinoName`.  On Unity, this value is accessible by using `UduinoManager.Instance.Read("myArduinoName", "mySensor");`. Uduino is handling the detection of the boards and the serial connection between the software and the hardware !
 
 
-
 ## Quick Start
 
 1 . Import [uduino.unitypackage][package] in your project<br>
@@ -39,6 +38,23 @@ public class ExampleScript : MonoBehaviour
 }
 ```
 5 . Add the reading/writing [methods](#Unity-Methods), and you're good to go !
+
+## Quick code
+
+```csharp
+using Uduino;
+
+public class ExampleScript : MonoBehaviour
+{
+    int ledPin = 11;
+    void Start() {
+       UduinoManager.Instance.InitPin(ledPin, PinMode.PWM);
+    }
+    void Update() {
+        UduinoManager.Instance.Write(ledPin, Time.time);
+    }
+}
+```
 
 ## Setup
 

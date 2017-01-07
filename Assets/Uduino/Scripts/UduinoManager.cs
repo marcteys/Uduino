@@ -31,6 +31,12 @@ namespace Uduino
 
     public enum AnalogPin { A0 = 12, A1 = 10, A2 = 3, A3 = 1, A4 = 2, A5 = 4 }
 
+    public enum State
+    {
+        LOW,
+        HIGH
+    }
+
 
     public class UduinoManager : MonoBehaviour {
 
@@ -213,7 +219,7 @@ namespace Uduino
 
             if(uduinoDevice.getStatus() != SerialArduino.SerialStatus.FOUND)
             {
-                Log.Error("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Closing.");
+                Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Closing.");
                 uduinoDevice.Close();
                 uduinoDevice = null;
             }
@@ -305,6 +311,17 @@ namespace Uduino
             else
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                     uduino.Value.WriteToArduino(message);
+        }
+
+        /// <summary>
+        /// Write a command on an Arduino
+        /// </summary>
+        /// <param name="target">Target device</param>
+        /// <param name="message">Message to write in the serial</param>
+        public void Write(string target = null, State state = State.LOW)
+        {
+            int value = (int)state * 255;
+            Write(target, value.ToString());
         }
 
         /// <summary>
