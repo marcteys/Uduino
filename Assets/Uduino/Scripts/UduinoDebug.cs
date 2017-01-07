@@ -3,13 +3,6 @@ using System;
 
 namespace Uduino
 {
-    public enum LogLevel
-    {
-        INFO,
-        WARNING,
-        ERROR,
-        NONE
-    }
 
     public static class Log 
     {

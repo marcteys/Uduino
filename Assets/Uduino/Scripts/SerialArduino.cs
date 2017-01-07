@@ -7,13 +7,6 @@ namespace Uduino
 {
     public class SerialArduino
     {
-        public enum SerialStatus
-        {
-            UNDEF,
-            OPEN,
-            FOUND,
-            CLOSE
-        };
 
         private string _port;
 
@@ -55,6 +48,7 @@ namespace Uduino
             }
         }
 
+        #region Public functions
         /// <summary>
         /// Return port status 
         /// </summary>
@@ -72,6 +66,18 @@ namespace Uduino
         {
             return _port;
         }
+
+        /// <summary>
+        /// A board with Uduino is found 
+        /// </summary>
+        public void UduinoFound()
+        {
+            serialStatus = SerialStatus.FOUND;
+        }
+
+        #endregion
+
+        #region Commands
 
         /// <summary>
         /// Write a message to a serial port
@@ -145,15 +151,9 @@ namespace Uduino
                 return null;
             }
         }
+        #endregion
 
-
-        /// <summary>
-        /// A board with Uduino is found 
-        /// </summary>
-        public void UduinoFound()
-        {
-            serialStatus = SerialStatus.FOUND;
-        }
+        #region Close
 
         /// <summary>
         /// Close Serial port 
@@ -186,6 +186,7 @@ namespace Uduino
         {
             isApplicationQuitting = true;
         }
+        #endregion
 
     }
 }

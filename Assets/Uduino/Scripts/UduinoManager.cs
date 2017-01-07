@@ -20,6 +20,8 @@ using System.IO.Ports;
 
 namespace Uduino
 {
+
+    #region Enums
     public enum PinMode
     {
         Output,
@@ -27,19 +29,37 @@ namespace Uduino
         Analog,
         Input_pullup,
         Servo
-    }
+    };
 
-    public enum AnalogPin { A0 = 12, A1 = 10, A2 = 3, A3 = 1, A4 = 2, A5 = 4 }
+    public enum AnalogPin { A0 = 12, A1 = 10, A2 = 3, A3 = 1, A4 = 2, A5 = 4 };
 
     public enum State
     {
         LOW,
         HIGH
-    }
+    };
 
+    public enum SerialStatus
+    {
+        UNDEF,
+        OPEN,
+        FOUND,
+        CLOSE
+    };
+
+    public enum LogLevel
+    {
+        INFO,
+        WARNING,
+        ERROR,
+        NONE
+    };
+
+    #endregion
 
     public class UduinoManager : MonoBehaviour {
 
+        #region Singleton
         /// <summary>
         /// UduinoManager unique instance.
         /// Create  a new instance if any UduinoManager is present on the scene.
@@ -73,6 +93,9 @@ namespace Uduino
         }
         private static UduinoManager _instance = null;
 
+        #endregion
+
+        #region Variables
         /// <summary>
         /// Dictionnary containing all the connected Arduino devices
         /// </summary>
@@ -129,7 +152,10 @@ namespace Uduino
             get { return blackListedPorts; }
             set { blackListedPorts = value; }
         }
-        
+
+        #endregion
+
+        #region Init
         void Awake()
         {
             Instance = this;
@@ -138,6 +164,9 @@ namespace Uduino
             if(readOnThread) StartThread();
         }
 
+        #endregion
+
+        #region Ports discovery
         /// <summary>
         /// Get the ports names, dependings of the current OS
         /// </summary>
@@ -243,8 +272,9 @@ namespace Uduino
             }
         }
 
+        #endregion
 
-
+        #region Commands
         /// <summary>
         /// Init a pin 
         /// </summary>
@@ -298,7 +328,9 @@ namespace Uduino
                 uduino.Value.callback = action;
             }
         }
+        #endregion
 
+        #region Write commands
         /// <summary>
         /// Write a command on an Arduino
         /// </summary>
@@ -378,6 +410,9 @@ namespace Uduino
             }
         }
 
+        #endregion
+
+        #region Reading
         /// <summary>
         /// Threading variables
         /// </summary>
@@ -467,6 +502,9 @@ namespace Uduino
             }
         }
 
+        #endregion
+
+        #region Close Ports
         /// <summary>
         /// Close all opened serial ports
         /// </summary>
@@ -500,9 +538,10 @@ namespace Uduino
             if (_Thread != null) _Thread.Abort();
             _Thread = null;
         }
-
+        #endregion
     }
 
+    #region Version
     public static class UduinoVersion
     {
         static int major = 1;
@@ -519,4 +558,5 @@ namespace Uduino
             return update;
         }
     }
+    #endregion
 }
