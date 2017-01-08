@@ -349,7 +349,7 @@ namespace Uduino
         #region Simple commands : Write
 
         /// <summary>
-        /// 
+        /// Write a digital command to the arduino
         /// </summary>
         /// <param name="target"></param>
         /// <param name="pin"></param>
@@ -358,8 +358,6 @@ namespace Uduino
         {
             if (value <= 150) value = 0;
             else value = 255;
-
-            Debug.Log(target + " " + pin + " " + value);
 
             foreach (Pin pinTarget in pins)
             {
@@ -487,7 +485,7 @@ namespace Uduino
             else
             {
 				//TODO: Restart a loop to find all objects
-                if(target != null) Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
+                if(target != null && target != "") Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }

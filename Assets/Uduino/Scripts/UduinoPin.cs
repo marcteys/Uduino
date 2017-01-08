@@ -9,7 +9,7 @@ namespace Uduino
     {
         public UduinoManager manager = null;
 
-        public string arduino = "";
+        public string arduino = null;
 
         public PinMode pinMode;
         public PinMode prevPinMode;
@@ -37,7 +37,7 @@ namespace Uduino
 
         public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
         {
-            if (parentArduinoTarget == arduino && currentPinTarget == currentPin) return true;
+            if ((parentArduinoTarget == null || parentArduinoTarget == arduino) && currentPinTarget == currentPin) return true;
             else return false;
         }
 
