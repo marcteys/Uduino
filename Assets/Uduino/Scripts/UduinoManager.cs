@@ -350,21 +350,22 @@ namespace Uduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
-        public void Write(string target = null, State state = State.LOW)
-        {
-            int value = (int)state * 255;
-            Write(target, value.ToString());
-        }
-
-        /// <summary>
-        /// Write a command on an Arduino
-        /// </summary>
-        /// <param name="target">Target device</param>
-        /// <param name="message">Message to write in the serial</param>
         public void Write(int pin, float floatVal = -1f)
         {
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 uduino.Value.WriteToArduino(Mathf.Round(floatVal).ToString());
+        }
+
+        /// <summary>
+        /// Write a command on an Arduino using a state
+        /// </summary>
+        /// <param name="target">Target device</param>
+        /// <param name="message">Message to write in the serial</param>
+        public void Write(int pin, State state = State.LOW)
+        {
+            int value = (int)state * 255;
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                uduino.Value.WriteToArduino(value.ToString());
         }
 
         /// <summary>

@@ -8,25 +8,8 @@ using Uduino;
 
 
 [SerializeField]
-public class Pin
+public class EditorPin : Pin
 {
-    //Pin stuff
-    private UduinoManagerEditor manager;
-
-    public string arduino = "";
-    public string lastReadValue = "";
-
-    private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
-
-    public PinMode pinMode = PinMode.Output;
-    private PinMode prevPinMode = PinMode.Output;
-
-    public int currentPin = 13;
-    private int prevPin = 13;
-
-    public int sendValue = 0;
-    private int prevSendValue = 0;
-
 
     public Pin(UduinoManagerEditor m, string arduinoParent)
     {
@@ -35,27 +18,8 @@ public class Pin
         SendMessage("s " + currentPin + " " + (int)pinMode);
     }
 
-    void SendMessage(string message)
-    {
-        manager.SendMessage(arduino, message);
-    }
 
-    void CheckChanges()
-    {
-        if(currentPin != prevPin)
-        {
-            SendMessage("s " + currentPin + " " + (int)pinMode);
-            prevPin = currentPin;
-        }
-
-        if(pinMode != prevPinMode)
-        {
-            SendMessage("s "+ currentPin + " " + (int)pinMode);
-            prevPinMode = pinMode;
-        }
-    }
-
-    public void Draw()
+    public override void Draw()
     {
         #if UNITY_EDITOR
         GUILayout.BeginHorizontal();
@@ -103,11 +67,6 @@ public class Pin
         GUILayout.EndHorizontal();
         #endif
     }
-
-    public void Destroy()
-    {
-        SendMessage("w " + currentPin + " 0");
-    }
 }
 
 
@@ -124,7 +83,6 @@ public class UduinoManagerEditor : Editor {
     LogLevel debugLevel;
 
     List<Pin> pins = new List<Pin>();
-
 
     bool defaultPanel = true;
     bool arduinoPanel = true;
