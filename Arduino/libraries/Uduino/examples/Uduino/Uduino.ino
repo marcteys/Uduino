@@ -35,9 +35,9 @@ static ServoWrapper Servos[MAXSERVOS];
 void setup()
 {
   Serial.begin(9600);
-  uduino.addCommand("setMode", SetMode);
-  uduino.addCommand("writePin", WritePin);
-  uduino.addCommand("readPin", ReadPin);
+  uduino.addCommand("s", SetMode);
+  uduino.addCommand("w", WritePin);
+  uduino.addCommand("r", ReadPin);
 }
 
 void SetMode() {

@@ -412,7 +412,7 @@ namespace Uduino
 
         #endregion
 
-        #region Reading
+        #region Hardware reading
         /// <summary>
         /// Threading variables
         /// </summary>

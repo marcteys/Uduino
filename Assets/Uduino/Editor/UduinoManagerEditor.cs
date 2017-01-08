@@ -32,7 +32,7 @@ public class Pin
     {
         manager = m;
         arduino = arduinoParent;
-        SendMessage("setMode " + currentPin + " " + (int)pinMode);
+        SendMessage("s " + currentPin + " " + (int)pinMode);
     }
 
     void SendMessage(string message)
@@ -44,13 +44,13 @@ public class Pin
     {
         if(currentPin != prevPin)
         {
-            SendMessage("setMode " + currentPin + " " + (int)pinMode);
+            SendMessage("s " + currentPin + " " + (int)pinMode);
             prevPin = currentPin;
         }
 
         if(pinMode != prevPinMode)
         {
-            SendMessage("setMode "+ currentPin + " " + (int)pinMode);
+            SendMessage("s "+ currentPin + " " + (int)pinMode);
             prevPinMode = pinMode;
         }
     }
@@ -96,7 +96,7 @@ public class Pin
         //Send  the message
         if (prevSendValue != sendValue)
         {
-            SendMessage("writePin " + currentPin + " " + sendValue);
+            SendMessage("w " + currentPin + " " + sendValue);
             prevSendValue = sendValue;
         }
 
@@ -106,7 +106,7 @@ public class Pin
 
     public void Destroy()
     {
-        SendMessage("writePin " + currentPin + " 0");
+        SendMessage("w " + currentPin + " 0");
     }
 }
 
@@ -151,7 +151,6 @@ public class UduinoManagerEditor : Editor {
     void OnEnable()
     {
         Instance = this;
-        baudRateIndex = System.Array.IndexOf(baudRates, manager.BaudRate.ToString());
     }
 
     void SetColorAndStyles()
@@ -190,7 +189,11 @@ public class UduinoManagerEditor : Editor {
 
     public override void OnInspectorGUI()
     {
-        if (manager == null) manager = (UduinoManager)target;
+        if (manager == null)
+        {
+            manager = (UduinoManager)target;
+            baudRateIndex = System.Array.IndexOf(baudRates, manager.BaudRate.ToString());
+        }
         Log.SetLogLevel(manager.debugLevel);
 
         SetColorAndStyles();
