@@ -22,7 +22,12 @@ namespace Uduino
             manager = UduinoManager.Instance;
             arduino = arduinoParent;
             currentPin = pin;
-            ChangePinMode(mode);
+            pinMode = mode;
+        }
+
+        public void Init()
+        {
+            ChangePinMode(pinMode);
         }
 
         public virtual void WriteMessage(string message)
@@ -44,6 +49,7 @@ namespace Uduino
         {
             pinMode = mode;
             WriteMessage("s " + currentPin + " " + (int)pinMode);
+            Log.Info("Pin " + currentPin + " is set to mode " + pinMode.ToString());
         }
 
         /// <summary>

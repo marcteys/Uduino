@@ -239,8 +239,9 @@ namespace Uduino
                         string name = reading.Split(new char[0])[1];
                         uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                        Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                        Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
+                        InitAllPins();
                         break;
                     }
                     else
@@ -248,7 +249,7 @@ namespace Uduino
                         Log.Info("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
                 }
-                yield return new WaitForSeconds(0.1f);    //Wait one frame
+                yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
             } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
 
             if(uduinoDevice.getStatus() != SerialStatus.FOUND)
@@ -287,7 +288,7 @@ namespace Uduino
         /// <param name="mode">PinMode to init pin</param>
         public void InitPin(int pin, PinMode mode)
         {
-            InitPin(null, (int)pin, mode);
+            InitPin(null, pin, mode);
         }
 
         /// <summary>
@@ -300,7 +301,6 @@ namespace Uduino
             InitPin(null, (int)pin, mode);
         }
 
-
         /// <summary>
         /// Init a pin 
         /// </summary>
@@ -309,10 +309,14 @@ namespace Uduino
         /// <param name="mode">PinMode to init pin</param>
         public void InitPin(string target, int pin, PinMode mode)
         {
-
+            bool pinExists = false;
             //TODO : vérifier si elle existe pas déjà !!!!
-            pins.Add(new Pin(target, pin, mode));
-            Log.Info("Pin " + pin + " is set to mode " + (string)(mode.ToString()));
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                    pinTarget.ChangePinMode(mode);
+            }
+            if(!pinExists) pins.Add(new Pin("", pin, mode));
         }
 
         /// <summary>
@@ -324,6 +328,18 @@ namespace Uduino
         public void InitPin(string target, AnalogPin pin, PinMode mode)
         {
             InitPin((int)pin, mode);
+        }
+
+        // TODO : Refactor that. Should not work with multiple boards !
+        /// <summary>
+        /// Init all Pins when the arduino boards are found
+        /// </summary>
+        public void InitAllPins()
+        {
+            foreach(Pin pin in pins)
+            {
+                pin.Init();
+            }
         }
 
         #endregion
@@ -341,6 +357,8 @@ namespace Uduino
         {
             if (value <= 150) value = 0;
             else value = 255;
+
+            Debug.Log(target + " " + pin + " " + value);
 
             foreach (Pin pinTarget in pins)
             {
@@ -468,7 +486,7 @@ namespace Uduino
             else
             {
 				//TODO: Restart a loop to find all objects
-                Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
+                if(target != null) Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }

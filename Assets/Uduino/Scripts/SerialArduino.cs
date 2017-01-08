@@ -169,7 +169,7 @@ namespace Uduino
             }
             else
             {
-                Log.Warning(_port + " already closed.");
+                Log.Info(_port + " already closed.");
             }
         }
 
