@@ -37,8 +37,10 @@ namespace Uduino
 
         public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
         {
-            if ((parentArduinoTarget == null || parentArduinoTarget == arduino) && currentPinTarget == currentPin) return true;
-            else return false;
+            if ((arduino == null || arduino == "" || parentArduinoTarget == null || parentArduinoTarget == "" || parentArduinoTarget == arduino) && currentPinTarget == currentPin )
+                return true;
+            else
+                return false;
         }
 
         /// <summary>
