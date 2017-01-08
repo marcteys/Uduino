@@ -49,6 +49,7 @@ namespace Uduino
 
     public enum LogLevel
     {
+        DEBUG,
         INFO,
         WARNING,
         ERROR,
