@@ -341,7 +341,6 @@ namespace Uduino
         {
             if (value <= 150) value = 0;
             else value = 255;
-            Debug.LogError("Nothing is made here !!!!!");
 
             foreach (Pin pinTarget in pins)
             {

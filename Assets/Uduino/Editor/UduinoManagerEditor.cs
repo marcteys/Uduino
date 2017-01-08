@@ -69,7 +69,7 @@ public class EditorPin : Pin
         //Send  the message
         if (prevSendValue != sendValue)
         {
-            SendMessage("w " + currentPin + " " + sendValue);
+            WriteMessage("w " + currentPin + " " + sendValue);
             prevSendValue = sendValue;
         }
 
@@ -81,20 +81,20 @@ public class EditorPin : Pin
     {
         if (currentPin != prevPin && currentPin != -1)
         {
-            SendMessage("s " + currentPin + " " + (int)pinMode);
+            WriteMessage("s " + currentPin + " " + (int)pinMode);
             prevPin = currentPin;
         }
 
         if (pinMode != prevPinMode)
         {
-            SendMessage("s " + currentPin + " " + (int)pinMode);
+            WriteMessage("s " + currentPin + " " + (int)pinMode);
             prevPinMode = pinMode;
         }
     }
 
-    public override void SendMessage(string message)
+    public override void WriteMessage(string message)
     {
-        if (editorManager != null) editorManager.SendMessage(arduino, message);
+        if (editorManager != null) editorManager.WriteMessage(arduino, message);
     }
 
 }
@@ -490,7 +490,7 @@ public class UduinoManagerEditor : Editor {
         GUI.backgroundColor = defaultButtonColor;
     }
 
-    public void SendMessage(string targetBoard, string message)
+    public void WriteMessage(string targetBoard, string message)
     {
         manager.Write(targetBoard, message);
     }

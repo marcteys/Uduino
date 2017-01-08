@@ -25,9 +25,9 @@ namespace Uduino
             ChangePinMode(mode);
         }
 
-        public virtual void SendMessage(string message)
+        public virtual void WriteMessage(string message)
         {
-          manager.SendMessage(arduino, message);
+          manager.Write(arduino, message);
         }
 
         public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
@@ -43,7 +43,7 @@ namespace Uduino
         public void ChangePinMode(PinMode mode)
         {
             pinMode = mode;
-            SendMessage("s " + currentPin + " " + (int)pinMode);
+            WriteMessage("s " + currentPin + " " + (int)pinMode);
         }
 
         /// <summary>
@@ -54,14 +54,14 @@ namespace Uduino
         {
             if(sendValue != prevSendValue)
             {
-                SendMessage("w " + currentPin + " " + sendValue);
+                WriteMessage("w " + currentPin + " " + sendValue);
                 prevSendValue = sendValue;
             }
         }
 
         public void Destroy()
         {
-            SendMessage("w " + currentPin + " 0");
+            WriteMessage("w " + currentPin + " 0");
         }
 
         public virtual void Draw()
@@ -69,5 +69,4 @@ namespace Uduino
         }
 
     }
-
 }
