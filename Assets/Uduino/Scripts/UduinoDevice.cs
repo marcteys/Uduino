@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace Uduino
 {
@@ -11,6 +12,8 @@ namespace Uduino
         public string lastWrite = null;
 
         public System.Action<string> callback = null;
+
+        private List<Pin> pins = new List<Pin>();
 
         public UduinoDevice(string port, int baudrate = 9600)
             : base(port, baudrate)

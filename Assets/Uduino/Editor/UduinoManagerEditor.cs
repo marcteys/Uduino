@@ -10,14 +10,23 @@ using Uduino;
 [SerializeField]
 public class EditorPin : Pin
 {
+    UduinoManagerEditor editorManager = null;
+    public string lastReadValue = "";
 
-    public Pin(UduinoManagerEditor m, string arduinoParent)
+    private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
+
+    public int sendValue = 0;
+
+    private int prevPin = -1;
+
+    public EditorPin(string arduinoParent, int pin, PinMode mode, UduinoManagerEditor m)
+            : base(arduinoParent, pin, mode)
     {
-        manager = m;
+        editorManager = m;
         arduino = arduinoParent;
-        SendMessage("s " + currentPin + " " + (int)pinMode);
+        currentPin = pin;
+        ChangePinMode(mode);
     }
-
 
     public override void Draw()
     {
@@ -67,6 +76,27 @@ public class EditorPin : Pin
         GUILayout.EndHorizontal();
         #endif
     }
+
+    void CheckChanges()
+    {
+        if (currentPin != prevPin && currentPin != -1)
+        {
+            SendMessage("s " + currentPin + " " + (int)pinMode);
+            prevPin = currentPin;
+        }
+
+        if (pinMode != prevPinMode)
+        {
+            SendMessage("s " + currentPin + " " + (int)pinMode);
+            prevPinMode = pinMode;
+        }
+    }
+
+    public override void SendMessage(string message)
+    {
+        if (editorManager != null) editorManager.SendMessage(arduino, message);
+    }
+
 }
 
 
@@ -244,7 +274,7 @@ public class UduinoManagerEditor : Editor {
                         pin.Draw();
 
                     if (GUILayout.Button("Add a pin", "TE toolbarbutton", GUILayout.ExpandWidth(true)))
-                        pins.Add(new Pin(this, uduino.Key));
+                        pins.Add(new EditorPin(uduino.Key, 13, PinMode.Output, this));
                 }
                 else // If it's a "Normal" Arduino
                 {

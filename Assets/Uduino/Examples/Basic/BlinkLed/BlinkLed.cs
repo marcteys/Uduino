@@ -17,9 +17,9 @@ public class BlinkLed : MonoBehaviour
     {
         while (true)
         {
-            UduinoManager.Instance.Write(13, State.HIGH);
+            UduinoManager.Instance.digitalWrite(13, State.HIGH);
             yield return new WaitForSeconds(1);
-            UduinoManager.Instance.Write(13, State.LOW);
+            UduinoManager.Instance.digitalWrite(13, State.LOW);
             yield return new WaitForSeconds(1);
         }
     }

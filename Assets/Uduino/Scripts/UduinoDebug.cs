@@ -8,21 +8,36 @@ namespace Uduino
     {
         private static LogLevel _debugLevel;
 
+        public static string CurrentClass
+        {
+            get
+            {
+                var st = new System.Diagnostics.StackTrace();
+
+                var index = Mathf.Min(st.FrameCount - 1, 2);
+
+                if (index < 0)
+                    return "{NoClass}";
+
+                return "" + st.GetFrame(index).GetMethod().DeclaringType.Name + "";
+            }
+        }
+
         public static void Error(object message)
         {
             if((int)_debugLevel <= (int)LogLevel.ERROR)
-                Debug.LogError(message);
+                Debug.LogError(string.Format("{0}:{1}",  CurrentClass, message));
         }
 
         public static void Warning(object message)
         {
             if ((int)_debugLevel <= (int)LogLevel.WARNING)
-            Debug.LogWarning(message);
+            Debug.LogWarning(string.Format("{0}:{1}", CurrentClass, message));
         }
         public static void Info(object message)
         {
             if ((int)_debugLevel <= (int)LogLevel.INFO)
-            Debug.Log(message);
+            Debug.Log(string.Format("{0}:{1}", CurrentClass, message));
         }
 
         public static void SetLogLevel(LogLevel level)

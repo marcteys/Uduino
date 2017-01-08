@@ -4,51 +4,58 @@ using UnityEngine;
 
 namespace Uduino
 {
-
-    [SerializeField]
+    // We use a class Pin to optimize
     public class Pin
     {
-        private UduinoManager manager = null;
+        public UduinoManager manager = null;
 
         public string arduino = "";
-        public string lastReadValue = "";
 
-        private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
-
-        public PinMode pinMode = PinMode.Output;
-        private PinMode prevPinMode = PinMode.Output;
+        public PinMode pinMode;
+        public PinMode prevPinMode;
 
         public int currentPin = -1;
-        private int prevPin = -1;
+        public int prevSendValue = 0;
 
-        public int sendValue = 0;
-        private int prevSendValue = 0;
-
-        public Pin(string arduinoParent)
+        public Pin(string arduinoParent, int pin, PinMode mode)
         {
             manager = UduinoManager.Instance;
             arduino = arduinoParent;
+            currentPin = pin;
+            ChangePinMode(mode);
+        }
+
+        public virtual void SendMessage(string message)
+        {
+          manager.SendMessage(arduino, message);
+        }
+
+        public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
+        {
+            if (parentArduinoTarget == arduino && currentPinTarget == currentPin) return true;
+            else return false;
+        }
+
+        /// <summary>
+        /// Change Pin mode
+        /// </summary>
+        /// <param name="mode">Mode</param>
+        public void ChangePinMode(PinMode mode)
+        {
+            pinMode = mode;
             SendMessage("s " + currentPin + " " + (int)pinMode);
         }
 
-        void SendMessage(string message)
+        /// <summary>
+        /// Send OptimizedValue
+        /// </summary>
+        /// <param name="sendValue">Value to send</param>
+        public void SendPinValue(int sendValue)
         {
-            manager.SendMessage(arduino, message);
-        }
-
-
-        void CheckChanges()
-        {
-            if (currentPin != prevPin)
+            if(sendValue != prevSendValue)
             {
-                SendMessage("s " + currentPin + " " + (int)pinMode);
-                prevPin = currentPin;
-            }
-
-            if (pinMode != prevPinMode)
-            {
-                SendMessage("s " + currentPin + " " + (int)pinMode);
-                prevPinMode = pinMode;
+                SendMessage("w " + currentPin + " " + sendValue);
+                prevSendValue = sendValue;
             }
         }
 
