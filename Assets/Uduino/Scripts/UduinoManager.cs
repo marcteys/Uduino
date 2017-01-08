@@ -49,6 +49,7 @@ namespace Uduino
 
     public enum LogLevel
     {
+        DEBUG,
         INFO,
         WARNING,
         ERROR,
@@ -100,6 +101,11 @@ namespace Uduino
         /// Dictionnary containing all the connected Arduino devices
         /// </summary>
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
+
+        /// <summary>
+        /// List containing all active pins
+        /// </summary>
+        public List<Pin> pins = new List<Pin>();
 
         /// <summary>
         /// Create a delegate event to trigger the function OnValueReceived()
@@ -234,16 +240,17 @@ namespace Uduino
                         string name = reading.Split(new char[0])[1];
                         uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
-                        Log.Info("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
+                        Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
+                        InitAllPins();
                         break;
                     }
                     else
                     {
-                        Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
+                        Log.Info("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
                 }
-                yield return new WaitForSeconds(0.1f);    //Wait one frame
+                yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
             } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
 
             if(uduinoDevice.getStatus() != SerialStatus.FOUND)
@@ -274,27 +281,122 @@ namespace Uduino
 
         #endregion
 
-        #region Commands
+        #region Simple commands : Init Pin
         /// <summary>
         /// Init a pin 
         /// </summary>
-        /// <param name="pin">Pin to init</param>
+        /// <param name="pin">Pin to initialize</param>
         /// <param name="mode">PinMode to init pin</param>
         public void InitPin(int pin, PinMode mode)
         {
-
+            InitPin(null, pin, mode);
         }
 
         /// <summary>
         /// Init a pin
         /// </summary>
-        /// <param name="pin">Pin to init</param>
+        /// <param name="pin">Analog pin to initialize</param>
         /// <param name="mode">PinMode to init pin</param>
         public void InitPin(AnalogPin pin, PinMode mode)
+        {
+            InitPin(null, (int)pin, mode);
+        }
+
+        /// <summary>
+        /// Init a pin 
+        /// </summary>
+        /// <param name="string">Target Name</param>
+        /// <param name="pin">Pin to init</param>
+        /// <param name="mode">PinMode to init pin</param>
+        public void InitPin(string target, int pin, PinMode mode)
+        {
+            bool pinExists = false;
+            //TODO : vérifier si elle existe pas déjà !!!!
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                    pinTarget.ChangePinMode(mode);
+            }
+            if(!pinExists) pins.Add(new Pin("", pin, mode));
+        }
+
+        /// <summary>
+        /// Init a pin
+        /// </summary>
+       /// <param name="string">Target Name</param>
+        /// <param name="pin">Pin to init</param>
+        /// <param name="mode">PinMode to init pin</param>
+        public void InitPin(string target, AnalogPin pin, PinMode mode)
         {
             InitPin((int)pin, mode);
         }
 
+        // TODO : Refactor that. Should not work with multiple boards !
+        /// <summary>
+        /// Init all Pins when the arduino boards are found
+        /// </summary>
+        public void InitAllPins()
+        {
+            foreach(Pin pin in pins)
+            {
+                pin.Init();
+            }
+        }
+
+        #endregion
+
+
+        #region Simple commands : Write
+
+        /// <summary>
+        /// Write a digital command to the arduino
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="pin"></param>
+        /// <param name="value"></param>
+        public void digitalWrite(string target, int pin, int value)
+        {
+            if (value <= 150) value = 0;
+            else value = 255;
+
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                    pinTarget.SendPinValue(value);
+            }
+        }
+
+
+        /// <summary>
+        /// Write a command on an Arduino
+        /// </summary>
+        public void digitalWrite(int pin, int value)
+        {
+            digitalWrite(null, pin, value);
+        }
+
+        /// <summary>
+        /// Write a command on an Arduino
+        /// </summary>
+        public void digitalWrite(int pin, State state = State.LOW)
+        {
+            digitalWrite(null, pin, (int)state * 255);
+        }
+
+        /// <summary>
+        /// Write a command on an Arduino 
+        /// </summary>
+        public void analogWrite(int pin, int value)
+        {
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                uduino.Value.WriteToArduino(value.ToString());
+        }
+
+        #endregion
+
+
+
+        #region Commands
         /// <summary>
         /// Send a read command to a specific arduino.
         /// A read command will be returned in the OnValueReceived() delegate function
@@ -330,7 +432,7 @@ namespace Uduino
         }
         #endregion
 
-        #region Write commands
+        #region Write advanced commands
         /// <summary>
         /// Write a command on an Arduino
         /// </summary>
@@ -343,28 +445,6 @@ namespace Uduino
             else
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                     uduino.Value.WriteToArduino(message);
-        }
-
-        /// <summary>
-        /// Write a command on an Arduino
-        /// </summary>
-        /// <param name="target">Target device</param>
-        /// <param name="message">Message to write in the serial</param>
-        public void Write(string target = null, State state = State.LOW)
-        {
-            int value = (int)state * 255;
-            Write(target, value.ToString());
-        }
-
-        /// <summary>
-        /// Write a command on an Arduino
-        /// </summary>
-        /// <param name="target">Target device</param>
-        /// <param name="message">Message to write in the serial</param>
-        public void Write(int pin, float floatVal = -1f)
-        {
-            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                uduino.Value.WriteToArduino(Mathf.Round(floatVal).ToString());
         }
 
         /// <summary>
@@ -405,7 +485,7 @@ namespace Uduino
             else
             {
 				//TODO: Restart a loop to find all objects
-                Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
+                if(target != null && target != "") Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }

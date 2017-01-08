@@ -1,9 +1,7 @@
 ﻿using UnityEngine;
-using System;
 
 namespace Uduino
 {
-
     public static class Log 
     {
         private static LogLevel _debugLevel;
@@ -11,18 +9,24 @@ namespace Uduino
         public static void Error(object message)
         {
             if((int)_debugLevel <= (int)LogLevel.ERROR)
-                Debug.LogError(message);
+                UnityEngine.Debug.LogError(message);
         }
 
         public static void Warning(object message)
         {
             if ((int)_debugLevel <= (int)LogLevel.WARNING)
-            Debug.LogWarning(message);
+                UnityEngine.Debug.LogWarning(message);
         }
         public static void Info(object message)
         {
             if ((int)_debugLevel <= (int)LogLevel.INFO)
-            Debug.Log(message);
+                UnityEngine.Debug.Log(message);
+        }
+
+        public static void Debug(object message)
+        {
+            if ((int)_debugLevel <= (int)LogLevel.DEBUG)
+                UnityEngine.Debug.Log(message);
         }
 
         public static void SetLogLevel(LogLevel level)

@@ -39,7 +39,7 @@ namespace Uduino
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
-                Log.Warning("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
+                Log.Info("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
             }
             catch (Exception e)
             {
@@ -169,7 +169,7 @@ namespace Uduino
             }
             else
             {
-                Log.Warning(_port + " already closed.");
+                Log.Info(_port + " already closed.");
             }
         }
 

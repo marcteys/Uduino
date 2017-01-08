@@ -8,54 +8,27 @@ using Uduino;
 
 
 [SerializeField]
-public class Pin
+public class EditorPin : Pin
 {
-    //Pin stuff
-    private UduinoManagerEditor manager;
-
-    public string arduino = "";
+    UduinoManagerEditor editorManager = null;
     public string lastReadValue = "";
 
     private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
 
-    public PinMode pinMode = PinMode.Output;
-    private PinMode prevPinMode = PinMode.Output;
-
-    public int currentPin = 13;
-    private int prevPin = 13;
-
     public int sendValue = 0;
-    private int prevSendValue = 0;
 
+    private int prevPin = -1;
 
-    public Pin(UduinoManagerEditor m, string arduinoParent)
+    public EditorPin(string arduinoParent, int pin, PinMode mode, UduinoManagerEditor m)
+            : base(arduinoParent, pin, mode)
     {
-        manager = m;
+        editorManager = m;
         arduino = arduinoParent;
-        SendMessage("s " + currentPin + " " + (int)pinMode);
+        currentPin = pin;
+        ChangePinMode(mode);
     }
 
-    void SendMessage(string message)
-    {
-        manager.SendMessage(arduino, message);
-    }
-
-    void CheckChanges()
-    {
-        if(currentPin != prevPin)
-        {
-            SendMessage("s " + currentPin + " " + (int)pinMode);
-            prevPin = currentPin;
-        }
-
-        if(pinMode != prevPinMode)
-        {
-            SendMessage("s "+ currentPin + " " + (int)pinMode);
-            prevPinMode = pinMode;
-        }
-    }
-
-    public void Draw()
+    public override void Draw()
     {
         #if UNITY_EDITOR
         GUILayout.BeginHorizontal();
@@ -96,7 +69,7 @@ public class Pin
         //Send  the message
         if (prevSendValue != sendValue)
         {
-            SendMessage("w " + currentPin + " " + sendValue);
+            WriteMessage("w " + currentPin + " " + sendValue);
             prevSendValue = sendValue;
         }
 
@@ -104,10 +77,39 @@ public class Pin
         #endif
     }
 
-    public void Destroy()
+    void CheckChanges()
     {
-        SendMessage("w " + currentPin + " 0");
+        //If it's playing, cange the values
+        if(Application.isPlaying)
+        {
+            foreach (Pin pinTarget in UduinoManager.Instance.pins)
+            {
+                if (pinTarget.PinTargetExists(arduino, currentPin))
+                {
+                    if (pinMode != prevPinMode)
+                        pinTarget.ChangePinMode(pinMode);
+                }
+            }
+        }
+
+        if (currentPin != prevPin && currentPin != -1)
+        {
+            WriteMessage("s " + currentPin + " " + (int)pinMode);
+            prevPin = currentPin;
+        }
+
+        if (pinMode != prevPinMode)
+        {
+            WriteMessage("s " + currentPin + " " + (int)pinMode);
+            prevPinMode = pinMode;
+        }
     }
+
+    public override void WriteMessage(string message)
+    {
+        if (editorManager != null) editorManager.WriteMessage(arduino, message);
+    }
+
 }
 
 
@@ -124,7 +126,6 @@ public class UduinoManagerEditor : Editor {
     LogLevel debugLevel;
 
     List<Pin> pins = new List<Pin>();
-
 
     bool defaultPanel = true;
     bool arduinoPanel = true;
@@ -270,6 +271,66 @@ public class UduinoManagerEditor : Editor {
                 //Todo: auto read
                 GUILayout.EndVertical();
 
+                if (uduino.Key == "uduinoBoard" && Application.isPlaying)
+                {
+                    GUILayout.Label("Pin active", EditorStyles.boldLabel);
+                    GUILayout.BeginVertical("Box");
+
+                    if(UduinoManager.Instance.pins.Count != 0) // If a pin is active
+                    { 
+                        GUILayout.BeginHorizontal();
+                        GUILayout.Label("Pin", "OL Titleleft", GUILayout.MaxWidth(40f));
+                        GUILayout.Label("Mode", "OL Titlemid", GUILayout.MaxWidth(55f));
+                        GUILayout.Label("Status", "OL Titlemid", GUILayout.ExpandWidth(true));
+                        GUILayout.EndHorizontal();
+
+                        foreach (Pin pin in UduinoManager.Instance.pins)
+                        {
+                            GUILayout.BeginHorizontal();
+                            GUILayout.Label(pin.currentPin.ToString(), "toolbarButton", GUILayout.MaxWidth(40f));
+                            GUILayout.Label(pin.pinMode.ToString(), "toolbarButton", GUILayout.MaxWidth(55f));
+                            GUILayout.BeginHorizontal();
+
+                            EditorGUIUtility.fieldWidth -= 22;
+
+                            switch (pin.pinMode)
+                            {
+                                case PinMode.Output:
+                                    GUILayout.Button("HIGH", "toolbarButton");
+                                    GUILayout.Button("LOW", "toolbarButton");
+                                    break;
+                                case PinMode.Input_pullup:
+                                    EditorGUILayout.LabelField("Digital read:");
+                                    break;
+                                case PinMode.PWM:
+                                    EditorGUILayout.IntSlider(pin.prevSendValue, 0, 255);
+                                    break;
+                                case PinMode.Servo:
+                                    EditorGUILayout.IntSlider(pin.prevSendValue, 0, 180);
+                                    break;
+                                case PinMode.Analog:
+                                    EditorGUILayout.LabelField("Analog read:");
+                                    break;
+                            }
+                            EditorGUIUtility.fieldWidth += 22;
+
+
+                            GUILayout.EndHorizontal();
+
+                            GUILayout.EndHorizontal();
+
+                        }
+                    }
+                    else // if no pins are active
+                    {
+                        GUILayout.Label("No arduino pins are currently setup by code.");
+                    }
+
+                    GUILayout.EndVertical();
+                }
+
+
+
                 GUILayout.Label("Send commands", EditorStyles.boldLabel);
 
                 GUILayout.BeginVertical("Box");
@@ -286,7 +347,7 @@ public class UduinoManagerEditor : Editor {
                         pin.Draw();
 
                     if (GUILayout.Button("Add a pin", "TE toolbarbutton", GUILayout.ExpandWidth(true)))
-                        pins.Add(new Pin(this, uduino.Key));
+                        pins.Add(new EditorPin(uduino.Key, 13, PinMode.Output, this));
                 }
                 else // If it's a "Normal" Arduino
                 {
@@ -502,7 +563,7 @@ public class UduinoManagerEditor : Editor {
         GUI.backgroundColor = defaultButtonColor;
     }
 
-    public void SendMessage(string targetBoard, string message)
+    public void WriteMessage(string targetBoard, string message)
     {
         manager.Write(targetBoard, message);
     }
