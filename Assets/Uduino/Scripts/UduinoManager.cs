@@ -349,6 +349,21 @@ namespace Uduino
         #region Simple commands : Write
 
         /// <summary>
+        /// DigitalWrite or AnalogWrite to arduino
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="pin"></param>
+        /// <param name="value"></param>
+        public void arduinoWrite(string target, int pin, int value)
+        {
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                    pinTarget.SendPinValue(value);
+            }
+        }
+
+        /// <summary>
         /// Write a digital command to the arduino
         /// </summary>
         /// <param name="target"></param>
@@ -358,14 +373,8 @@ namespace Uduino
         {
             if (value <= 150) value = 0;
             else value = 255;
-
-            foreach (Pin pinTarget in pins)
-            {
-                if (pinTarget.PinTargetExists(target, pin))
-                    pinTarget.SendPinValue(value);
-            }
+            arduinoWrite(target,pin,value);
         }
-
 
         /// <summary>
         /// Write a command on an Arduino
@@ -380,20 +389,31 @@ namespace Uduino
         /// </summary>
         public void digitalWrite(int pin, State state = State.LOW)
         {
-            digitalWrite(null, pin, (int)state * 255);
+            arduinoWrite(null, pin, (int)state * 255);
         }
 
         /// <summary>
-        /// Write a command on an Arduino 
+        /// Write an analog value to Arduino
         /// </summary>
+        /// <param name="pin">Arduino Pin</param>
+        /// <param name="value">Value</param>
         public void analogWrite(int pin, int value)
         {
-            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                uduino.Value.WriteToArduino(value.ToString());
+            arduinoWrite(null, pin, value);
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="target">Arduino board</param>
+        /// <param name="pin">Arduino Pin</param>
+        /// <param name="value">Value</param>
+        public void analogWrite(string target, int pin, int value)
+        {
+            arduinoWrite(target, pin, value);
         }
 
         #endregion
-
 
 
         #region Commands

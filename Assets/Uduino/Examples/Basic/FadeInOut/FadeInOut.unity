@@ -188,7 +188,7 @@ GameObject:
   - component: {fileID: 1819778916}
   - component: {fileID: 1819778915}
   m_Layer: 0
-  m_Name: BlinkLed
+  m_Name: FadeInOut
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -202,7 +202,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1819778914}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aa504dc8fb4505747b212d58086fbef0, type: 3}
+  m_Script: {fileID: 11500000, guid: bb76a10bcec202d4899d96c8919a58a0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!4 &1819778916
@@ -260,7 +260,7 @@ Prefab:
     - target: {fileID: 114023058375386772, guid: 3ce74fcab37665d498546a6b3ff71edd,
         type: 2}
       propertyPath: debugLevel
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3ce74fcab37665d498546a6b3ff71edd, type: 2}
