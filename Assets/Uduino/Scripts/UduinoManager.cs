@@ -31,7 +31,7 @@ namespace Uduino
         Servo
     };
 
-    public enum AnalogPin { A0 = 12, A1 = 10, A2 = 3, A3 = 1, A4 = 2, A5 = 4 };
+    public enum AnalogPin { A0 = 14, A1 = 15, A2 = 16, A3 = 17, A4 = 18, A5 = 19 };
 
     public enum State
     {
@@ -310,14 +310,24 @@ namespace Uduino
         /// <param name="mode">PinMode to init pin</param>
         public void InitPin(string target, int pin, PinMode mode)
         {
+            if (target == null) target = "";
             bool pinExists = false;
-            //TODO : vérifier si elle existe pas déjà !!!!
+
             foreach (Pin pinTarget in pins)
             {
                 if (pinTarget.PinTargetExists(target, pin))
+                {
                     pinTarget.ChangePinMode(mode);
+                    pinExists = true;
+                }
             }
-            if(!pinExists) pins.Add(new Pin("", pin, mode));
+            if (!pinExists)
+            {
+                Pin newPin = new Pin(target, pin, mode);
+                pins.Add(newPin);
+                if (UduinoTargetExists(target) || (target == "" && uduinoDevices.Count != 0))
+                    newPin.Init();
+            }
         }
 
         /// <summary>
@@ -337,6 +347,7 @@ namespace Uduino
         /// </summary>
         public void InitAllPins()
         {
+            Log.Debug("Init all pins");
             foreach(Pin pin in pins)
             {
                 pin.Init();
@@ -415,6 +426,32 @@ namespace Uduino
 
         #endregion
 
+
+        #region Simple commands: Read
+        public int analogRead(string target, int pin)
+        {
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                {
+                    pinTarget.SendRead();
+                }
+            }
+
+            return 0;
+        }
+
+        public int analogRead(int pin)
+        {
+            return analogRead(null, pin);
+        }
+
+        public int analogRead(AnalogPin pin)
+        {
+            return analogRead(null, (int)pin);
+        }
+
+        #endregion
 
         #region Commands
         /// <summary>
@@ -597,6 +634,7 @@ namespace Uduino
             {
                 UduinoDevice uduino = uduinoDevices[target];
                 uduino.lastRead = data;
+                Debug.Log(uduino.lastRead);
                 if (uduino.callback != null) uduino.callback(data);
                 else OnValueReceived(data, target);
             }

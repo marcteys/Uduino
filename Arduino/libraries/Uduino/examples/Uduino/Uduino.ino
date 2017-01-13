@@ -100,7 +100,16 @@ void WritePin() {
 }
 
 void ReadPin() {
-  Serial.println(analogRead(A0));
+  int pinToRead;
+  char *arg;
+  arg = uduino.next();
+  if (arg != NULL)
+  {
+    pinToRead = atoi(arg);
+  }
+  Serial.print(pinToRead);
+  Serial.print(" ");
+  Serial.println(analogRead(pinToRead));
 }
 
 void loop()

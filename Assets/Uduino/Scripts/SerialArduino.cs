@@ -118,6 +118,14 @@ namespace Uduino
         }
 
         /// <summary>
+        /// Callback function when a message is read 
+        /// </summary>
+        /// <param name="message">Message successfully read</param>
+        public virtual void ReadingSuccess(string message)
+        {
+        }
+
+        /// <summary>
         /// Read Arduino serial port
         /// </summary>
         /// <param name="message">Write a message to the serial port before reading the serial</param>

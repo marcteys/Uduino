@@ -6,6 +6,7 @@ namespace Uduino
 {
     public class UduinoDevice : SerialArduino
     {
+        public bool continuousRead = false;
         public string read = null;
 
         public string lastRead = null;
@@ -36,5 +37,12 @@ namespace Uduino
         {
             lastWrite = message;
         }
+
+
+        public override void ReadingSuccess(string message)
+        {
+            //TODO : ne sert a rien pour l'instant
+        }
+
     }
 }

@@ -17,6 +17,8 @@ namespace Uduino
         public int currentPin = -1;
         public int prevSendValue = 0;
 
+        private string lastRead = null;
+
         public Pin(string arduinoParent, int pin, PinMode mode)
         {
             manager = UduinoManager.Instance;
@@ -28,6 +30,14 @@ namespace Uduino
         public void Init()
         {
             ChangePinMode(pinMode);
+        }
+
+
+        public virtual void WriteReadMessage(string message)
+        {
+            manager.Write(arduino, message);
+            //TODO : ajouter ref a la carte arduino
+            manager.Read(currentPin);
         }
 
         public virtual void WriteMessage(string message)
@@ -51,7 +61,15 @@ namespace Uduino
         {
             pinMode = mode;
             WriteMessage("s " + currentPin + " " + (int)pinMode);
-            Log.Info("Pin " + currentPin + " is set to mode " + pinMode.ToString());
+        }
+
+        /// <summary>
+        /// Send OptimizedValue
+        /// </summary>
+        /// <param name="sendValue">Value to send</param>
+        public void SendRead()
+        {
+          WriteMessage("r " + currentPin);
         }
 
         /// <summary>
