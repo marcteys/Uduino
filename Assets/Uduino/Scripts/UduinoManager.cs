@@ -153,7 +153,7 @@ namespace Uduino
             set { discoverTries = value; }
         }
 
-        public List<string> blackListedPorts = new List<string>();
+        private List<string> blackListedPorts = new List<string>();
         public List<string> BlackListedPorts {
             get { return blackListedPorts; }
             set { blackListedPorts = value; }
@@ -218,7 +218,10 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                StartCoroutine(FindBoardPort(portName));
+                if(!blackListedPorts.Contains(portName))
+                    StartCoroutine(FindBoardPort(portName));
+                else
+                    Log.Info("Port " + portName + " is blacklisted");
             }
         }
 
@@ -650,7 +653,7 @@ namespace Uduino
         {
             if (uduinoDevices.Count == 0)
             {
-                 Log.Info("All ports are closed.");
+                 Log.Info("Ports closed.");
             }
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)
