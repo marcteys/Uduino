@@ -37,7 +37,6 @@ namespace Uduino
         {
             manager.Write(arduino, message);
             //TODO : ajouter ref a la carte arduino
-            manager.Read(currentPin);
         }
 
         public virtual void WriteMessage(string message)
@@ -69,7 +68,7 @@ namespace Uduino
         /// <param name="sendValue">Value to send</param>
         public void SendRead()
         {
-          WriteMessage("r " + currentPin);
+            manager.Read(arduino, "r " + currentPin);
         }
 
         /// <summary>
@@ -92,6 +91,7 @@ namespace Uduino
 
         public virtual void Draw()
         {
+
         }
 
     }
