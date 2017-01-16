@@ -36,7 +36,8 @@ void setup()
 {
   Serial.begin(9600);
   uduino.addCommand("s", SetMode);
-  uduino.addCommand("w", WritePin);
+  uduino.addCommand("d", WritePinDigital);
+  uduino.addCommand("a", WritePinAnalog);
   uduino.addCommand("r", ReadPin);
 }
 
@@ -54,7 +55,7 @@ void SetMode() {
   if (arg != NULL)
   {
     type = atoi(arg);
-    if(type != 4) getServoAttachedTo(pinToMap)->disable();
+    if (type != 4) getServoAttachedTo(pinToMap)->disable();
     switch (type) {
       case 0: // Output
         pinMode(pinToMap, OUTPUT);
@@ -69,15 +70,14 @@ void SetMode() {
         pinMode(pinToMap, INPUT_PULLUP);
         break;
       case 4: // Servo
-       startServo(getServoAttachedTo(-1),pinToMap);
+        startServo(getServoAttachedTo(-1), pinToMap);
         break;
     }
   }
   //uduino.charToInt(arg)
 }
 
-
-void WritePin() {
+void WritePinAnalog() {
   int pinToMap;
   char *arg;
   arg = uduino.next();
@@ -91,11 +91,31 @@ void WritePin() {
   if (arg != NULL)
   {
     value = atoi(arg);
-    if(getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
+    if (getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
       getServoAttachedTo(pinToMap)->pos = value;
     } else {
       analogWrite(pinToMap, value);
     }
+  }
+}
+
+
+void WritePinDigital() {
+  int pinToMap;
+  char *arg;
+  arg = uduino.next();
+  if (arg != NULL)
+  {
+    pinToMap = atoi(arg);
+  }
+
+  int value;
+  arg = uduino.next();
+  if (arg != NULL)
+  {
+    value = atoi(arg);
+    if (getServoAttachedTo(pinToMap)->pin == -1) //it's not a servo
+      digitalWrite(pinToMap, value);
   }
 }
 
