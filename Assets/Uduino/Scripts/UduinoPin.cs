@@ -32,7 +32,6 @@ namespace Uduino
             ChangePinMode(pinMode);
         }
 
-
         public virtual void WriteReadMessage(string message)
         {
             manager.Write(arduino, message);
@@ -75,11 +74,11 @@ namespace Uduino
         /// Send OptimizedValue
         /// </summary>
         /// <param name="sendValue">Value to send</param>
-        public void SendPinValue(int sendValue)
+        public void SendPinValue(int sendValue, string typeOfPin)
         {
-            if(sendValue != prevSendValue)
+            if (sendValue != prevSendValue)
             {
-                WriteMessage("w " + currentPin + " " + sendValue);
+                WriteMessage(typeOfPin + " " + currentPin + " " + sendValue);
                 prevSendValue = sendValue;
             }
         }

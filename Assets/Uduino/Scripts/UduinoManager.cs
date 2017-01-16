@@ -362,18 +362,21 @@ namespace Uduino
 
         #region Simple commands : Write
 
+
+
+
         /// <summary>
         /// DigitalWrite or AnalogWrite to arduino
         /// </summary>
         /// <param name="target"></param>
         /// <param name="pin"></param>
         /// <param name="value"></param>
-        public void arduinoWrite(string target, int pin, int value)
+        public void arduinoWrite(string target, int pin, int value, string typeOfPin)
         {
             foreach (Pin pinTarget in pins)
             {
                 if (pinTarget.PinTargetExists(target, pin))
-                    pinTarget.SendPinValue(value);
+                    pinTarget.SendPinValue(value, typeOfPin);
             }
         }
 
@@ -387,7 +390,7 @@ namespace Uduino
         {
             if (value <= 150) value = 0;
             else value = 255;
-            arduinoWrite(target,pin,value);
+            arduinoWrite(target,pin,value,"d");
         }
 
         /// <summary>
@@ -403,7 +406,7 @@ namespace Uduino
         /// </summary>
         public void digitalWrite(int pin, State state = State.LOW)
         {
-            arduinoWrite(null, pin, (int)state * 255);
+            arduinoWrite(null, pin, (int)state * 255,"d");
         }
 
         /// <summary>
@@ -413,7 +416,7 @@ namespace Uduino
         /// <param name="value">Value</param>
         public void analogWrite(int pin, int value)
         {
-            arduinoWrite(null, pin, value);
+            arduinoWrite(null, pin, value, "a");
         }
 
         /// <summary>
@@ -424,11 +427,10 @@ namespace Uduino
         /// <param name="value">Value</param>
         public void analogWrite(string target, int pin, int value)
         {
-            arduinoWrite(target, pin, value);
+            arduinoWrite(target, pin, value, "a");
         }
 
         #endregion
-
 
         #region Simple commands: Read
         public int analogRead(string target, int pin)
