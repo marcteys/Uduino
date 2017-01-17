@@ -363,7 +363,6 @@ namespace Uduino
 
         #region Simple commands : Write
 
-
         /// <summary>
         /// DigitalWrite or AnalogWrite to arduino
         /// </summary>
@@ -500,13 +499,25 @@ namespace Uduino
         /// </summary>
         /// <param name="target">Target device</param>
         /// <param name="message">Message to write in the serial</param>
-        public void Write(string target = null, string message = null)
+        public void Write(string target = null, string message = null, string bundle = null)
         {
-            if (UduinoTargetExists(target))
-                uduinoDevices[target].WriteToArduino(message);
+            //  TODO : Cannot make that prettier ? 
+            if(bundle != null)
+            {
+                if (UduinoTargetExists(target))
+                    uduinoDevices[target].AddToBundle(message, bundle);
+                else
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                        uduino.Value.AddToBundle(message, bundle);
+            }
             else
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    uduino.Value.WriteToArduino(message);
+            {
+                if (UduinoTargetExists(target))
+                    uduinoDevices[target].WriteToArduino(message);
+                else
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                        uduino.Value.WriteToArduino(message);
+            }
         }
 
         /// <summary>
@@ -557,6 +568,11 @@ namespace Uduino
         #endregion
 
         #region Bundle
+        /// <summary>
+        /// Send an existing message bundle to Arduino
+        /// </summary>
+        /// <param name="target">Target arduino</param>
+        /// <param name="bundleName">Bundle name</param>
         public void SendBundle(string target, string bundleName)
         {
             if (UduinoTargetExists(target))
@@ -566,6 +582,10 @@ namespace Uduino
                     uduino.Value.SendBundle(bundleName);
         }
 
+        /// <summary>
+        /// Send an existing message bundle to Arduino
+        /// </summary>
+        /// <param name="bundleName">Bundle name</param>
         public void SendBundle(string bundleName)
         {
             SendBundle(null, bundleName);

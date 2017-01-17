@@ -20,9 +20,9 @@ namespace Uduino
 
         private string lastRead = null;
 
-        public Pin(UduinoDevice device, string arduinoParent, int pin, PinMode mode)
+        public Pin(string arduinoParent, int pin, PinMode mode)
         {
-            uduinoDevice = device;
+          //  uduinoDevice = device;
             manager = UduinoManager.Instance;
             arduinoName = arduinoParent;
             currentPin = pin;
@@ -36,13 +36,13 @@ namespace Uduino
 
         public virtual void WriteReadMessage(string message)
         {
-            manager.Write(arduinoName, message);
+            manager.Write(arduinoName, message); // TODO : ref to bundle? 
             //TODO : Add ref to arduinocard
         }
 
-        public virtual void WriteMessage(string message)
+        public virtual void WriteMessage(string message, string bundle = null)
         {
-          manager.Write(arduinoName, message);
+          manager.Write(arduinoName, message, bundle);
         }
 
         public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
@@ -60,7 +60,7 @@ namespace Uduino
         public void ChangePinMode(PinMode mode, string bundle = null)
         {
             pinMode = mode;
-            WriteMessage("s " + currentPin + " " + (int)pinMode);
+            WriteMessage("s " + currentPin + " " + (int)pinMode, bundle);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace Uduino
         {
             if (sendValue != prevSendValue)
             {
-                WriteMessage(typeOfPin + " " + currentPin + " " + sendValue);
+                WriteMessage(typeOfPin + " " + currentPin + " " + sendValue, bundle);
                 prevSendValue = sendValue;
             }
         }

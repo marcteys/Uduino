@@ -105,7 +105,7 @@ public class EditorPin : Pin
         }
     }
 
-    public override void WriteMessage(string message)
+    public override void WriteMessage(string message, string bundle = null)
     {
         if (editorManager != null) editorManager.WriteMessage(arduinoName, message);
     }

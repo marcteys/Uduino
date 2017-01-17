@@ -87,6 +87,7 @@ namespace Uduino
         {
             if (value != null)
                 message = " " + value.ToString();
+
             if (serial == null || !serial.IsOpen || message == null || message == "" ) return;
             try
             {

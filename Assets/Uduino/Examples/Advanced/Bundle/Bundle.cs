@@ -19,21 +19,6 @@ public class Bundle : MonoBehaviour {
         StartCoroutine(BlinkAllLoop());
     }
 
-    /*
-     * TODO : SthiThis is not working. SHould remove all references to advancedWrite
-    IEnumerator BlinkTestLoop()
-    {
-        while (true)
-        {
-            u.Write("uduinoBoard",new string[] {"d 3","d 4","d 5","d 6","d 7"}, new int[] { 255,255,255,255,255});
-            yield return new WaitForSeconds(1);
-            u.Write("uduinoBoard", new string[] { "d 3", "d 4", "d 5", "d 6", "d 7" }, new int[] { 0, 0, 0, 0, 0 });
-            u.SendBundle("LedOff");
-            yield return new WaitForSeconds(1);
-        }
-    }
-    */
-
     IEnumerator BlinkAllLoop()
     {
         while (true)
@@ -42,13 +27,13 @@ public class Bundle : MonoBehaviour {
             {
                 u.digitalWrite(i, State.HIGH,"LedOn");
             }
-            u.SendBundle("LedOn");
+           u.SendBundle("LedOn");
             yield return new WaitForSeconds(1);
             for (int i = 2; i < 13; i++)
             {
                 u.digitalWrite(i, State.LOW, "LedOff");
             }
-            u.SendBundle("LedOff");
+           u.SendBundle("LedOff");
             yield return new WaitForSeconds(1);
         }
     }

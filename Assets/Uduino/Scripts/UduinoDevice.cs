@@ -12,7 +12,8 @@ namespace Uduino
                 return _name;
             } set
             {
-                if (_name == "") _name = value;
+                if (_name == "")
+                    _name = value;
             }
         }
         private string _name = "";
@@ -27,14 +28,11 @@ namespace Uduino
 
         private List<Pin> pins = new List<Pin>();
 
-        private Dictionary<string, string[]> bundles = new Dictionary<string, string[]>();
+        private Dictionary<string, List<string>> bundles = new Dictionary<string, List<string>>();
          
-        public UduinoDevice(string port, int baudrate = 9600)
-            : base(port, baudrate)
-        {
+        public UduinoDevice(string port, int baudrate = 9600) : base(port, baudrate) { }
 
-        }
-
+        // TODO : remove ?
         public void AdvancedWriteToArduino(string[] command, int[] value)
         {
             string buffer = "";
@@ -46,32 +44,47 @@ namespace Uduino
             WriteToArduino(buffer);
         }
 
-
-        /*
-        public void AddToBundle( string message )
+        /// <summary>
+        /// Add a message to the bundle
+        /// </summary>
+        /// <param name="message">Message to send</param>
+        /// <param name="bundle">Bundle Name</param>
+        public void AddToBundle( string message , string bundle)
         {
 
-        }*/
+            List<string> existing;
+            if (!bundles.TryGetValue(bundle, out existing))
+            {
+                existing = new List<string>();
+                bundles[bundle] = existing;
+            }
+            existing.Add(","+ message );
+            Log.Info("Message " + message + " added to the bundle " + bundle);
+        }
 
+        /// <summary>
+        /// Send a Bundle to the arduino
+        /// </summary>
+        /// TODO : Max Length, matching avec arduino
+        /// <param name="bundleName">Name of the bundle to send</param>
         public void SendBundle(string bundleName)
         {
-            /*
-            string[] bundleValues;
+            List<string> bundleValues;
 
             if (bundles.TryGetValue(bundleName, out bundleValues))
             {
-                //success!
+                string fullMessage = "b " + bundleValues.Count;
 
+                for (int i = 0; i < bundleValues.Count; i++)
+                    fullMessage += bundleValues[i];
 
-                Log.Info("Sending the bundle " + bundleName);
-                bundles.Remove(bundleName); 
-
+                WriteToArduino(fullMessage);
+                bundles.Remove(bundleName);
             }
             else
             {
                 Log.Warning("You are tring to send the Bundle " + bundleName + " but it seems that it's empty.");
             }
-            */
         }
 
         public override void WritingSuccess(string message)
@@ -79,11 +92,7 @@ namespace Uduino
             lastWrite = message;
         }
 
-
-        public override void ReadingSuccess(string message)
-        {
-            
-        }
+        public override void ReadingSuccess(string message){ }
 
     }
 }
