@@ -7,6 +7,8 @@ Uduino uduino("uduinoBoard"); // Declare and name your object
 #include <Servo.h>
 #define MAXSERVOS 12
 
+#define UDUINODEBUG 1
+
 typedef struct _servoWrapper {
   int pin = -1;
   Servo servo;
@@ -39,7 +41,25 @@ void setup()
   uduino.addCommand("d", WritePinDigital);
   uduino.addCommand("a", WritePinAnalog);
   uduino.addCommand("r", ReadPin);
+  uduino.addCommand("b", ReadBundle);
 }
+
+
+
+void ReadBundle() {
+  char *arg;
+  char *number;
+  number = uduino.next();
+  int len ;
+  if (number != NULL)
+    len = atoi(number);
+
+  for (int i = 0; i < len; i++) {
+    uduino.launchCommand(arg);
+  }
+}
+
+
 
 void SetMode() {
   int pinToMap;
@@ -55,26 +75,29 @@ void SetMode() {
   if (arg != NULL)
   {
     type = atoi(arg);
-    if (type != 4) getServoAttachedTo(pinToMap)->disable();
-    switch (type) {
-      case 0: // Output
-        pinMode(pinToMap, OUTPUT);
-        break;
-      case 1: // PWM
-        pinMode(pinToMap, OUTPUT);
-        break;
-      case 2: // Analog
-        pinMode(pinToMap, INPUT);
-        break;
-      case 3: // Input_Pullup
-        pinMode(pinToMap, INPUT_PULLUP);
-        break;
-      case 4: // Servo
-        startServo(getServoAttachedTo(-1), pinToMap);
-        break;
-    }
+    PinSetMode(pinToMap, type);
   }
-  //uduino.charToInt(arg)
+}
+
+void PinSetMode(int pin, int type) {
+  if (type != 4) getServoAttachedTo(pin)->disable();
+  switch (type) {
+    case 0: // Output
+      pinMode(pin, OUTPUT);
+      break;
+    case 1: // PWM
+      pinMode(pin, OUTPUT);
+      break;
+    case 2: // Analog
+      pinMode(pin, INPUT);
+      break;
+    case 3: // Input_Pullup
+      pinMode(pin, INPUT_PULLUP);
+      break;
+    case 4: // Servo
+      startServo(getServoAttachedTo(-1), pin);
+      break;
+  }
 }
 
 void WritePinAnalog() {
@@ -91,7 +114,7 @@ void WritePinAnalog() {
   if (arg != NULL)
   {
     value = atoi(arg);
-    if (getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
+     if (getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
       getServoAttachedTo(pinToMap)->pos = value;
     } else {
       analogWrite(pinToMap, value);
@@ -114,9 +137,10 @@ void WritePinDigital() {
   if (arg != NULL)
   {
     value = atoi(arg);
-    if (getServoAttachedTo(pinToMap)->pin == -1) //it's not a servo
+      if (getServoAttachedTo(pinToMap)->pin == -1) //it's not a servo
       digitalWrite(pinToMap, value);
   }
+  
 }
 
 void ReadPin() {
@@ -140,7 +164,7 @@ void loop()
   for (int i = 0; i < MAXSERVOS; i++) {
     updateServo(&Servos[i]);
   }
-  delay(15);
+  delayMicroseconds(50);
 }
 
 

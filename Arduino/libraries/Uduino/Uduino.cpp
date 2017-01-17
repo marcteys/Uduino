@@ -20,6 +20,7 @@ Uduino::Uduino(char* identity)
 {
   usingSoftwareSerial=0;
   strncpy(delim," ",MAXDELIMETER);  // strtok_r needs a null-terminated string
+  strncpy(delimBundle," ,",MAXDELIMETER);  // strtok_r needs a null-terminated string
   term='\r';   // return character, default terminator for commands
   numCommand=0;    // Number of callback handlers installed
   clearBuffer(); 
@@ -39,6 +40,7 @@ Uduino::Uduino(SoftwareSerial &_SoftSer,char* identity)
   usingSoftwareSerial=1; 
   SoftSerial = &_SoftSer;
   strncpy(delim," ",MAXDELIMETER);  // strtok_r needs a null-terminated string
+  strncpy(delimBundle," ,",MAXDELIMETER);  // strtok_r needs a null-terminated string
   term='\r';   // return character, default terminator for commands
   numCommand=0;    // Number of callback handlers installed
   clearBuffer(); 
@@ -82,8 +84,39 @@ void Uduino::clearBuffer()
 char *Uduino::next() 
 {
   char *nextToken;
-  nextToken = strtok_r(NULL, delim, &last); 
+ // nextToken = strtok_r(NULL, delim, &last); 
+  nextToken = strtok_r(NULL, delimBundle, &last); 
   return nextToken; 
+}
+
+
+// Launch a command
+void Uduino::launchCommand(char * command) {
+  char * t;
+
+  t = strtok_r(command,delimBundle,&last);
+
+  if (t == NULL) return; 
+    for (int i=0; i<numCommand; i++) {
+        #ifdef UDUINODEBUG
+        Serial.print("Comparing ["); 
+        Serial.print(token); 
+        Serial.print("] to [");
+        Serial.print(CommandList[i].command);
+        Serial.println("]");
+        #endif
+
+      if (strncmp(t,CommandList[i].command,UDUINOBUFFER) == 0) 
+      {
+        #ifdef UDUINODEBUG
+        Serial.print("Matched Command: "); 
+        Serial.println(t);
+        #endif
+        // Execute the stored handler function for the command
+        (*CommandList[i].function)(); 
+        break; 
+      }
+    }
 }
 
 // This checks the Serial stream for characters, and assembles them into a buffer.  
@@ -118,7 +151,7 @@ void Uduino::readSerial()
       Serial.println(buffer);
         #endif
       bufPos=0;           // Reset to start of buffer
-      token = strtok_r(buffer,delim,&last);   // Search for command at start of buffer
+      token = strtok_r(buffer,delimBundle,&last);   // Search for command at start of buffer
       if (token == NULL) return; 
       matched=false; 
       for (i=0; i<numCommand; i++) {
@@ -163,7 +196,7 @@ void Uduino::readSerial()
 // to the handler function to deal with it. 
 void Uduino::addCommand(const char *command, void (*function)())
 {
-  if (numCommand < MAXUDUINOS) {
+  if (numCommand < MAXCOMMANDS) {
     #ifdef UDUINODEBUG
     Serial.print(numCommand); 
     Serial.print("-"); 
@@ -179,7 +212,7 @@ void Uduino::addCommand(const char *command, void (*function)())
     // Not much we can do since there is no real visible error assertion, we just ignore adding
     // the command
     #ifdef UDUINODEBUG
-    Serial.println("Too many handlers - recompile changing MAXUDUINOS"); 
+    Serial.println("Too many handlers - recompile changing MAXCOMMANDS"); 
     #endif 
   }
 }

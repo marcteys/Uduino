@@ -54,8 +54,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string.h>
 
 
-#define UDUINOBUFFER 16
-#define MAXUDUINOS 10
+#define UDUINOBUFFER 64 // Max length of bundle
+#define MAXCOMMANDS 10
 #define MAXDELIMETER 2
 
 #define UDUINODEBUG 1
@@ -76,18 +76,19 @@ class Uduino
     void readSerial();    // Main entry point.  
     void addCommand(const char *, void(*)());   // Add commands to processing dictionary
     void addDefaultHandler(void (*function)());    // A handler to call when no valid command received. 
+    void launchCommand(char * command);
     int charToInt(char* arg); //COnverts char to int
 
     // Uduino specific commands
     char *getIdentity();
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)
 
-
   private:
     char inChar;          // A character read from the serial stream 
     char buffer[UDUINOBUFFER];   // Buffer of stored characters while waiting for terminator character
     int  bufPos;                        // Current position in the buffer
     char delim[MAXDELIMETER];           // null-terminated list of character to be used as delimeters for tokenizing (default " ")
+    char delimBundle[MAXDELIMETER];           // null-terminated list of character to be used as delimeters for tokenizing (default " ")
     char term;                          // Character that signals end of command (default '\r')
     char *token;                        // Returned token from the command buffer as returned by strtok_r
     char *last;                         // State variable used by strtok_r during processing
@@ -96,7 +97,7 @@ class Uduino
       void (*function)();
     } UduinoCallback;            // Data structure to hold Command/Handler function key-value pairs
     int numCommand;
-    UduinoCallback CommandList[MAXUDUINOS];   // Actual definition for command/handler array
+    UduinoCallback CommandList[MAXCOMMANDS];   // Actual definition for command/handler array
     void (*defaultHandler)();           // Pointer to the default handler function 
     int usingSoftwareSerial;            // Used as boolean to see if we're using SoftwareSerial object or not
     #ifndef UDUINO_HARDWAREONLY 
