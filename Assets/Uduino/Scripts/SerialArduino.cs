@@ -90,11 +90,11 @@ namespace Uduino
             if (serial == null || !serial.IsOpen || message == null || message == "" ) return;
             try
             {
-                Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
                 try
                 {
                     serial.WriteLine(message + "\r\n");
                     serial.BaseStream.Flush();
+                    Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
                 }
                 catch (System.IO.IOException e) {
                     Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);

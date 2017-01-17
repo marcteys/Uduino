@@ -6,6 +6,17 @@ namespace Uduino
 {
     public class UduinoDevice : SerialArduino
     {
+        public string name {
+            get
+            {
+                return _name;
+            } set
+            {
+                if (_name == "") _name = value;
+            }
+        }
+        private string _name = "";
+
         public bool continuousRead = false;
         public string read = null;
 
@@ -16,6 +27,8 @@ namespace Uduino
 
         private List<Pin> pins = new List<Pin>();
 
+        private Dictionary<string, string[]> bundles = new Dictionary<string, string[]>();
+         
         public UduinoDevice(string port, int baudrate = 9600)
             : base(port, baudrate)
         {
@@ -33,6 +46,34 @@ namespace Uduino
             WriteToArduino(buffer);
         }
 
+
+        /*
+        public void AddToBundle( string message )
+        {
+
+        }*/
+
+        public void SendBundle(string bundleName)
+        {
+            /*
+            string[] bundleValues;
+
+            if (bundles.TryGetValue(bundleName, out bundleValues))
+            {
+                //success!
+
+
+                Log.Info("Sending the bundle " + bundleName);
+                bundles.Remove(bundleName); 
+
+            }
+            else
+            {
+                Log.Warning("You are tring to send the Bundle " + bundleName + " but it seems that it's empty.");
+            }
+            */
+        }
+
         public override void WritingSuccess(string message)
         {
             lastWrite = message;
@@ -41,7 +82,7 @@ namespace Uduino
 
         public override void ReadingSuccess(string message)
         {
-            //TODO : ne sert a rien pour l'instant
+            
         }
 
     }

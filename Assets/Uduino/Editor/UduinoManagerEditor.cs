@@ -23,7 +23,7 @@ public class EditorPin : Pin
             : base(arduinoParent, pin, mode)
     {
         editorManager = m;
-        arduino = arduinoParent;
+        arduinoName = arduinoParent;
         currentPin = pin;
         ChangePinMode(mode);
     }
@@ -84,7 +84,7 @@ public class EditorPin : Pin
         {
             foreach (Pin pinTarget in UduinoManager.Instance.pins)
             {
-                if (pinTarget.PinTargetExists(arduino, currentPin))
+                if (pinTarget.PinTargetExists(arduinoName, currentPin))
                 {
                     if (pinMode != prevPinMode)
                         pinTarget.ChangePinMode(pinMode);
@@ -107,7 +107,7 @@ public class EditorPin : Pin
 
     public override void WriteMessage(string message)
     {
-        if (editorManager != null) editorManager.WriteMessage(arduino, message);
+        if (editorManager != null) editorManager.WriteMessage(arduinoName, message);
     }
 
 }

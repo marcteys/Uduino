@@ -241,6 +241,7 @@ namespace Uduino
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
                         string name = reading.Split(new char[0])[1];
+                        uduinoDevice.name = name;
                         uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
@@ -363,20 +364,18 @@ namespace Uduino
         #region Simple commands : Write
 
 
-
-
         /// <summary>
         /// DigitalWrite or AnalogWrite to arduino
         /// </summary>
         /// <param name="target"></param>
         /// <param name="pin"></param>
         /// <param name="value"></param>
-        public void arduinoWrite(string target, int pin, int value, string typeOfPin)
+        public void arduinoWrite(string target, int pin, int value, string typeOfPin, string bundle = null)
         {
             foreach (Pin pinTarget in pins)
             {
                 if (pinTarget.PinTargetExists(target, pin))
-                    pinTarget.SendPinValue(value, typeOfPin);
+                    pinTarget.SendPinValue(value, typeOfPin, bundle);
             }
         }
 
@@ -386,27 +385,27 @@ namespace Uduino
         /// <param name="target"></param>
         /// <param name="pin"></param>
         /// <param name="value"></param>
-        public void digitalWrite(string target, int pin, int value)
+        public void digitalWrite(string target, int pin, int value, string bundle = null)
         {
             if (value <= 150) value = 0;
             else value = 255;
-            arduinoWrite(target,pin,value,"d");
+            arduinoWrite(target,pin,value,"d", bundle);
         }
 
         /// <summary>
         /// Write a command on an Arduino
         /// </summary>
-        public void digitalWrite(int pin, int value)
+        public void digitalWrite(int pin, int value, string bundle = null)
         {
-            digitalWrite(null, pin, value);
+            digitalWrite("", pin, value, bundle);
         }
 
         /// <summary>
         /// Write a command on an Arduino
         /// </summary>
-        public void digitalWrite(int pin, State state = State.LOW)
+        public void digitalWrite(int pin, State state = State.LOW, string bundle = null)
         {
-            arduinoWrite(null, pin, (int)state * 255,"d");
+            arduinoWrite("", pin, (int)state * 255,"d", bundle);
         }
 
         /// <summary>
@@ -414,9 +413,9 @@ namespace Uduino
         /// </summary>
         /// <param name="pin">Arduino Pin</param>
         /// <param name="value">Value</param>
-        public void analogWrite(int pin, int value)
+        public void analogWrite(int pin, int value, string bundle = null)
         {
-            arduinoWrite(null, pin, value, "a");
+            arduinoWrite(null, pin, value, "a", bundle);
         }
 
         /// <summary>
@@ -425,9 +424,9 @@ namespace Uduino
         /// <param name="target">Arduino board</param>
         /// <param name="pin">Arduino Pin</param>
         /// <param name="value">Value</param>
-        public void analogWrite(string target, int pin, int value)
+        public void analogWrite(string target, int pin, int value, string bundle = null)
         {
-            arduinoWrite(target, pin, value, "a");
+            arduinoWrite(target, pin, value, "a", bundle);
         }
 
         #endregion
@@ -448,12 +447,12 @@ namespace Uduino
 
         public int analogRead(int pin)
         {
-            return analogRead(null, pin);
+            return analogRead("", pin);
         }
 
         public int analogRead(AnalogPin pin)
         {
-            return analogRead(null, (int)pin);
+            return analogRead("", (int)pin);
         }
 
         #endregion
@@ -462,6 +461,7 @@ namespace Uduino
         /// <summary>
         /// Send a read command to a specific arduino.
         /// A read command will be returned in the OnValueReceived() delegate function
+        /// TODO : I should remove that from here ? 
         /// </summary>
         /// <param name="target">Target device name. Not defined means read everything</param>
         /// <param name="variable">Variable watched, if defined</param>
@@ -530,8 +530,9 @@ namespace Uduino
         public void Write(string target = null, string[] message = null, int[] values = null) {
             if (UduinoTargetExists(target))
                 uduinoDevices[target].AdvancedWriteToArduino(message, values);
-            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                uduino.Value.AdvancedWriteToArduino(message, values);
+            else
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    uduino.Value.AdvancedWriteToArduino(message, values);
         }
 
         /// <summary>
@@ -542,6 +543,7 @@ namespace Uduino
         private bool UduinoTargetExists(string target)
         {
             UduinoDevice uduino = null;
+            if (target == "" || target == null) return false;
             if (uduinoDevices.TryGetValue(target, out uduino))
                 return true;
             else
@@ -553,6 +555,23 @@ namespace Uduino
         }
 
         #endregion
+
+        #region Bundle
+        public void SendBundle(string target, string bundleName)
+        {
+            if (UduinoTargetExists(target))
+                uduinoDevices[target].SendBundle(bundleName);
+            else
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    uduino.Value.SendBundle(bundleName);
+        }
+
+        public void SendBundle(string bundleName)
+        {
+            SendBundle(null, bundleName);
+        }
+        #endregion
+
 
         #region Hardware reading
         /// <summary>

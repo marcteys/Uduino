@@ -9,7 +9,8 @@ namespace Uduino
     {
         public UduinoManager manager = null;
 
-        public string arduino = null;
+        public string arduinoName = null; // TODO : we don't need that !! 
+        public UduinoDevice uduinoDevice = null;
 
         public PinMode pinMode;
         public PinMode prevPinMode;
@@ -19,10 +20,11 @@ namespace Uduino
 
         private string lastRead = null;
 
-        public Pin(string arduinoParent, int pin, PinMode mode)
+        public Pin(UduinoDevice device, string arduinoParent, int pin, PinMode mode)
         {
+            uduinoDevice = device;
             manager = UduinoManager.Instance;
-            arduino = arduinoParent;
+            arduinoName = arduinoParent;
             currentPin = pin;
             pinMode = mode;
         }
@@ -34,18 +36,18 @@ namespace Uduino
 
         public virtual void WriteReadMessage(string message)
         {
-            manager.Write(arduino, message);
-            //TODO : ajouter ref a la carte arduino
+            manager.Write(arduinoName, message);
+            //TODO : Add ref to arduinocard
         }
 
         public virtual void WriteMessage(string message)
         {
-          manager.Write(arduino, message);
+          manager.Write(arduinoName, message);
         }
 
         public bool PinTargetExists(string parentArduinoTarget, int currentPinTarget)
         {
-            if ((arduino == null || arduino == "" || parentArduinoTarget == null || parentArduinoTarget == "" || parentArduinoTarget == arduino) && currentPinTarget == currentPin )
+            if ((arduinoName == null || arduinoName == "" || parentArduinoTarget == null || parentArduinoTarget == "" || parentArduinoTarget == arduinoName) && currentPinTarget == currentPin )
                 return true;
             else
                 return false;
@@ -55,7 +57,7 @@ namespace Uduino
         /// Change Pin mode
         /// </summary>
         /// <param name="mode">Mode</param>
-        public void ChangePinMode(PinMode mode)
+        public void ChangePinMode(PinMode mode, string bundle = null)
         {
             pinMode = mode;
             WriteMessage("s " + currentPin + " " + (int)pinMode);
@@ -67,14 +69,14 @@ namespace Uduino
         /// <param name="sendValue">Value to send</param>
         public void SendRead()
         {
-            manager.Read(arduino, "r " + currentPin);
+            manager.Read(arduinoName, "r " + currentPin);
         }
 
         /// <summary>
         /// Send OptimizedValue
         /// </summary>
         /// <param name="sendValue">Value to send</param>
-        public void SendPinValue(int sendValue, string typeOfPin)
+        public void SendPinValue(int sendValue, string typeOfPin, string bundle = null)
         {
             if (sendValue != prevSendValue)
             {
