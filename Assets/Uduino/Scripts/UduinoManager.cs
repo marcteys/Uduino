@@ -360,7 +360,6 @@ namespace Uduino
 
         #endregion
 
-
         #region Simple commands : Write
 
         /// <summary>
@@ -433,15 +432,18 @@ namespace Uduino
         #region Simple commands: Read
         public int analogRead(string target, int pin)
         {
+            int readVal = 0;
+
             foreach (Pin pinTarget in pins)
             {
                 if (pinTarget.PinTargetExists(target, pin))
                 {
                     pinTarget.SendRead();
+                    readVal = pinTarget.lastRead;
                 }
             }
 
-            return 0;
+            return readVal;
         }
 
         public int analogRead(int pin)
@@ -466,12 +468,16 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string variable = null, int timeout = 100, System.Action<string> action = null)
+        public void Read(string target = null, string variable = null, int timeout = 10, System.Action<string> action = null)
         {
+            //
+            // TODO / WTF IS IT WORKING
+            //
             if (UduinoTargetExists(target))
             {
-                uduinoDevices[target].read = variable;
+                uduinoDevices[target].read = variable; //TODO : Could be improved
                 uduinoDevices[target].callback = action;
+                uduinoDevices[target].ReadFromArduino(variable, timeout);
             }
             else
             {
@@ -479,12 +485,15 @@ namespace Uduino
                 {
                     uduino.Value.read = variable;
                     uduino.Value.callback = action;
+                    uduino.Value.ReadFromArduino(variable, timeout);
                 }
             }
         }
 
+        // TODO : add target for arduino target ? Is it sometimes used  ?
         public void Read(int pin, System.Action<string> action = null)
         {
+            //TODO : redo as overload
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
             {
                 uduino.Value.ReadFromArduino();
@@ -581,7 +590,6 @@ namespace Uduino
         }
         #endregion
 
-
         #region Hardware reading
         /// <summary>
         /// Threading variables
@@ -663,11 +671,12 @@ namespace Uduino
         /// <param name="target">TODO : for the moment target is unused</param>
         void ReadData(string data, string target = null)
         {
+            Debug.Log("LASTREAD  " + data);
+
             if (data != null && data != "" && data != "Null")
             {
-                UduinoDevice uduino = uduinoDevices[target];
+                UduinoDevice uduino = uduinoDevices[target]; //TODO : And if it's null ?
                 uduino.lastRead = data;
-                Debug.Log(uduino.lastRead);
                 if (uduino.callback != null) uduino.callback(data);
                 else OnValueReceived(data, target);
             }

@@ -13,7 +13,6 @@ public class AnalogRead : MonoBehaviour {
     {
         UduinoManager.Instance.InitPin(AnalogPin.A0, PinMode.Analog);
         UduinoManager.Instance.OnValueReceived += OnValueReceived; //Create the Delegate
-
     }
 
     void Update ()
@@ -26,7 +25,5 @@ public class AnalogRead : MonoBehaviour {
     {
         Debug.Log(int.Parse(data)); // Use the data as you want !
     }
-
-
 
 }

@@ -81,7 +81,11 @@ namespace Uduino
             lastWrite = message;
         }
 
-        public override void ReadingSuccess(string message){ }
+        public override void ReadingSuccess(string message)
+        {
+            Debug.Log("last read : " + message);
+            lastRead = message;
+        }
 
     }
 }

@@ -16,6 +16,8 @@ namespace Uduino
 
         SerialStatus serialStatus = SerialStatus.UNDEF;
 
+        private bool readInProcess = false;
+
         public SerialArduino(string port, int baudrate = 9600)
         {
             _port = port;
@@ -134,9 +136,16 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
-            WriteToArduino(message);
+            if (readInProcess)
+                return null;
 
-            if (serial == null) return null;
+            readInProcess = true;
+
+            if (serial == null)
+                return null;
+
+            if (message != null)
+                WriteToArduino(message);
 
             serial.ReadTimeout = timeout;
             serial.DiscardInBuffer(); // TODO : To remove ?
@@ -146,15 +155,21 @@ namespace Uduino
             {
                 try
                 {
-                    return serial.ReadLine();
+                    string readedLine = serial.ReadLine();
+                    ReadingSuccess(readedLine);
+                    readInProcess = false;
+                    return readedLine;
                 }
-                catch (TimeoutException)
+                catch (TimeoutException e)
                 {
+                    Log.Warning(e);
+                    readInProcess = false;
                     return null;
                 }
             }
             catch (Exception e)
             {
+                readInProcess = false;
                 Log.Error(e);
                 Close();
                 return null;

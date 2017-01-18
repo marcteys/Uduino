@@ -18,7 +18,7 @@ namespace Uduino
         public int currentPin = -1;
         public int prevSendValue = 0;
 
-        private string lastRead = null;
+        public int lastRead = 0;
 
         public Pin(string arduinoParent, int pin, PinMode mode)
         {
