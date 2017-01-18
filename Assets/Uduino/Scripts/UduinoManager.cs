@@ -534,17 +534,6 @@ namespace Uduino
                     uduino.Value.WriteToArduino(message,value);
         }
 
-        /// <summary>
-        /// Write a command on an Arduino with several commands and values
-        /// </summary>
-        /// TODO : To improve
-        public void Write(string target = null, string[] message = null, int[] values = null) {
-            if (UduinoTargetExists(target))
-                uduinoDevices[target].AdvancedWriteToArduino(message, values);
-            else
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    uduino.Value.AdvancedWriteToArduino(message, values);
-        }
 
         /// <summary>
         /// Verify if the target exists when we want to get a value

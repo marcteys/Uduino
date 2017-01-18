@@ -32,17 +32,6 @@ namespace Uduino
          
         public UduinoDevice(string port, int baudrate = 9600) : base(port, baudrate) { }
 
-        // TODO : remove ?
-        public void AdvancedWriteToArduino(string[] command, int[] value)
-        {
-            string buffer = "";
-            for (int i = 0; i < value.Length; i++)
-            {
-                buffer += command[i] + " " + value[i] + " ";
-            }
-            buffer += '\n';
-            WriteToArduino(buffer);
-        }
 
         /// <summary>
         /// Add a message to the bundle
