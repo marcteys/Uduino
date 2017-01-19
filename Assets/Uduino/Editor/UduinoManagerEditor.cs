@@ -44,18 +44,24 @@ public class EditorPin : Pin
                 if (GUILayout.Button("LOW", "toolbarButton")) sendValue = 0;
                 break;
             case PinMode.Input_pullup:
-                EditorGUILayout.LabelField("Digital read:");
+                if (GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
+                    SendRead();
+                GUILayout.Label(lastReadValue.ToString(), "TE Toolbarbutton");
                 break;
             case PinMode.PWM:
+                GUILayout.BeginHorizontal("TE Toolbarbutton");
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
+                GUILayout.EndHorizontal();
                 break;
             case PinMode.Servo:
+                GUILayout.BeginHorizontal("TE Toolbarbutton");
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
+                GUILayout.EndHorizontal();
                 break;
             case PinMode.Analog:
                 if(GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
                         SendRead();
-                EditorGUILayout.LabelField("Read: " + lastReadValue);
+                GUILayout.Label(lastReadValue.ToString(), "TE Toolbarbutton");
                 break;
         }
         EditorGUIUtility.fieldWidth += 22;
@@ -333,15 +339,20 @@ public class UduinoManagerEditor : Editor {
                                     break;
                                 case PinMode.Input_pullup:
                                     EditorGUILayout.LabelField("Digital read:");
+                                    GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
                                     break;
                                 case PinMode.PWM:
+                                    GUILayout.BeginHorizontal("TE Toolbarbutton");
                                     EditorGUILayout.IntSlider(pin.prevSendValue, 0, 255);
+                                    GUILayout.EndHorizontal();
                                     break;
                                 case PinMode.Servo:
+                                    GUILayout.BeginHorizontal("TE Toolbarbutton");
                                     EditorGUILayout.IntSlider(pin.prevSendValue, 0, 180);
+                                    GUILayout.EndHorizontal();
                                     break;
                                 case PinMode.Analog:
-                                    EditorGUILayout.LabelField("Analog read:");
+                                    GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
                                     break;
                             }
                             EditorGUIUtility.fieldWidth += 22;

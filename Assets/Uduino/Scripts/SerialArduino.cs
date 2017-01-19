@@ -136,8 +136,8 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
-            if (readInProcess)
-                return null;
+          //  if (readInProcess)
+            //    return null;
 
             readInProcess = true;
 

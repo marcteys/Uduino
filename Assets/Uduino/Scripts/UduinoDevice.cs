@@ -81,9 +81,10 @@ namespace Uduino
 
         public override void ReadingSuccess(string message)
         {
-        //    Debug.Log("last read : " + message);
+            Debug.Log("last read : " + message);
             lastRead = message;
-            if(callback != null) callback(message);
+            //TODO : !Application.isPlaying &&  ?
+            if (callback != null) callback(message);
         }
 
     }

@@ -318,7 +318,8 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Init a pin 
+        /// Create a new Pin and setup the mode if the pin is not registered.
+        /// If the pin exsists, change only the mode
         /// </summary>
         /// <param name="string">Target Name</param>
         /// <param name="pin">Pin to init</param>
@@ -479,18 +480,18 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string variable = null, int timeout = 100, System.Action<string> action = null)
+        public void Read(string target = null, string message = null, int timeout = 100, System.Action<string> action = null)
         {
             if (UduinoTargetExists(target))
             {
-                uduinoDevices[target].read = variable; 
+                uduinoDevices[target].read = message; 
                 uduinoDevices[target].callback = action;
             }
             else
             {
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
-                    uduino.Value.read = variable;
+                    uduino.Value.read = message;
                     uduino.Value.callback = action;
                 }
             }
@@ -644,11 +645,12 @@ namespace Uduino
         {
             while (readAllPorts)
             {
+              //  Debug.Log("ee");
+
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
                     if (uduino.Value.read != null)
                     {
-                        Debug.Log("hahahahaha");
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
                         uduino.Value.read = null;
                         ReadData(data, uduino.Key);
