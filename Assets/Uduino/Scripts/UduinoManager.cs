@@ -439,7 +439,7 @@ namespace Uduino
                 if (pinTarget.PinTargetExists(target, pin))
                 {
                     pinTarget.SendRead();
-                    readVal = pinTarget.lastRead;
+                    readVal = pinTarget.lastReadValue;
                 }
             }
 
@@ -468,16 +468,12 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string variable = null, int timeout = 10, System.Action<string> action = null)
+        public void Read(string target = null, string variable = null, int timeout = 100, System.Action<string> action = null)
         {
-            //
-            // TODO / WTF IS IT WORKING
-            //
             if (UduinoTargetExists(target))
             {
-                uduinoDevices[target].read = variable; //TODO : Could be improved
+                uduinoDevices[target].read = variable; 
                 uduinoDevices[target].callback = action;
-                uduinoDevices[target].ReadFromArduino(variable, timeout);
             }
             else
             {
@@ -485,7 +481,6 @@ namespace Uduino
                 {
                     uduino.Value.read = variable;
                     uduino.Value.callback = action;
-                    uduino.Value.ReadFromArduino(variable, timeout);
                 }
             }
         }
@@ -671,8 +666,6 @@ namespace Uduino
         /// <param name="target">TODO : for the moment target is unused</param>
         void ReadData(string data, string target = null)
         {
-            Debug.Log("LASTREAD  " + data);
-
             if (data != null && data != "" && data != "Null")
             {
                 UduinoDevice uduino = uduinoDevices[target]; //TODO : And if it's null ?

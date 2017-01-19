@@ -18,7 +18,8 @@ namespace Uduino
         public int currentPin = -1;
         public int prevSendValue = 0;
 
-        public int lastRead = 0;
+        string lastRead = "";
+        public int lastReadValue = 0;
 
         public Pin(string arduinoParent, int pin, PinMode mode)
         {
@@ -69,7 +70,20 @@ namespace Uduino
         /// <param name="sendValue">Value to send</param>
         public void SendRead()
         {
-            manager.Read(arduinoName, "r " + currentPin);
+            manager.Read(arduinoName, "r " + currentPin, action: ParseReadData );
+        }
+
+        /// <summary>
+        /// Read the recevied data
+        /// </summary>
+        /// <param name="data">Data received</param>
+        void ParseReadData(string data)
+        {
+            int receivedPin = int.Parse(data.Split(' ')[0]);
+            if (receivedPin == currentPin)
+                lastReadValue = int.Parse(data.Split(' ')[1]);
+            else
+                Log.Warning("The read value is not an int");
         }
 
         /// <summary>

@@ -32,7 +32,6 @@ namespace Uduino
          
         public UduinoDevice(string port, int baudrate = 9600) : base(port, baudrate) { }
 
-
         /// <summary>
         /// Add a message to the bundle
         /// </summary>
@@ -40,7 +39,6 @@ namespace Uduino
         /// <param name="bundle">Bundle Name</param>
         public void AddToBundle( string message , string bundle)
         {
-
             List<string> existing;
             if (!bundles.TryGetValue(bundle, out existing))
             {
@@ -83,7 +81,7 @@ namespace Uduino
 
         public override void ReadingSuccess(string message)
         {
-            Debug.Log("last read : " + message);
+        //    Debug.Log("last read : " + message);
             lastRead = message;
         }
 
