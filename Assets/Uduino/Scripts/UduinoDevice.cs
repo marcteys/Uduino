@@ -65,7 +65,9 @@ namespace Uduino
                 for (int i = 0; i < bundleValues.Count; i++)
                     fullMessage += bundleValues[i];
 
-                WriteToArduino(fullMessage);
+               // WriteToArduino(fullMessage);
+                read = fullMessage; //TODO : Verify
+
                 bundles.Remove(bundleName);
             }
             else
@@ -81,7 +83,6 @@ namespace Uduino
 
         public override void ReadingSuccess(string message)
         {
-            Debug.Log("last read : " + message);
             lastRead = message;
             //TODO : !Application.isPlaying &&  ?
             if (callback != null) callback(message);

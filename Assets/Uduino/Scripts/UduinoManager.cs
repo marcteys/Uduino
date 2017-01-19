@@ -179,6 +179,7 @@ namespace Uduino
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
             if(readOnThread) StartThread();
+            OnValueReceived += DefaultOnValueReceived;
         }
 
         #endregion
@@ -296,7 +297,7 @@ namespace Uduino
 
         #endregion
 
-        #region Simple commands : Init Pin
+        #region Simple commands : Pin setup
         /// <summary>
         /// Init a pin 
         /// </summary>
@@ -442,7 +443,7 @@ namespace Uduino
         #endregion
 
         #region Simple commands: Read
-        public int analogRead(string target, int pin)
+        public int analogRead(string target, int pin, string bundle = null)
         {
             int readVal = 0;
 
@@ -450,7 +451,7 @@ namespace Uduino
             {
                 if (pinTarget.PinTargetExists(target, pin))
                 {
-                    pinTarget.SendRead();
+                    pinTarget.SendRead(bundle, ParseAnalogReadValue);
                     readVal = pinTarget.lastReadValue;
                 }
             }
@@ -458,14 +459,32 @@ namespace Uduino
             return readVal;
         }
 
-        public int analogRead(int pin)
+        public int analogRead(int pin, string bundle = null)
         {
-            return analogRead("", pin);
+            return analogRead("", pin, bundle);
         }
 
-        public int analogRead(AnalogPin pin)
+        public int analogRead(AnalogPin pin, string bundle = null)
         {
-            return analogRead("", (int)pin);
+            return analogRead("", (int)pin, bundle);
+        }
+
+        public void ParseAnalogReadValue(string data)
+        {
+            Debug.Log("Here Am I :" + data);
+        }
+
+        public int receivedValueForPin(string target, int pin, string message)
+        {
+            int readVal = int.Parse(message);
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists(target, pin))
+                {
+                   pinTarget.lastReadValue = readVal;
+                }
+            }
+            return readVal;
         }
 
         #endregion
@@ -480,41 +499,63 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string message = null, int timeout = 100, System.Action<string> action = null)
+        public void Read(string target = null, string message = null, int timeout = 100, System.Action<string> action = null, string bundle = null)
         {
-            if (UduinoTargetExists(target))
+            if (bundle != null)
             {
-                uduinoDevices[target].read = message; 
-                uduinoDevices[target].callback = action;
+                if (UduinoTargetExists(target))
+                    uduinoDevices[target].AddToBundle(message, bundle);
+                else
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                        uduino.Value.AddToBundle(message, bundle);
             }
             else
             {
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                if (UduinoTargetExists(target))
                 {
-                    uduino.Value.read = message;
-                    uduino.Value.callback = action;
+                    uduinoDevices[target].callback = action;
+                    uduinoDevices[target].read = message;
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    {
+                        uduino.Value.callback = action;
+                        uduino.Value.read = message;
+                    }
                 }
             }
         }
 
-        public void DirectReadFromArduino(string target = null, string message = null, System.Action<string> action = null, int timeout = 100)
+        public void DirectReadFromArduino(string target = null, string message = null, System.Action<string> action = null, int timeout = 100, string bundle = null)
         {
-            if (UduinoTargetExists(target))
+            if (bundle != null)
             {
-                uduinoDevices[target].ReadFromArduino(message, timeout);
-                uduinoDevices[target].callback = action;
+                if (UduinoTargetExists(target))
+                    uduinoDevices[target].AddToBundle(message, bundle);
+                else
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                        uduino.Value.AddToBundle(message, bundle);
             }
             else
             {
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                if (UduinoTargetExists(target))
                 {
-                    uduino.Value.ReadFromArduino(message, timeout);
-                    uduino.Value.callback = action;
+                    uduinoDevices[target].callback = action;
+                    uduinoDevices[target].ReadFromArduino(message, timeout);
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    {
+                        uduino.Value.callback = action;
+                        uduino.Value.ReadFromArduino(message, timeout);
+                    }
                 }
             }
         }
 
-        //TODO : Too much overload
+        //TODO : Too much overload ? Bundle ? 
         public void Read(int pin, string target=null, System.Action<string> action = null, int timeout = 100)
         {
             DirectReadFromArduino(action: action);
@@ -638,6 +679,18 @@ namespace Uduino
             }
         }
 
+
+        void Update()
+        {
+            Debug.Log(_Thread.ThreadState);
+            /*
+            if (!_Thread.IsAlive)
+            {
+               StartThread();
+
+            }*/
+        }
+
         /// <summary>
         ///  Read the Serial Port data in a new thread.
         /// </summary>
@@ -645,10 +698,11 @@ namespace Uduino
         {
             while (readAllPorts)
             {
-              //  Debug.Log("ee");
+            //    Debug.Log("readcaca");
 
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
+                 //   Debug.Log("read:" + uduino.Value.read);
                     if (uduino.Value.read != null)
                     {
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
@@ -705,6 +759,15 @@ namespace Uduino
                 if (uduino.callback != null) uduino.callback(data);
                 else OnValueReceived(data, target);
             }
+        }
+        /// <summary>
+        /// Default delegate OnValueReceived 
+        /// </summary>
+        /// <param name="data">Data received</param>
+        /// <param name="device">Device emmiter</param>
+        void DefaultOnValueReceived(string data, string device)
+        {
+          //  Debug.Log(data);
         }
 
         #endregion

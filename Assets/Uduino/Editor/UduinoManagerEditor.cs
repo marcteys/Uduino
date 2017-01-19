@@ -36,6 +36,7 @@ public class EditorPin : Pin
         GUILayout.BeginHorizontal();
 
         EditorGUIUtility.fieldWidth -= 22;
+        string message = "d";
 
         switch (pinMode)
         {
@@ -51,11 +52,13 @@ public class EditorPin : Pin
             case PinMode.PWM:
                 GUILayout.BeginHorizontal("TE Toolbarbutton");
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
+                message = "a";
                 GUILayout.EndHorizontal();
                 break;
             case PinMode.Servo:
                 GUILayout.BeginHorizontal("TE Toolbarbutton");
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
+                message = "a";
                 GUILayout.EndHorizontal();
                 break;
             case PinMode.Analog:
@@ -75,7 +78,7 @@ public class EditorPin : Pin
         //Send  the message
         if (prevSendValue != sendValue)
         {
-            WriteMessage("w " + currentPin + " " + sendValue);
+            WriteMessage(message + " " + currentPin + " " + sendValue);
             prevSendValue = sendValue;
         }
 
@@ -83,7 +86,7 @@ public class EditorPin : Pin
         #endif
     }
 
-    public override void SendRead()
+    public override void SendRead(string bundle = null, System.Action<string> action = null)
     {
         if (editorManager != null)
         {
@@ -371,7 +374,6 @@ public class UduinoManagerEditor : Editor {
 
                     GUILayout.EndVertical();
                 }
-
 
 
                 GUILayout.Label("Send commands", EditorStyles.boldLabel);

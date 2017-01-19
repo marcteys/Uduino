@@ -67,22 +67,31 @@ namespace Uduino
         /// Send OptimizedValue
         /// </summary>
         /// <param name="sendValue">Value to send</param>
-        public virtual void SendRead()
+        public virtual void SendRead(string bundle = null, System.Action<string> action = null)
         {
-            manager.Read(arduinoName, "r " + currentPin, action: ParseReadData );
+            string cmd = "r";
+            if (bundle != null) cmd = "br";
+            manager.Read(arduinoName, cmd + " " + currentPin, action: action, bundle: bundle);
+
         }
 
         /// <summary>
         /// Read the recevied data
         /// </summary>
         /// <param name="data">Data received</param>
+        /// TODO : replace Parse by TryParse
         public void ParseReadData(string data)
         {
             int receivedPin = int.Parse(data.Split(' ')[0]);
             if (receivedPin == currentPin)
+            {
                 lastReadValue = int.Parse(data.Split(' ')[1]);
+            }
             else
-                Log.Warning("The read value is not an int");
+            {
+              //  manager.receivedValueForPin("", receivedPin, data.Split(' ')[1]);
+            }              
+
         }
 
         /// <summary>
@@ -100,7 +109,7 @@ namespace Uduino
 
         public void Destroy()
         {
-            WriteMessage("w " + currentPin + " 0");
+            WriteMessage("d " + currentPin + " 0");
         }
 
         public virtual void Draw()

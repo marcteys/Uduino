@@ -34,6 +34,30 @@ typedef struct _servoWrapper {
 
 static ServoWrapper Servos[MAXSERVOS];
 
+/*
+  typedef struct _analogPinWrapper {
+  int pin = -1;
+  int prevVal;
+
+  int getPin() {
+    if (pin != -1) return pin;
+    else return false;
+  }
+  void disable() {
+    pin = -1;
+  }
+  void read() {
+    int val = analogRead(pin);
+    if(val != prevVal) {
+
+      prevVal = val;
+    }
+  }
+  } ReadPin;
+
+  static ReadPin ReadPins[MAXSERVOS];
+*/
+
 void setup()
 {
   Serial.begin(9600);
@@ -41,6 +65,7 @@ void setup()
   uduino.addCommand("d", WritePinDigital);
   uduino.addCommand("a", WritePinAnalog);
   uduino.addCommand("r", ReadPin);
+  uduino.addCommand("br", BundleReadPin);
   uduino.addCommand("b", ReadBundle);
 }
 
@@ -57,6 +82,7 @@ void ReadBundle() {
   for (int i = 0; i < len; i++) {
     uduino.launchCommand(arg);
   }
+  Serial.println();
 }
 
 
@@ -114,7 +140,7 @@ void WritePinAnalog() {
   if (arg != NULL)
   {
     value = atoi(arg);
-     if (getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
+    if (getServoAttachedTo(pinToMap)->pin != -1) { //it's a servo
       getServoAttachedTo(pinToMap)->pos = value;
     } else {
       analogWrite(pinToMap, value);
@@ -137,10 +163,10 @@ void WritePinDigital() {
   if (arg != NULL)
   {
     value = atoi(arg);
-      if (getServoAttachedTo(pinToMap)->pin == -1) //it's not a servo
+    if (getServoAttachedTo(pinToMap)->pin == -1) //it's not a servo
       digitalWrite(pinToMap, value);
   }
-  
+
 }
 
 void ReadPin() {
@@ -154,6 +180,21 @@ void ReadPin() {
   Serial.print(pinToRead);
   Serial.print(" ");
   Serial.println(analogRead(pinToRead));
+}
+
+
+void BundleReadPin() {
+  int pinToRead;
+  char *arg;
+  arg = uduino.next();
+  if (arg != NULL)
+  {
+    pinToRead = atoi(arg);
+  }
+  Serial.print(pinToRead);
+  Serial.print(" ");
+  Serial.print(analogRead(pinToRead));
+  Serial.print("-");
 }
 
 void loop()
