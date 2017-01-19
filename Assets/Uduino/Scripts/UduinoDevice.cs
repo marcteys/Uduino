@@ -83,6 +83,7 @@ namespace Uduino
         {
         //    Debug.Log("last read : " + message);
             lastRead = message;
+            if(callback != null) callback(message);
         }
 
     }

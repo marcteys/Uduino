@@ -6,12 +6,10 @@ using System.Collections.Generic;
 using UnityEditor;
 using Uduino;
 
-
 [SerializeField]
 public class EditorPin : Pin
 {
     UduinoManagerEditor editorManager = null;
-    public string lastReadValue = "";
 
     private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
 
@@ -55,7 +53,9 @@ public class EditorPin : Pin
                 sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
                 break;
             case PinMode.Analog:
-                EditorGUILayout.LabelField("Analog read:");
+                if(GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
+                        SendRead();
+                EditorGUILayout.LabelField("Read: " + lastReadValue);
                 break;
         }
         EditorGUIUtility.fieldWidth += 22;
@@ -75,6 +75,14 @@ public class EditorPin : Pin
 
         GUILayout.EndHorizontal();
         #endif
+    }
+
+    public override void SendRead()
+    {
+        if (editorManager != null)
+        {
+            editorManager.Read(arduinoName, "r " + currentPin, action: ParseReadData);
+        }
     }
 
     void CheckChanges()
@@ -145,9 +153,13 @@ public class UduinoManagerEditor : Editor {
     bool isUpToDate = false;
     bool isUpToDateChecked = false;
 
+    // Settings
     public string[] baudRates = new string[] { "4800", "9600", "19200", "57600", "115200" };
     int prevBaudRateIndex = 1;
     public int baudRateIndex = 1;
+
+    bool limitSendRate = false;
+
 
     void OnEnable()
     {
@@ -223,6 +235,26 @@ public class UduinoManagerEditor : Editor {
             
             manager.ReadOnThread = EditorGUILayout.Toggle("Read on threads", manager.ReadOnThread);
             EditorGUI.indentLevel--;
+
+            GUILayout.Label("Messages", EditorStyles.boldLabel);
+            EditorGUI.indentLevel++;
+            if(limitSendRate = EditorGUILayout.Toggle("Limit Send Rate", limitSendRate))
+            {
+                if (limitSendRate)
+                    manager.SendRateSpeed = 20;
+                else 
+                    manager.SendRateSpeed = 0;
+            }
+            if (limitSendRate)
+            {
+                manager.SendRateSpeed = EditorGUILayout.IntField("Send Rate speed", manager.SendRateSpeed);
+                EditorGUILayout.Separator();
+            }
+            EditorGUILayout.Toggle("Pack in bundles", false);
+            EditorGUILayout.IntField("Send frequency", manager.DiscoverTries);
+
+            EditorGUI.indentLevel--;
+
             EditorGUILayout.Separator();
         }
 
@@ -566,6 +598,11 @@ public class UduinoManagerEditor : Editor {
     public void WriteMessage(string targetBoard, string message)
     {
         manager.Write(targetBoard, message);
+    }
+
+    public void Read(string target = null, string variable = null, System.Action<string> action = null)
+    {
+        manager.DirectReadFromArduino(target, variable, action: action);
     }
 
     public void RemovePin(Pin pin)

@@ -18,12 +18,10 @@ namespace Uduino
         public int currentPin = -1;
         public int prevSendValue = 0;
 
-        string lastRead = "";
         public int lastReadValue = 0;
 
         public Pin(string arduinoParent, int pin, PinMode mode)
         {
-          //  uduinoDevice = device;
             manager = UduinoManager.Instance;
             arduinoName = arduinoParent;
             currentPin = pin;
@@ -37,7 +35,8 @@ namespace Uduino
 
         public virtual void WriteReadMessage(string message)
         {
-            manager.Write(arduinoName, message); // TODO : ref to bundle? 
+            manager.Write(arduinoName, message);
+            //TODO : ref to bundle? 
             //TODO : Add ref to arduinocard
         }
 
@@ -68,7 +67,7 @@ namespace Uduino
         /// Send OptimizedValue
         /// </summary>
         /// <param name="sendValue">Value to send</param>
-        public void SendRead()
+        public virtual void SendRead()
         {
             manager.Read(arduinoName, "r " + currentPin, action: ParseReadData );
         }
@@ -77,7 +76,7 @@ namespace Uduino
         /// Read the recevied data
         /// </summary>
         /// <param name="data">Data received</param>
-        void ParseReadData(string data)
+        public void ParseReadData(string data)
         {
             int receivedPin = int.Parse(data.Split(' ')[0]);
             if (receivedPin == currentPin)
@@ -106,7 +105,7 @@ namespace Uduino
 
         public virtual void Draw()
         {
-
+            //Function overrided by the Editor
         }
 
     }

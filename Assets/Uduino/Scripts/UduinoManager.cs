@@ -115,16 +115,10 @@ namespace Uduino
         public event OnValueReceivedEvent OnValueReceived;
 
         /// <summary>
-        /// Enable the reading of serial port in a different Thread.
-        /// Might be usefull for optimization and not block the runtime during a reading. 
+        /// Log level
         /// </summary>
         [SerializeField]
-        private bool readOnThread = true;
-        public bool ReadOnThread
-        {
-            get { return readOnThread; }
-            set { readOnThread = value; }
-        }
+        public LogLevel debugLevel;
 
         /// <summary>
         /// BaudRate
@@ -137,10 +131,27 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Log level
+        /// Enable the reading of serial port in a different Thread.
+        /// Might be usefull for optimization and not block the runtime during a reading. 
         /// </summary>
         [SerializeField]
-        public LogLevel debugLevel;
+        private bool readOnThread = true;
+        public bool ReadOnThread
+        {
+            get { return readOnThread; }
+            set { readOnThread = value; }
+        }
+
+        /// <summary>
+        /// SendRateSpeed
+        /// </summary>
+        [SerializeField]
+        private int sendRateSpeed = 0;
+        public int SendRateSpeed
+        {
+            get { return sendRateSpeed; }
+            set { sendRateSpeed = value; }
+        }
 
         /// <summary>
         /// Number of tries to discover the attached serial ports
@@ -485,15 +496,32 @@ namespace Uduino
             }
         }
 
-        // TODO : add target for arduino target ? Is it sometimes used  ?
+        public void DirectReadFromArduino(string target = null, string message = null, System.Action<string> action = null, int timeout = 100)
+        {
+            if (UduinoTargetExists(target))
+            {
+                uduinoDevices[target].ReadFromArduino(message, timeout);
+                uduinoDevices[target].callback = action;
+            }
+            else
+            {
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                {
+                    uduino.Value.ReadFromArduino(message, timeout);
+                    uduino.Value.callback = action;
+                }
+            }
+        }
+
+        //TODO : Too much overload
+        public void Read(int pin, string target=null, System.Action<string> action = null, int timeout = 100)
+        {
+            DirectReadFromArduino(action: action);
+        }
+
         public void Read(int pin, System.Action<string> action = null)
         {
-            //TODO : redo as overload
-            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-            {
-                uduino.Value.ReadFromArduino();
-                uduino.Value.callback = action;
-            }
+            DirectReadFromArduino(action: action);
         }
         #endregion
 
@@ -620,6 +648,7 @@ namespace Uduino
                 {
                     if (uduino.Value.read != null)
                     {
+                        Debug.Log("hahahahaha");
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
                         uduino.Value.read = null;
                         ReadData(data, uduino.Key);
@@ -661,6 +690,7 @@ namespace Uduino
 
         /// <summary>
         /// Parse the received data
+        /// TODO : Rename in dataReaded
         /// </summary>
         /// <param name="data">Received data</param>
         /// <param name="target">TODO : for the moment target is unused</param>
