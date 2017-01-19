@@ -469,14 +469,31 @@ namespace Uduino
             return analogRead("", (int)pin, bundle);
         }
 
-        public void ParseAnalogReadValue(string data)
+        //TODO : Add ref to the card 
+        public void ParseAnalogReadValue(string data/*, string target =null*/)
         {
-            Debug.Log("Here Am I :" + data);
+            string[] parts = data.Split('-');
+            for(int i=0;i<parts.Length-1;i++)
+            {
+                int recivedPin = -1;
+                int.TryParse(parts[i].Split(' ')[0], out recivedPin);
+               
+                int value = 0;
+                int.TryParse(parts[i].Split(' ')[1], out value);
+                if (recivedPin != -1)
+                    dispatchValueForPin("", recivedPin, value);
+            }
         }
 
-        public int receivedValueForPin(string target, int pin, string message)
+        /// <summary>
+        /// Dispatch received value for a pin
+        /// </summary>
+        /// <param name="target"></param>
+        /// <param name="pin"></param>
+        /// <param name="message"></param>
+        /// <returns>Value</returns>
+        public int dispatchValueForPin(string target, int pin, int readVal)
         {
-            int readVal = int.Parse(message);
             foreach (Pin pinTarget in pins)
             {
                 if (pinTarget.PinTargetExists(target, pin))
@@ -504,10 +521,16 @@ namespace Uduino
             if (bundle != null)
             {
                 if (UduinoTargetExists(target))
+                {
+                    uduinoDevices[target].callback = action;
                     uduinoDevices[target].AddToBundle(message, bundle);
+                }
                 else
                     foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    {
+                        uduino.Value.callback = action;
                         uduino.Value.AddToBundle(message, bundle);
+                    }
             }
             else
             {
@@ -679,18 +702,6 @@ namespace Uduino
             }
         }
 
-
-        void Update()
-        {
-            Debug.Log(_Thread.ThreadState);
-            /*
-            if (!_Thread.IsAlive)
-            {
-               StartThread();
-
-            }*/
-        }
-
         /// <summary>
         ///  Read the Serial Port data in a new thread.
         /// </summary>
@@ -763,11 +774,12 @@ namespace Uduino
         /// <summary>
         /// Default delegate OnValueReceived 
         /// </summary>
+        /// TODO : Maybe it's better to use delegate rather than CallbackFunction
         /// <param name="data">Data received</param>
         /// <param name="device">Device emmiter</param>
         void DefaultOnValueReceived(string data, string device)
         {
-          //  Debug.Log(data);
+        //   Debug.Log(data);
         }
 
         #endregion

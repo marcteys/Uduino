@@ -72,26 +72,6 @@ namespace Uduino
             string cmd = "r";
             if (bundle != null) cmd = "br";
             manager.Read(arduinoName, cmd + " " + currentPin, action: action, bundle: bundle);
-
-        }
-
-        /// <summary>
-        /// Read the recevied data
-        /// </summary>
-        /// <param name="data">Data received</param>
-        /// TODO : replace Parse by TryParse
-        public void ParseReadData(string data)
-        {
-            int receivedPin = int.Parse(data.Split(' ')[0]);
-            if (receivedPin == currentPin)
-            {
-                lastReadValue = int.Parse(data.Split(' ')[1]);
-            }
-            else
-            {
-              //  manager.receivedValueForPin("", receivedPin, data.Split(' ')[1]);
-            }              
-
         }
 
         /// <summary>

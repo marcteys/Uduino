@@ -87,10 +87,13 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message, object value = null)
         {
+
+            if (serial == null || !serial.IsOpen || message == null || message == "" )
+                return;
+
             if (value != null)
                 message = " " + value.ToString();
 
-            if (serial == null || !serial.IsOpen || message == null || message == "" ) return;
             try
             {
                 try
@@ -141,11 +144,11 @@ namespace Uduino
 
             readInProcess = true;
 
-            if (serial == null)
-                return null;
-
             if (message != null)
                 WriteToArduino(message);
+
+            if (serial == null || !serial.IsOpen)
+                return null;
 
             serial.ReadTimeout = timeout;
             serial.DiscardInBuffer(); // TODO : To remove ?

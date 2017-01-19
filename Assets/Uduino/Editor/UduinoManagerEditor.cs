@@ -90,7 +90,7 @@ public class EditorPin : Pin
     {
         if (editorManager != null)
         {
-            editorManager.Read(arduinoName, "r " + currentPin, action: ParseReadData);
+            editorManager.Read(arduinoName, "r " + currentPin, action: editorManager.ParseReadData);
         }
     }
 
@@ -606,6 +606,11 @@ public class UduinoManagerEditor : Editor {
     void SetGUIBackgroundColor()
     {
         GUI.backgroundColor = defaultButtonColor;
+    }
+
+    public void ParseReadData(string data)
+    {
+        manager.ParseAnalogReadValue(data);
     }
 
     public void WriteMessage(string targetBoard, string message)
