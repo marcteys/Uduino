@@ -143,6 +143,39 @@ namespace Uduino
         }
 
         /// <summary>
+        /// Limitation of the send rate
+        /// Packing into bundles
+        /// </summary>
+        [SerializeField]
+        private bool limitSendRate = false;
+        public bool LimitSendRate
+        {
+            get { return limitSendRate; }
+            set {
+                if (limitSendRate == value)
+                    return;
+               if (Application.isPlaying)
+               {
+                    if (value && !autoSendIsRunning)
+                    {
+                        Log.Debug("Start auto read");
+                        StartCoroutine("AutoSendBundle");
+                        autoSendIsRunning = true;
+                    }
+                    else
+                    {
+                        Log.Debug("Stop auto read");
+                        StopCoroutine("AutoSendBundle");
+                        autoSendIsRunning = false;
+                    }
+               }
+                limitSendRate = value;
+            }
+        }
+        private bool autoSendIsRunning = false;
+
+
+        /// <summary>
         /// SendRateSpeed
         /// </summary>
         [SerializeField]
@@ -180,6 +213,10 @@ namespace Uduino
             DiscoverPorts();
             if(readOnThread) StartThread();
             OnValueReceived += DefaultOnValueReceived;
+
+            StopCoroutine("AutoSendBundle");
+            if (limitSendRate) StartCoroutine("AutoSendBundle");
+
         }
 
         #endregion
@@ -473,7 +510,10 @@ namespace Uduino
         public void ParseAnalogReadValue(string data/*, string target =null*/)
         {
             string[] parts = data.Split('-');
-            for(int i=0;i<parts.Length-1;i++)
+            int max = 0;
+            if (parts.Length == 1) max = 1;
+            else max = parts.Length - 1;
+            for (int i=0;i< max; i++)
             {
                 int recivedPin = -1;
                 int.TryParse(parts[i].Split(' ')[0], out recivedPin);
@@ -598,9 +638,9 @@ namespace Uduino
         /// <param name="message">Message to write in the serial</param>
         public void Write(string target = null, string message = null, string bundle = null)
         {
-            //  TODO : Cannot make that prettier ? 
-            if(bundle != null)
+            if(bundle != null || limitSendRate)
             {
+                if (limitSendRate) bundle = "LimitSend";
                 if (UduinoTargetExists(target))
                     uduinoDevices[target].AddToBundle(message, bundle);
                 else
@@ -676,6 +716,27 @@ namespace Uduino
         {
             SendBundle(null, bundleName);
         }
+
+        /// <summary>
+        /// Automatically send bundles
+        /// </summary>
+        /// <returns>Delay before next sending</returns>
+        IEnumerator AutoSendBundle()
+        {
+            while (true)
+            {
+                if (!LimitSendRate)
+                    yield return null;
+
+                yield return new WaitForSeconds(sendRateSpeed / 1000.0f);
+                Debug.Log("hehehe " + sendRateSpeed / 1000.0f);
+                Debug.Log(!LimitSendRate);
+                List<string> keys = new List<string>(uduinoDevices.Keys);
+                foreach (string key in keys)
+                    uduinoDevices[key].SendAllBundles();
+            }
+        }
+
         #endregion
 
         #region Hardware reading
@@ -792,7 +853,7 @@ namespace Uduino
         {
             if (uduinoDevices.Count == 0)
             {
-                 Log.Info("Ports closed.");
+                 Log.Debug("Ports already closed.");
             }
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)

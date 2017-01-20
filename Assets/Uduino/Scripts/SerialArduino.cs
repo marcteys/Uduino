@@ -165,6 +165,7 @@ namespace Uduino
                 }
                 catch (TimeoutException e)
                 {
+                    Log.Warning("Error for message: " + message);
                     Log.Warning(e);
                     readInProcess = false;
                     return null;

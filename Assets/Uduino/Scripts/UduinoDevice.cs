@@ -45,8 +45,8 @@ namespace Uduino
                 existing = new List<string>();
                 bundles[bundle] = existing;
             }
-            existing.Add(","+ message );
-            Log.Info("Message " + message + " added to the bundle " + bundle);
+            existing.Add("," + message);
+            Log.Debug("Message <color=#4CAF50>" + message + "</color> added to the bundle " + bundle);
         }
 
         /// <summary>
@@ -57,16 +57,25 @@ namespace Uduino
         public void SendBundle(string bundleName)
         {
             List<string> bundleValues;
-
             if (bundles.TryGetValue(bundleName, out bundleValues))
             {
                 string fullMessage = "b " + bundleValues.Count;
 
+                if(bundleValues.Count == 1 ) // If there is one message
+                {
+                    //read = bundleValues[0].Substring(1, bundleValues[0].Length-1);
+                    WriteToArduino(bundleValues[0].Substring(1, bundleValues[0].Length - 1));
+
+                    return;
+                }
+
                 for (int i = 0; i < bundleValues.Count; i++)
                     fullMessage += bundleValues[i];
 
-               // WriteToArduino(fullMessage);
-                read = fullMessage; //TODO : Verify
+                WriteToArduino(fullMessage);
+               // read = fullMessage;
+                if (fullMessage.Length >= 62)
+                    Log.Error("The bundle message is too big ! TODO : Verify if its restart the arduino ? ");
 
                 bundles.Remove(bundleName);
             }
@@ -74,6 +83,14 @@ namespace Uduino
             {
                 Log.Warning("You are tring to send the Bundle " + bundleName + " but it seems that it's empty.");
             }
+        }
+
+        public void SendAllBundles()
+        {
+            Log.Debug("Send all bundles");
+            List<string> bundleNames = new List<string>(bundles.Keys);
+            foreach (string key in bundleNames)
+                SendBundle(key);
         }
 
         public override void WritingSuccess(string message)
@@ -84,7 +101,6 @@ namespace Uduino
         public override void ReadingSuccess(string message)
         {
             lastRead = message;
-            //TODO : !Application.isPlaying &&  ?
             if (callback != null) callback(message);
         }
 

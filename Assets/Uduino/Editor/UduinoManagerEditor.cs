@@ -167,9 +167,6 @@ public class UduinoManagerEditor : Editor {
     int prevBaudRateIndex = 1;
     public int baudRateIndex = 1;
 
-    bool limitSendRate = false;
-
-
     void OnEnable()
     {
         Instance = this;
@@ -247,21 +244,18 @@ public class UduinoManagerEditor : Editor {
 
             GUILayout.Label("Messages", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
-            if(limitSendRate = EditorGUILayout.Toggle("Limit Send Rate", limitSendRate))
-            {
-                if (limitSendRate)
-                    manager.SendRateSpeed = 20;
-                else 
-                    manager.SendRateSpeed = 0;
-            }
-            if (limitSendRate)
+            if(manager.LimitSendRate = EditorGUILayout.Toggle("Limit Send Rate", manager.LimitSendRate))
+            if (manager.LimitSendRate)
             {
                 manager.SendRateSpeed = EditorGUILayout.IntField("Send Rate speed", manager.SendRateSpeed);
                 EditorGUILayout.Separator();
             }
-            EditorGUILayout.Toggle("Pack in bundles", false);
-            EditorGUILayout.IntField("Send frequency", manager.DiscoverTries);
-
+            /*
+            manager.PackInBundles = EditorGUILayout.Toggle("Pack in bundles", manager.PackInBundles);
+            if(manager.PackInBundles)
+            {
+                manager.BundleRateSpeed = EditorGUILayout.IntField("Send bundle freq", manager.BundleRateSpeed);
+            }*/
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Separator();
@@ -309,7 +303,6 @@ public class UduinoManagerEditor : Editor {
                 GUILayout.BeginVertical("Box");
                 EditorGUILayout.TextField("Last read message", uduino.Value.lastRead);
                 EditorGUILayout.TextField("Last sent value", uduino.Value.lastWrite);
-                //Todo: auto read
                 GUILayout.EndVertical();
 
                 if (uduino.Key == "uduinoBoard" && Application.isPlaying)
@@ -343,6 +336,7 @@ public class UduinoManagerEditor : Editor {
                                 case PinMode.Input_pullup:
                                     EditorGUILayout.LabelField("Digital read:");
                                     GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
+                                    UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
                                     break;
                                 case PinMode.PWM:
                                     GUILayout.BeginHorizontal("TE Toolbarbutton");
@@ -356,10 +350,10 @@ public class UduinoManagerEditor : Editor {
                                     break;
                                 case PinMode.Analog:
                                     GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
+                                    UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
                                     break;
                             }
                             EditorGUIUtility.fieldWidth += 22;
-
 
                             GUILayout.EndHorizontal();
 
@@ -610,7 +604,38 @@ public class UduinoManagerEditor : Editor {
 
     public void ParseReadData(string data)
     {
-        manager.ParseAnalogReadValue(data);
+            int recivedPin = -1;
+            int.TryParse(data.Split(' ')[0], out recivedPin);
+
+            int value = 0;
+            int.TryParse(data.Split(' ')[1], out value);
+            if (recivedPin != -1)
+            {
+            foreach (Pin pinTarget in pins)
+            {
+                if (pinTarget.PinTargetExists("", recivedPin))
+                {
+                    pinTarget.lastReadValue = value;
+                }
+            }
+        }
+    }
+    
+    /// <summary>
+    /// Update the state of a read pin
+    /// </summary>
+    /// <param name="target"></param>
+    /// <param name="pin"></param>
+    /// <param name="value"></param>
+    void UpdateReadPins(string target, int pin, int value)
+    {
+        foreach (Pin pinTarget in pins)
+        {
+            if (pinTarget.PinTargetExists(target, pin))
+            {
+                pinTarget.lastReadValue = value;
+            }
+        }
     }
 
     public void WriteMessage(string targetBoard, string message)
