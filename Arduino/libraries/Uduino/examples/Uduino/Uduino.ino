@@ -1,4 +1,4 @@
-// Uduino Test board
+// Uduino Default Board
 
 #include<Uduino.h>
 Uduino uduino("uduinoBoard"); // Declare and name your object
@@ -6,8 +6,6 @@ Uduino uduino("uduinoBoard"); // Declare and name your object
 // Servo
 #include <Servo.h>
 #define MAXSERVOS 12
-
-#define UDUINODEBUG 1
 
 typedef struct _servoWrapper {
   int pin = -1;
@@ -34,30 +32,6 @@ typedef struct _servoWrapper {
 
 static ServoWrapper Servos[MAXSERVOS];
 
-/*
-  typedef struct _analogPinWrapper {
-  int pin = -1;
-  int prevVal;
-
-  int getPin() {
-    if (pin != -1) return pin;
-    else return false;
-  }
-  void disable() {
-    pin = -1;
-  }
-  void read() {
-    int val = analogRead(pin);
-    if(val != prevVal) {
-
-      prevVal = val;
-    }
-  }
-  } ReadPin;
-
-  static ReadPin ReadPins[MAXSERVOS];
-*/
-
 void setup()
 {
   Serial.begin(9600);
@@ -68,8 +42,6 @@ void setup()
   uduino.addCommand("br", BundleReadPin);
   uduino.addCommand("b", ReadBundle);
 }
-
-
 
 void ReadBundle() {
   char *arg;
@@ -82,10 +54,12 @@ void ReadBundle() {
   for (int i = 0; i < len; i++) {
     uduino.launchCommand(arg);
   }
-  Serial.println();
+  Serial.print(UDUINOBUFFER);
+  Serial.println(" - ");
+
+  Serial.print(UDUINOBUFFER);
+  Serial.println(" - ");
 }
-
-
 
 void SetMode() {
   int pinToMap;
@@ -147,7 +121,6 @@ void WritePinAnalog() {
     }
   }
 }
-
 
 void WritePinDigital() {
   int pinToMap;

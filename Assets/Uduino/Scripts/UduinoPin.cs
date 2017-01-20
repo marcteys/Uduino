@@ -30,7 +30,7 @@ namespace Uduino
 
         public void Init()
         {
-            ChangePinMode(pinMode);
+            ChangePinMode(pinMode,"init");
         }
 
         public virtual void WriteReadMessage(string message)

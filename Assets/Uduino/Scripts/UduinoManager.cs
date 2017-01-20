@@ -396,6 +396,7 @@ namespace Uduino
             {
                 pin.Init();
             }
+            SendBundle("init");
         }
 
         #endregion

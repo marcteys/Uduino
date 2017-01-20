@@ -84,7 +84,7 @@ namespace Uduino
             }
             else
             {
-                Log.Warning("You are tring to send the Bundle " + bundleName + " but it seems that it's empty.");
+                Log.Info("You are tring to send the bundle \"" + bundleName + "\" but it seems that it's empty.");
             }
         }
 

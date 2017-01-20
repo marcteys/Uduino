@@ -23,13 +23,13 @@ public class Bundle : MonoBehaviour {
     {
         while (true)
         {
-            for (int i = 2; i < 6; i++)
+            for (int i = 2; i < 11; i++)
             {
                 u.digitalWrite(i, State.HIGH,"LedOn");
             }
            u.SendBundle("LedOn");
             yield return new WaitForSeconds(1);
-            for (int i = 2; i < 6; i++)
+            for (int i = 2; i < 11; i++)
             {
                 u.digitalWrite(i, State.LOW, "LedOff");
             }

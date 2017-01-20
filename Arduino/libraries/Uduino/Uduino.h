@@ -53,15 +53,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string.h>
 
-#ifndef UDUINOBUFFER
-#define UDUINOBUFFER 64 // Max length of bundle
-#endif
+#define UDUINOBUFFER 128 // Max length of bundle
 
 #define MAXCOMMANDS 10
 #define MAXDELIMETER 2
 
 #define UDUINODEBUG 1
-#undef UDUINODEBUG      // Comment this out to run the library in debug mode (verbose messages)
+#undef UDUINODEBUG      // Comment for Debug Mode
 
 class Uduino
 {
