@@ -1,16 +1,6 @@
-﻿/* 
- * Uduino - Yet Another Arduin-Unity Library
- * Version 1.2, Jan 2017, Marc Teyssier
- *  
- *  ================
- *       TODOs
- *  ================
- *  UduinoManager.Instance.Read("sensorArduino", "SENSOR", 2000); -> Verifiy that the timeout is working
- *  Option to "write" on all arduino when no one is specified (set the param as option)
- *  Public values for the number of tries ?
- *  Function to discover manually a specific port ?
- *  TODO : Create a "utils" script, with some helper functions (ex conver a string to int, send an array of string, etc)
- * 
+﻿/*
+ * Uduino - Arduino-Unity Library
+ * Version 1.3, Jan 2017, Marc Teyssier
  */
 
 using UnityEngine;
@@ -886,7 +876,7 @@ namespace Uduino
     public static class UduinoVersion
     {
         static int major = 1;
-        static int minor = 2;
+        static int minor = 3;
         static string update = "Jan 2017";
 
         public static string getVersion()
