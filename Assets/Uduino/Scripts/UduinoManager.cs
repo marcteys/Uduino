@@ -197,6 +197,7 @@ namespace Uduino
             set { discoverTries = value; }
         }
 
+        [SerializeField]
         private List<string> blackListedPorts = new List<string>();
         public List<string> BlackListedPorts {
             get { return blackListedPorts; }
@@ -216,7 +217,6 @@ namespace Uduino
 
             StopCoroutine("AutoSendBundle");
             if (limitSendRate) StartCoroutine("AutoSendBundle");
-
         }
 
         #endregion

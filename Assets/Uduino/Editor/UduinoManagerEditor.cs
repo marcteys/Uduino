@@ -467,8 +467,10 @@ public class UduinoManagerEditor : Editor {
             newBlackListedPort = EditorGUILayout.TextField("", newBlackListedPort, olInput, GUILayout.ExpandWidth(true));
             if (GUILayout.Button("Add", "TE Toolbarbutton", GUILayout.MaxWidth(35)))
             {
-                if (newBlackListedPort == "") return;
+                if (newBlackListedPort == "")
+                    return;
                 manager.BlackListedPorts.Add(newBlackListedPort);
+                newBlackListedPort = "";
             }
             GUILayout.EndHorizontal();
             GUILayout.EndVertical();
