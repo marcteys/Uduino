@@ -78,7 +78,7 @@ namespace Uduino
                 else WriteToArduino(fullMessage);
 
                 if (fullMessage.Length >= 62)
-                    Log.Error("The bundle message is too big ! TODO : Verify if its restart the arduino ? ");
+                    Log.Error("The bundle message is too big. Please increase UDUINOBUFFER in Uduino code.");
 
                 bundles.Remove(bundleName);
             }
