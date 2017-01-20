@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Uduino
 {
@@ -61,10 +62,11 @@ namespace Uduino
             {
                 string fullMessage = "b " + bundleValues.Count;
 
-                if(bundleValues.Count == 1 ) // If there is one message
+                if (bundleValues.Count == 1 ) // If there is one message
                 {
-                    //read = bundleValues[0].Substring(1, bundleValues[0].Length-1);
-                    WriteToArduino(bundleValues[0].Substring(1, bundleValues[0].Length - 1));
+                    string message = bundleValues[0].Substring(1, bundleValues[0].Length - 1);
+                    if (message.Contains("r")) read = message;
+                    else WriteToArduino(message);
 
                     return;
                 }
@@ -72,8 +74,9 @@ namespace Uduino
                 for (int i = 0; i < bundleValues.Count; i++)
                     fullMessage += bundleValues[i];
 
-                WriteToArduino(fullMessage);
-               // read = fullMessage;
+                if (fullMessage.Contains("r")) read = fullMessage;
+                else WriteToArduino(fullMessage);
+
                 if (fullMessage.Length >= 62)
                     Log.Error("The bundle message is too big ! TODO : Verify if its restart the arduino ? ");
 
