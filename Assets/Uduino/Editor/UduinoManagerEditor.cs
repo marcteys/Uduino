@@ -304,7 +304,8 @@ public class UduinoManagerEditor : Editor {
         SetGUIBackgroundColor("#4FC3F7");
         if (GUILayout.Button("Discover ports"))
         {
-            manager.DiscoverPorts();
+            if(!Application.isPlaying)
+                manager.DiscoverPorts();
         }
         GUILayout.EndVertical();
 

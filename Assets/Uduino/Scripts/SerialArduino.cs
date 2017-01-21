@@ -23,12 +23,18 @@ namespace Uduino
         private bool readArduino = true;
 
         public string read = null; // Value to Read
+        private Queue inputQueue, outputQueue;
+
+        int maxQueueLength = 1;
 
         public SerialArduino(string port, int baudrate = 9600)
         {
             _port = port;
             _baudrate = baudrate;
             this.Open();
+
+            inputQueue = Queue.Synchronized(new Queue());
+            outputQueue = Queue.Synchronized(new Queue());
         }
 
         /// <summary>
@@ -108,7 +114,6 @@ namespace Uduino
             }
         }
 
-
         /// <summary>
         ///  Read the Serial Port data in a new thread.
         /// </summary>
@@ -118,19 +123,87 @@ namespace Uduino
             {
                 while (IsLooping())
                 {
+
+                    if (outputQueue.Count != 0)
+                    {
+                        string outputMessage = (string)outputQueue.Dequeue();
+                        WriteMessageToSerial(outputMessage);
+                    }
+
+                    //Read a message;
+
+                    /*
                     if (read != null)
                     {
                         string data = ReadFromArduino(read, 50);
                         read = null;
                         ReadData(data);
-                    }
+                    }*/
                 }
             }
             catch (Exception e)
             {
-                Debug.LogError("Unknown exception: " + e.Message + " " + e.StackTrace);
+               // Debug.LogError("Unknown exception: " + e.Message + " " + e.StackTrace);
             }
+        }
 
+
+        string ReadMessageFromSerial()
+        {
+            return null;
+        }
+
+
+        void WriteMessageToSerial(string message)
+        {
+
+            try
+            {
+                try
+                {
+                    serial.WriteLine(message + "\r\n");
+                    serial.BaseStream.Flush();
+                    Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
+                }
+                catch (System.IO.IOException e)
+                {
+                    Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
+                    Close();
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+                Close();
+            }
+            WritingSuccess(message);
+        }
+
+        public bool IsLooping()
+        {
+            lock (this)
+            {
+                return readArduino;
+            }
+        }
+
+        public void StopThread()
+        {
+            lock (this)
+            {
+                readArduino = false;
+            }
+        }
+
+        public void CloseThread()
+        {
+            StopThread();
+            if (_Thread != null)
+            {
+                _Thread.Join();
+            }
+            _Thread = null;
+            Log.Debug("Killing Thread of " + _port);
         }
 
         public virtual void ReadData(string data) { }
@@ -141,7 +214,7 @@ namespace Uduino
         /// </summary>
         /// <param name="target"></param>
         /// <returns>null</returns>
-        /// TODO : Launch it from 
+        /// TODO : Launch it from UduinoManager
         public IEnumerator ReadSerialCoroutine(string target)
         {
             while (true)
@@ -161,6 +234,7 @@ namespace Uduino
         }
 
         #endregion
+
         #region Commands
 
         /// <summary>
@@ -169,32 +243,13 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message, object value = null)
         {
-
             if (serial == null || !serial.IsOpen || message == null || message == "" )
                 return;
 
             if (value != null)
                 message = " " + value.ToString();
 
-            try
-            {
-                try
-                {
-                    serial.WriteLine(message + "\r\n");
-                    serial.BaseStream.Flush();
-                    Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
-                }
-                catch (System.IO.IOException e) {
-                    Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
-                    Close();
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                Close();
-            }
-            WritingSuccess(message);
+            outputQueue.Enqueue(message);
         }
 
         /// <summary>
@@ -205,8 +260,7 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
-          //  if (readInProcess)
-            //    return null;
+
             if (message != null)
                 WriteToArduino(message);
 
@@ -223,6 +277,9 @@ namespace Uduino
                 {
                     string readedLine = serial.ReadLine();
                     ReadingSuccess(readedLine);
+               //     if (readedLine != null && inputQueue.Count < maxQueueLength)
+                  //      inputQueue.Enqueue(readedLine);
+
                     return readedLine;
                 }
                 catch (TimeoutException e)
@@ -255,7 +312,6 @@ namespace Uduino
         #endregion
 
         #region Close
-
         /// <summary>
         /// Close Serial port 
         /// </summary>
@@ -273,33 +329,6 @@ namespace Uduino
             {
                 Log.Info(_port + " already closed.");
             }
-        }
-
-
-        public bool IsLooping()
-        {
-            lock (this)
-            {
-                return readArduino;
-            }
-        }
-
-        public void StopThread()
-        {
-            lock (this)
-            {
-                readArduino = false;
-            }
-        }
-
-        public void CloseThread()
-        {
-            StopThread();
-            if (_Thread != null) {
-                _Thread.Join();
-            }
-            _Thread = null;
-            Log.Debug("Killing Thread of " + _port);
         }
         #endregion
 
