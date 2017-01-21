@@ -20,7 +20,6 @@ namespace Uduino
         private string _name = "";
 
         public bool continuousRead = false;
-        public string read = null;
 
         public string lastRead = null;
         public string lastWrite = null;
@@ -94,6 +93,18 @@ namespace Uduino
             List<string> bundleNames = new List<string>(bundles.Keys);
             foreach (string key in bundleNames)
                 SendBundle(key);
+        }
+
+
+        public override void ReadData(string data)
+        {
+            if (data != null && data != "" && data != "Null")
+            {
+                lastRead = data;
+                if (callback != null) callback(data);
+                else UduinoManager.Instance.LaunchDelegate(data, name);
+
+            }
         }
 
         public override void WritingSuccess(string message)

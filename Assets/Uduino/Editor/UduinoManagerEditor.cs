@@ -208,6 +208,7 @@ public class UduinoManagerEditor : Editor {
         {
             EditorUtility.SetDirty(target);
         }
+        EditorUtility.SetDirty(target);
 
     }
 

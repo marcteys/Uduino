@@ -19,7 +19,10 @@ namespace Uduino
 
         SerialStatus serialStatus = SerialStatus.UNDEF;
 
-        private bool readInProcess = false;
+        private System.Threading.Thread _Thread = null;
+        private bool readArduino = true;
+
+        public string read = null; // Value to Read
 
         public SerialArduino(string port, int baudrate = 9600)
         {
@@ -44,6 +47,8 @@ namespace Uduino
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
+                StartThread();
+
                 Log.Info("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
             }
             catch (Exception e)
@@ -82,9 +87,80 @@ namespace Uduino
             if(Application.isPlaying) EditorUtility.SetDirty(UduinoManager.Instance);
             #endif
         }
-
         #endregion
 
+
+        #region Thread 
+        /// <summary>
+        /// Initialisation of the Thread reading on Awake()
+        /// </summary>
+        void StartThread()
+        {
+            try
+            {
+                Log.Debug("Starting Thread for " + _port);
+               _Thread = new System.Threading.Thread(ReadPorts);
+               _Thread.Start();
+            }
+            catch (System.Threading.ThreadStateException e)
+            {
+                Log.Error(e);
+            }
+        }
+
+
+        /// <summary>
+        ///  Read the Serial Port data in a new thread.
+        /// </summary>
+        public void ReadPorts()
+        {
+            try
+            {
+                while (IsLooping())
+                {
+                    if (read != null)
+                    {
+                        string data = ReadFromArduino(read, 50);
+                        read = null;
+                        ReadData(data);
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.LogError("Unknown exception: " + e.Message + " " + e.StackTrace);
+            }
+
+        }
+
+        public virtual void ReadData(string data) { }
+
+
+        /// <summary>
+        /// Retreive the Data from the Serial Prot using Unity Coroutines
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns>null</returns>
+        /// TODO : Launch it from 
+        public IEnumerator ReadSerialCoroutine(string target)
+        {
+            while (true)
+            {
+                if (read != null)
+                {
+                    string data = ReadFromArduino(read, 50);
+                    read = null;
+                    yield return null;
+                    ReadData(data);
+                }
+                else
+                {
+                    yield return null;
+                }
+            }
+        }
+
+        #endregion
         #region Commands
 
         /// <summary>
@@ -122,22 +198,6 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Callback function when a message is written 
-        /// </summary>
-        /// <param name="message">Message successfully writen</param>
-        public virtual void WritingSuccess(string message)
-        {
-        }
-
-        /// <summary>
-        /// Callback function when a message is read 
-        /// </summary>
-        /// <param name="message">Message successfully read</param>
-        public virtual void ReadingSuccess(string message)
-        {
-        }
-
-        /// <summary>
         /// Read Arduino serial port
         /// </summary>
         /// <param name="message">Write a message to the serial port before reading the serial</param>
@@ -147,9 +207,6 @@ namespace Uduino
         {
           //  if (readInProcess)
             //    return null;
-
-            readInProcess = true;
-
             if (message != null)
                 WriteToArduino(message);
 
@@ -166,25 +223,35 @@ namespace Uduino
                 {
                     string readedLine = serial.ReadLine();
                     ReadingSuccess(readedLine);
-                    readInProcess = false;
                     return readedLine;
                 }
                 catch (TimeoutException e)
                 {
-                    Log.Warning("Error for message: " + message);
-                    Log.Warning(e);
-                    readInProcess = false;
+                 //   Log.Warning("Error for message: " + message);
+                   // Log.Warning(e);
                     return null;
                 }
             }
             catch (Exception e)
             {
-                readInProcess = false;
                 Log.Error(e);
                 Close();
                 return null;
             }
         }
+
+
+        /// <summary>
+        /// Callback function when a message is written 
+        /// </summary>
+        /// <param name="message">Message successfully writen</param>
+        public virtual void WritingSuccess(string message) { }
+
+        /// <summary>
+        /// Callback function when a message is read 
+        /// </summary>
+        /// <param name="message">Message successfully read</param>
+        public virtual void ReadingSuccess(string message) { }
         #endregion
 
         #region Close
@@ -194,6 +261,7 @@ namespace Uduino
         /// </summary>
         public void Close()
         {
+            CloseThread();
             if (serial != null && serial.IsOpen)
             {
                 Log.Warning("Closing port : <color=#2196F3>[" + _port + "]</color>");
@@ -207,18 +275,31 @@ namespace Uduino
             }
         }
 
-        /// Specal Handler when application quit;
-        private bool isApplicationQuitting = false;
 
-        void OnDisable()
+        public bool IsLooping()
         {
-            if (isApplicationQuitting) return;
-            Close();
+            lock (this)
+            {
+                return readArduino;
+            }
         }
 
-        void OnApplicationQuit()
+        public void StopThread()
         {
-            isApplicationQuitting = true;
+            lock (this)
+            {
+                readArduino = false;
+            }
+        }
+
+        public void CloseThread()
+        {
+            StopThread();
+            if (_Thread != null) {
+                _Thread.Join();
+            }
+            _Thread = null;
+            Log.Debug("Killing Thread of " + _port);
         }
         #endregion
 

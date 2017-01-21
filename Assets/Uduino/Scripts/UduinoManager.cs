@@ -210,7 +210,6 @@ namespace Uduino
             Instance = this;
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
-            if(readOnThread) StartThread();
             OnValueReceived += DefaultOnValueReceived;
 
             StopCoroutine("AutoSendBundle");
@@ -284,13 +283,12 @@ namespace Uduino
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
+                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200); // TODO :Read that in a thread ? 
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
                         string name = reading.Split(new char[0])[1];
                         uduinoDevice.name = name;
                         uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
-                        if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
                         InitAllPins();
@@ -300,6 +298,12 @@ namespace Uduino
                     {
                         Log.Info("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
+                }
+
+                if(applicationIsQuitting) // TODO : This is not wokring. It is here to fix the problem when we press play/stop too quickly
+                {
+                    uduinoDevice.Close();
+                    break;
                 }
                 yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
             } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
@@ -736,95 +740,10 @@ namespace Uduino
 
         #endregion
 
-        #region Hardware reading
-        /// <summary>
-        /// Threading variables
-        /// </summary>
-        private System.Threading.Thread _Thread = null;
-        private bool readAllPorts = true;
-
-        /// <summary>
-        /// Initialisation of the Thread reading on Awake()
-        /// </summary>
-        void StartThread()
+        #region Delegates
+        public void LaunchDelegate(string data, string target)
         {
-            try
-            {
-                _Thread = new System.Threading.Thread(ReadPorts);
-                _Thread.Start();
-            }
-            catch (System.Threading.ThreadStateException e)
-            {
-                //TODO : Parse the errors and display a correct message
-                Log.Error(e);
-            }
-        }
-
-        /// <summary>
-        ///  Read the Serial Port data in a new thread.
-        /// </summary>
-        public void ReadPorts()
-        {
-            while (readAllPorts)
-            {
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                {
-                    if (uduino.Value.read != null)
-                    {
-                        string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
-                        uduino.Value.read = null;
-                        ReadData(data, uduino.Key);
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Retreive the Data from the Serial Prot using Unity Coroutines
-        /// </summary>
-        /// <param name="target"></param>
-        /// <returns>null</returns>
-        public IEnumerator ReadSerial(string target)
-        {
-            while (true)
-            {
-                UduinoDevice uduino = null;
-                if (uduinoDevices.TryGetValue(target, out uduino))
-                {
-                    if (uduino.read != null)
-                    {
-                        string data = uduino.ReadFromArduino(uduino.read, 50);
-                        uduino.read = null;
-                        yield return null;
-                        ReadData(data, target);
-                    }
-                    else
-                    {
-                        yield return null;
-                    }
-                }
-                else
-                {
-                    yield return null;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Parse the received data
-        /// TODO : Rename in dataReaded
-        /// </summary>
-        /// <param name="data">Received data</param>
-        /// <param name="target">TODO : for the moment target is unused</param>
-        void ReadData(string data, string target = null)
-        {
-            if (data != null && data != "" && data != "Null")
-            {
-                UduinoDevice uduino = uduinoDevices[target]; //TODO : And if it's null ?
-                uduino.lastRead = data;
-                if (uduino.callback != null) uduino.callback(data);
-                else OnValueReceived(data, target);
-            }
+            OnValueReceived(data, target);
         }
         /// <summary>
         /// Default delegate OnValueReceived 
@@ -866,21 +785,21 @@ namespace Uduino
             }
         }
 
+        // When the applciation is quitting, to stop all threads in the discovery process
+        bool applicationIsQuitting = false;
+
         public void OnDisable()
         {
-            if (readOnThread)
-            {
-                DisableThread();
-            }
-            if(uduinoDevices.Count != 0) CloseAllPorts();
+           applicationIsQuitting = true;
+           CloseAllPorts();
         }
 
-        void DisableThread()
+        public void OnApplicationQuit()
         {
-            readAllPorts = false;
-            if (_Thread != null) _Thread.Abort();
-            _Thread = null;
+            applicationIsQuitting = true;
+            CloseAllPorts();
         }
+
         #endregion
     }
 

@@ -5,7 +5,7 @@ Uduino uduino("uduinoBoard"); // Declare and name your object
 
 // Servo
 #include <Servo.h>
-#define MAXSERVOS 12
+#define MAXSERVOS 6
 
 typedef struct _servoWrapper {
   int pin = -1;
@@ -195,4 +195,3 @@ void setServoPosition(struct _servoWrapper* servo, int pos) {
 void updateServo(struct _servoWrapper* servo) {
   servo->update();
 }
-

@@ -53,9 +53,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string.h>
 
-#define UDUINOBUFFER 128 // Max length of bundle
+#define UDUINOBUFFER 100 // Max length of bundle
 
-#define MAXCOMMANDS 10
+#define MAXCOMMANDS 8
 #define MAXDELIMETER 2
 
 #define UDUINODEBUG 1
