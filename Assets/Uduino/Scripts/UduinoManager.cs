@@ -169,7 +169,7 @@ namespace Uduino
         /// SendRateSpeed
         /// </summary>
         [SerializeField]
-        private int sendRateSpeed = 0;
+        private int sendRateSpeed = 20;
         public int SendRateSpeed
         {
             get { return sendRateSpeed; }
