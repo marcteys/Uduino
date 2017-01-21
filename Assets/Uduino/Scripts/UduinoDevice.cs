@@ -77,8 +77,8 @@ namespace Uduino
                 if (fullMessage.Contains("r")) read = fullMessage;
                 else WriteToArduino(fullMessage);
 
-                if (fullMessage.Length >= 62)
-                    Log.Error("The bundle message is too big. Please increase UDUINOBUFFER in Uduino code.");
+                if (fullMessage.Length >= 120)
+                    Log.Warning("The bundle message is too big. Try to not send too many messages or increase UDUINOBUFFER in Uduino library.");
 
                 bundles.Remove(bundleName);
             }

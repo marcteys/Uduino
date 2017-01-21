@@ -187,6 +187,12 @@ namespace Uduino
             set { discoverTries = value; }
         }
 
+
+        public bool stopAllOnQuit = true;
+
+        /// <summary>
+        /// List of black listed ports
+        /// </summary>
         [SerializeField]
         private List<string> blackListedPorts = new List<string>();
         public List<string> BlackListedPorts {
@@ -844,8 +850,16 @@ namespace Uduino
         {
             if (uduinoDevices.Count == 0)
             {
-                 Log.Debug("Ports already closed.");
+                Log.Debug("Ports already closed.");
+                return;
             }
+
+            if(stopAllOnQuit)
+            {
+                foreach (Pin pinTarget in pins)
+                    pinTarget.Destroy();
+            }
+
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)
             {

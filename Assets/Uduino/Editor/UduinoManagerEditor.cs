@@ -476,6 +476,15 @@ public class UduinoManagerEditor : Editor {
             GUILayout.EndVertical();
         }
 
+        GUILayout.Label("On disconnect", EditorStyles.boldLabel);
+        GUILayout.BeginHorizontal();
+        EditorGUI.indentLevel++;
+        manager.stopAllOnQuit = EditorGUILayout.Toggle("Reset pins", manager.stopAllOnQuit);
+        EditorGUI.indentLevel--;
+        GUILayout.EndHorizontal();
+
+
+
         GUILayout.Label("Debug", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         GUILayout.BeginHorizontal();
