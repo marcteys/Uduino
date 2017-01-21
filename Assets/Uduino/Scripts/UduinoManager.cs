@@ -64,7 +64,7 @@ namespace Uduino
                 UduinoManager[] uduinoManagers = FindObjectsOfType(typeof(UduinoManager)) as UduinoManager[];
                 if (uduinoManagers.Length == 0 )
                 {
-                    Debug.Log("UduinoManager not present on the scene. Creating a new one.");
+                    Log.Warning("UduinoManager not present on the scene. Creating a new one.");
                     UduinoManager manager = new GameObject("UduinoManager").AddComponent<UduinoManager>();
                     _instance = manager;
                     return _instance;
@@ -77,7 +77,7 @@ namespace Uduino
                     _instance = value;
                 else
                 {
-                    Debug.Log("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
+                    Log.Warning("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
                     DestroyImmediate(value);
                 }
             }
@@ -726,8 +726,6 @@ namespace Uduino
                     yield return null;
 
                 yield return new WaitForSeconds(sendRateSpeed / 1000.0f);
-                Debug.Log("hehehe " + sendRateSpeed / 1000.0f);
-                Debug.Log(!LimitSendRate);
                 List<string> keys = new List<string>(uduinoDevices.Keys);
                 foreach (string key in keys)
                     uduinoDevices[key].SendAllBundles();
@@ -767,11 +765,8 @@ namespace Uduino
         {
             while (readAllPorts)
             {
-            //    Debug.Log("readcaca");
-
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
-                 //   Debug.Log("read:" + uduino.Value.read);
                     if (uduino.Value.read != null)
                     {
                         string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
