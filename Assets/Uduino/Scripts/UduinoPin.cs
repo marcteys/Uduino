@@ -16,6 +16,9 @@ namespace Uduino
         public PinMode prevPinMode;
 
         public int currentPin = -1;
+
+        [SerializeField]
+        public int sendValue = 0;
         public int prevSendValue = 0;
 
         public int lastReadValue = 0;
@@ -100,5 +103,6 @@ namespace Uduino
             //Function overrided by the Editor
         }
 
+        public virtual void CheckChanges() { }
     }
 }

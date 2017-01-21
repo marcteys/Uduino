@@ -11,9 +11,7 @@ public class EditorPin : Pin
 {
     UduinoManagerEditor editorManager = null;
 
-    private string[] allPin = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
-
-    public int sendValue = 0;
+    public static string[] arduinoUnoPins = new string[] { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "A0", "A1", "A2", "A3", "A4", "A5" };
 
     private int prevPin = -1;
 
@@ -26,66 +24,6 @@ public class EditorPin : Pin
         ChangePinMode(mode);
     }
 
-    public override void Draw()
-    {
-        #if UNITY_EDITOR
-        GUILayout.BeginHorizontal();
-        currentPin = EditorGUILayout.Popup(currentPin, allPin, "ToolbarDropDown", GUILayout.MaxWidth(40));
-        pinMode = (PinMode)EditorGUILayout.EnumPopup(pinMode, "ToolbarDropDown", GUILayout.MaxWidth(55));
-        CheckChanges();
-        GUILayout.BeginHorizontal();
-
-        EditorGUIUtility.fieldWidth -= 22;
-        string message = "d";
-
-        switch (pinMode)
-        {
-            case PinMode.Output:
-                if (GUILayout.Button("HIGH", "toolbarButton")) sendValue = 255;
-                if (GUILayout.Button("LOW", "toolbarButton")) sendValue = 0;
-                break;
-            case PinMode.Input_pullup:
-                if (GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
-                    SendRead();
-                GUILayout.Label(lastReadValue.ToString(), "TE Toolbarbutton");
-                break;
-            case PinMode.PWM:
-                GUILayout.BeginHorizontal("TE Toolbarbutton");
-                sendValue = EditorGUILayout.IntSlider(sendValue, 0, 255);
-                message = "a";
-                GUILayout.EndHorizontal();
-                break;
-            case PinMode.Servo:
-                GUILayout.BeginHorizontal("TE Toolbarbutton");
-                sendValue = EditorGUILayout.IntSlider(sendValue, 0, 180);
-                message = "a";
-                GUILayout.EndHorizontal();
-                break;
-            case PinMode.Analog:
-                if(GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
-                        SendRead();
-                GUILayout.Label(lastReadValue.ToString(), "TE Toolbarbutton");
-                break;
-        }
-        EditorGUIUtility.fieldWidth += 22;
-
-        if (GUILayout.Button("-", "toolbarButton", GUILayout.Width(22)))
-        {
-            UduinoManagerEditor.Instance.RemovePin(this);
-        }
-        GUILayout.EndHorizontal();
-
-        //Send  the message
-        if (prevSendValue != sendValue)
-        {
-            WriteMessage(message + " " + currentPin + " " + sendValue);
-            prevSendValue = sendValue;
-        }
-
-        GUILayout.EndHorizontal();
-        #endif
-    }
-
     public override void SendRead(string bundle = null, System.Action<string> action = null)
     {
         if (editorManager != null)
@@ -94,9 +32,8 @@ public class EditorPin : Pin
         }
     }
 
-    void CheckChanges()
+    public  override void CheckChanges()
     {
-        //If it's playing, cange the values
         if(Application.isPlaying)
         {
             foreach (Pin pinTarget in UduinoManager.Instance.pins)
@@ -229,7 +166,6 @@ public class UduinoManagerEditor : Editor {
             GUILayout.Label("Arduino", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
 
-           // manager.BaudRate = EditorGUILayout.IntField("Baud Rate", manager.BaudRate );
             baudRateIndex  = EditorGUILayout.Popup("Baud Rate", baudRateIndex,  baudRates);
             if(prevBaudRateIndex != baudRateIndex)
             {
@@ -250,12 +186,7 @@ public class UduinoManagerEditor : Editor {
                 manager.SendRateSpeed = EditorGUILayout.IntField("Send Rate speed", manager.SendRateSpeed);
                 EditorGUILayout.Separator();
             }
-            /*
-            manager.PackInBundles = EditorGUILayout.Toggle("Pack in bundles", manager.PackInBundles);
-            if(manager.PackInBundles)
-            {
-                manager.BundleRateSpeed = EditorGUILayout.IntField("Send bundle freq", manager.BundleRateSpeed);
-            }*/
+
             EditorGUI.indentLevel--;
 
             EditorGUILayout.Separator();
@@ -273,8 +204,11 @@ public class UduinoManagerEditor : Editor {
             AdvancedSettings();
         }
 
-        //TODO : Needed to update when message sent/received. This uses a lot of passes. Maybe change that, do a variable to check if a new value is here
-        EditorUtility.SetDirty(target);
+        if (GUI.changed) // Can be commented
+        {
+            EditorUtility.SetDirty(target);
+        }
+
     }
 
     public void ArduinoSetings()
@@ -319,47 +253,7 @@ public class UduinoManagerEditor : Editor {
                         GUILayout.EndHorizontal();
 
                         foreach (Pin pin in UduinoManager.Instance.pins)
-                        {
-                            GUILayout.BeginHorizontal();
-                            GUILayout.Label(pin.currentPin.ToString(), "toolbarButton", GUILayout.MaxWidth(40f));
-                            GUILayout.Label(pin.pinMode.ToString(), "toolbarButton", GUILayout.MaxWidth(55f));
-                            GUILayout.BeginHorizontal();
-
-                            EditorGUIUtility.fieldWidth -= 22;
-
-                            switch (pin.pinMode)
-                            {
-                                case PinMode.Output:
-                                    GUILayout.Button("HIGH", "toolbarButton");
-                                    GUILayout.Button("LOW", "toolbarButton");
-                                    break;
-                                case PinMode.Input_pullup:
-                                    EditorGUILayout.LabelField("Digital read:");
-                                    GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
-                                    UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
-                                    break;
-                                case PinMode.PWM:
-                                    GUILayout.BeginHorizontal("TE Toolbarbutton");
-                                    EditorGUILayout.IntSlider(pin.prevSendValue, 0, 255);
-                                    GUILayout.EndHorizontal();
-                                    break;
-                                case PinMode.Servo:
-                                    GUILayout.BeginHorizontal("TE Toolbarbutton");
-                                    EditorGUILayout.IntSlider(pin.prevSendValue, 0, 180);
-                                    GUILayout.EndHorizontal();
-                                    break;
-                                case PinMode.Analog:
-                                    GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
-                                    UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
-                                    break;
-                            }
-                            EditorGUIUtility.fieldWidth += 22;
-
-                            GUILayout.EndHorizontal();
-
-                            GUILayout.EndHorizontal();
-
-                        }
+                                DrawPin(pin);
                     }
                     else // if no pins are active
                     {
@@ -383,7 +277,7 @@ public class UduinoManagerEditor : Editor {
                     GUILayout.EndHorizontal();
 
                     foreach (Pin pin in pins.ToArray())
-                        pin.Draw();
+                        DrawPin(pin,true);
 
                     if (GUILayout.Button("Add a pin", "TE toolbarbutton", GUILayout.ExpandWidth(true)))
                         pins.Add(new EditorPin(uduino.Key, 13, PinMode.Output, this));
@@ -425,7 +319,6 @@ public class UduinoManagerEditor : Editor {
         GUILayout.EndHorizontal();
 
         EditorGUILayout.Separator();
-
     }
 
     public void AdvancedSettings()
@@ -508,7 +401,6 @@ public class UduinoManagerEditor : Editor {
         GUILayout.EndVertical();
         GUILayout.EndHorizontal();
 
-
         GUILayout.Label("Update Uduino", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
         GUILayout.BeginHorizontal();
@@ -548,6 +440,65 @@ public class UduinoManagerEditor : Editor {
 
         EditorGUILayout.Separator();
 
+    }
+
+    public void DrawPin(Pin pin, bool editorPin = false)
+    {
+        GUILayout.BeginHorizontal();
+        pin.currentPin = EditorGUILayout.Popup(pin.currentPin, EditorPin.arduinoUnoPins, "ToolbarDropDown", GUILayout.MaxWidth(40));
+        pin.pinMode = (PinMode)EditorGUILayout.EnumPopup(pin.pinMode, "ToolbarDropDown", GUILayout.MaxWidth(55));
+        pin.CheckChanges();
+        GUILayout.BeginHorizontal();
+
+        EditorGUIUtility.fieldWidth -= 22;
+        serializedObject.ApplyModifiedProperties();
+
+        switch (pin.pinMode)
+        {
+            case PinMode.Output:
+                if (GUILayout.Button("HIGH", "toolbarButton"))
+                    pin.SendPinValue(255,"d");
+                if (GUILayout.Button("LOW", "toolbarButton"))
+                    pin.SendPinValue(0, "d");
+                break;
+            case PinMode.Input_pullup:
+                if (GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
+                    pin.SendRead();
+                GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
+                UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
+                break;
+            case PinMode.PWM:
+                GUILayout.BeginHorizontal("TE Toolbarbutton");
+                pin.sendValue = EditorGUILayout.IntSlider(pin.sendValue, 0, 255);
+                pin.SendPinValue(pin.sendValue, "a");
+                GUILayout.EndHorizontal();
+                break;
+            case PinMode.Servo:
+                GUILayout.BeginHorizontal("TE Toolbarbutton");
+                pin.sendValue = EditorGUILayout.IntSlider(pin.sendValue, 0, 180);
+                pin.SendPinValue(pin.sendValue, "a");
+                GUILayout.EndHorizontal();
+                break;
+            case PinMode.Analog:
+                if (GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
+                    pin.SendRead();
+                GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
+                UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
+                break;
+        }
+        EditorGUIUtility.fieldWidth += 22;
+
+        if (editorPin)
+        {
+            if (GUILayout.Button("-", "toolbarButton", GUILayout.Width(22)))
+            {
+                //TODO : struff here
+                UduinoManagerEditor.Instance.RemovePin(pin);
+            }
+        }
+        GUILayout.EndHorizontal();
+
+        GUILayout.EndHorizontal();
     }
 
     public void DrawLine(int marginTop, int marginBottom, int height)

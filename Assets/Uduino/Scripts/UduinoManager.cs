@@ -46,6 +46,7 @@ namespace Uduino
         NONE
     };
 
+
     #endregion
 
     public class UduinoManager : MonoBehaviour {
@@ -187,7 +188,9 @@ namespace Uduino
             set { discoverTries = value; }
         }
 
-
+        /// <summary>
+        /// Stop all digital/analog pin on quit
+        /// </summary>
         public bool stopAllOnQuit = true;
 
         /// <summary>
@@ -199,7 +202,6 @@ namespace Uduino
             get { return blackListedPorts; }
             set { blackListedPorts = value; }
         }
-
         #endregion
 
         #region Init

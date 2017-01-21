@@ -2,6 +2,9 @@
 using System;
 using System.Collections;
 using System.IO.Ports;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace Uduino
 {
@@ -75,6 +78,9 @@ namespace Uduino
         public void UduinoFound()
         {
             serialStatus = SerialStatus.FOUND;
+            #if UNITY_EDITOR
+            if(Application.isPlaying) EditorUtility.SetDirty(UduinoManager.Instance);
+            #endif
         }
 
         #endregion
