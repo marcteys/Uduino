@@ -10,6 +10,7 @@ using System.IO.Ports;
 
 namespace Uduino
 {
+    public delegate void OnQuitAction();
 
     #region Enums
     public enum PinMode
@@ -92,6 +93,7 @@ namespace Uduino
         /// Dictionnary containing all the connected Arduino devices
         /// </summary>
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
+        private List<UduinoDevice> lookUpDevices = new List<UduinoDevice>();
 
         /// <summary>
         /// List containing all active pins
@@ -104,6 +106,13 @@ namespace Uduino
         /// </summary>
         public delegate void OnValueReceivedEvent(string data, string device);
         public event OnValueReceivedEvent OnValueReceived;
+
+
+        /// <summary>
+        /// Create a delegate event to trigger the function OnValueReceived()
+        /// Takes one parameter, the returned data.
+        /// </summary>
+        public static OnQuitAction OnQuit;
 
         /// <summary>
         /// Log level
@@ -207,6 +216,9 @@ namespace Uduino
         #region Init
         void Awake()
         {
+            if (uduinoDevices.Count != 0)
+                CloseAllPorts();
+
             Instance = this;
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
@@ -264,7 +276,7 @@ namespace Uduino
 
             foreach (string portName in portNames)
             {
-                if(!blackListedPorts.Contains(portName))
+                if(!blackListedPorts.Contains(portName) && !UduinoPortIsOpen(portName))
                     StartCoroutine(FindBoardPort(portName));
                 else
                     Log.Info("Port " + portName + " is blacklisted");
@@ -278,12 +290,14 @@ namespace Uduino
         IEnumerator FindBoardPort(string portName)
         {
             UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
+            lookUpDevices.Add(uduinoDevice);
+            OnQuit += uduinoDevice.QuitAction();
             int tries = 0;
             do
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200); // TODO :Read that in a thread ? 
+                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 100); // TODO :Read that in a thread ? 
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
                         string name = reading.Split(new char[0])[1];
@@ -292,6 +306,7 @@ namespace Uduino
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
                         InitAllPins();
+                        lookUpDevices.Remove(uduinoDevice);
                         break;
                     }
                     else
@@ -299,19 +314,17 @@ namespace Uduino
                         Log.Info("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
                 }
-
-                if(applicationIsQuitting) // TODO : This is not wokring. It is here to fix the problem when we press play/stop too quickly
-                {
-                    uduinoDevice.Close();
-                    break;
-                }
-                yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
+                //  yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
+                yield return null;    //Wait one frame with yield return null
             } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
 
-            if(uduinoDevice.getStatus() != SerialStatus.FOUND)
+
+            if (uduinoDevice.getStatus() != SerialStatus.FOUND)
             {
                 Log.Warning("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Closing.");
                 uduinoDevice.Close();
+                OnQuit -= uduinoDevice.QuitAction();
+                lookUpDevices.Remove(uduinoDevice);
                 uduinoDevice = null;
             }
         }
@@ -580,14 +593,14 @@ namespace Uduino
                 if (UduinoTargetExists(target))
                 {
                     uduinoDevices[target].callback = action;
-                    uduinoDevices[target].read = message;
+                    uduinoDevices[target].ReadFromArduino(message);
                 }
                 else
                 {
                     foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                     {
                         uduino.Value.callback = action;
-                        uduino.Value.read = message;
+                        uduino.Value.ReadFromArduino(message);
                     }
                 }
             }
@@ -694,6 +707,20 @@ namespace Uduino
             }
         }
 
+
+        private bool UduinoPortIsOpen(string port)
+        {
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+            {
+                if (uduino.Value.getPort() == port)
+                {
+                    Log.Warning("Port already open for " + port);
+                    return true;
+                }
+            }
+            return false;
+        }
+
         #endregion
 
         #region Bundle
@@ -764,17 +791,25 @@ namespace Uduino
         /// </summary>
         public void CloseAllPorts()
         {
+            StopAllCoroutines();
+            foreach (UduinoDevice tmpDevice in lookUpDevices)
+            {
+                tmpDevice.Close();
+                lookUpDevices.Remove(tmpDevice);
+            }
+
             if (uduinoDevices.Count == 0)
             {
                 Log.Debug("Ports already closed.");
                 return;
             }
-
             if(stopAllOnQuit)
             {
                 foreach (Pin pinTarget in pins)
                     pinTarget.Destroy();
             }
+            if (OnQuit != null)
+                OnQuit();
 
             List<string> keys = new List<string>(uduinoDevices.Keys);
             foreach (string key in keys)

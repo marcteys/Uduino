@@ -226,6 +226,11 @@ Prefab:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 114023058375386772, guid: 3ce74fcab37665d498546a6b3ff71edd,
+        type: 2}
+      propertyPath: blackListedPorts.Array.size
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 4720884688345560, guid: 3ce74fcab37665d498546a6b3ff71edd, type: 2}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -261,7 +266,17 @@ Prefab:
     - target: {fileID: 114023058375386772, guid: 3ce74fcab37665d498546a6b3ff71edd,
         type: 2}
       propertyPath: debugLevel
-      value: 1
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114023058375386772, guid: 3ce74fcab37665d498546a6b3ff71edd,
+        type: 2}
+      propertyPath: blackListedPorts.Array.data[0]
+      value: COM1
+      objectReference: {fileID: 0}
+    - target: {fileID: 114023058375386772, guid: 3ce74fcab37665d498546a6b3ff71edd,
+        type: 2}
+      propertyPath: blackListedPorts.Array.data[1]
+      value: COM3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: 3ce74fcab37665d498546a6b3ff71edd, type: 2}

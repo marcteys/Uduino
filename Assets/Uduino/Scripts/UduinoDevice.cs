@@ -64,8 +64,9 @@ namespace Uduino
                 if (bundleValues.Count == 1 ) // If there is one message
                 {
                     string message = bundleValues[0].Substring(1, bundleValues[0].Length - 1);
-                    if (message.Contains("r")) read = message;
-                    else WriteToArduino(message);
+                   // if (message.Contains("r")) read = message;
+                   // else
+                        WriteToArduino(message);
 
                     return;
                 }
@@ -73,10 +74,11 @@ namespace Uduino
                 for (int i = 0; i < bundleValues.Count; i++)
                     fullMessage += bundleValues[i];
 
-                if (fullMessage.Contains("r")) read = fullMessage;
-                else WriteToArduino(fullMessage);
+             //   if (fullMessage.Contains("r")) read = fullMessage;
+              //  else
+WriteToArduino(fullMessage);
 
-                if (fullMessage.Length >= 120)
+                if (fullMessage.Length >= 100)
                     Log.Warning("The bundle message is too big. Try to not send too many messages or increase UDUINOBUFFER in Uduino library.");
 
                 bundles.Remove(bundleName);

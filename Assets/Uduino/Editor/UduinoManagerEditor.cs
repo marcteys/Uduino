@@ -107,8 +107,19 @@ public class UduinoManagerEditor : Editor {
     void OnEnable()
     {
         Instance = this;
+        Debug.Log("enable");
     }
 
+    void OnDisable()
+    {
+        Debug.Log("disable");
+        if (manager)
+            Debug.Log("manager");
+    }
+
+    void OnApplicationQuit() {
+        Debug.Log("appquit");
+    }
     void SetColorAndStyles()
     {
         if(boldtext == null)

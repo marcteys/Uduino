@@ -10,7 +10,6 @@ namespace Uduino
 {
     public class SerialArduino
     {
-
         private string _port;
 
         private int _baudrate;
@@ -25,7 +24,9 @@ namespace Uduino
         public string read = null; // Value to Read
         private Queue readQueue, writeQueue;
 
-        int maxQueueLength = 10;
+        int maxQueueLength = 1000;
+
+        bool shouldRead = false;
 
         public SerialArduino(string port, int baudrate = 9600)
         {
@@ -36,6 +37,12 @@ namespace Uduino
             writeQueue = Queue.Synchronized(new Queue());
 
             Open();
+        }
+
+        public OnQuitAction QuitAction()
+        {
+            Debug.Log("Should close");
+            return null;
         }
 
         /// <summary>
@@ -124,26 +131,16 @@ namespace Uduino
             {
                 while (IsLooping())
                 {
+                    Debug.Log("Running");
                     WriteMessagesToSerial();
-                    try
-                    {
-                        string inputMessage = serial.ReadLine();
-                        if (inputMessage != null && readQueue.Count < maxQueueLength)
-                        {
-                            readQueue.Enqueue(inputMessage);
-                        }
-                    }
-                    catch (TimeoutException ex)
-                    {
-                        Debug.Log(ex);
-
-                    }
+                    if(shouldRead)
+                        ReadMessageFromSerial();
                     /*
                     if (read != null)
                     {
-                        string data = ReadFromArduino(read, 50);
+                        ReadMessageFromSerial();
                         read = null;
-                        ReadData(data);
+                       // ReadData(data);
                     }*/
                 }
             }
@@ -154,11 +151,27 @@ namespace Uduino
         }
 
 
-        string ReadMessageFromSerial()
+        void ReadMessageFromSerial()
         {
-            return null;
+          //  serial.ReadTimeout = 200;
+          //  serial.DiscardInBuffer(); // TODO : To remove ?
+         //   serial.DiscardOutBuffer();
+            try
+            {
+                string inputMessage = serial.ReadLine();
+                if (inputMessage != null && readQueue.Count < maxQueueLength)
+                {
+                    readQueue.Enqueue(inputMessage);
+                    Debug.Log("Adding  " + inputMessage + " to queue");
+                    shouldRead = false;
+                }
+                shouldRead = false;
+            }
+            catch (TimeoutException ex)
+            {
+                Debug.Log(ex);
+            }
         }
-
 
         void WriteMessagesToSerial()
         {
@@ -167,21 +180,13 @@ namespace Uduino
                 string message = (string)writeQueue.Dequeue();
                 try
                 {
-                    try
-                    {
-                        serial.WriteLine(message + "\r\n");
-                        serial.BaseStream.Flush();
-                        Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
-                    }
-                    catch (System.IO.IOException e)
-                    {
-                        Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
-                        Close();
-                    }
+                    serial.WriteLine(message + "\r\n");
+                    serial.BaseStream.Flush();
+                    Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e);
+                    Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
                     Close();
                 }
                 WritingSuccess(message);
@@ -269,47 +274,21 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 10)
         {
-
             if (message != null)
                 WriteToArduino(message);
 
-            if (serial == null || !serial.IsOpen)
-                return null;
+            return null;
+            shouldRead = true;
 
+            Debug.Log(readQueue.Count);
 
             if (readQueue.Count == 0)
                 return null;
 
-            return (string)readQueue.Dequeue();
-
-            serial.ReadTimeout = timeout;
-            serial.DiscardInBuffer(); // TODO : To remove ?
-            serial.DiscardOutBuffer();
-
-            try
-            {
-                try
-                {
-                    string readedLine = serial.ReadLine();
-                    ReadingSuccess(readedLine);
-               //     if (readedLine != null && inputQueue.Count < maxQueueLength)
-                  //      inputQueue.Enqueue(readedLine);
-
-                    return readedLine;
-                }
-                catch (TimeoutException e)
-                {
-                 //   Log.Warning("Error for message: " + message);
-                   // Log.Warning(e);
-                    return null;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-                Close();
-                return null;
-            }
+            string readedVal = (string)readQueue.Dequeue();
+            Debug.Log("Last read value "  + readedVal);
+            ReadingSuccess(readedVal);
+            return readedVal;
         }
 
 
