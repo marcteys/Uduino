@@ -21,11 +21,19 @@ namespace Uduino
 
         private bool readInProcess = false;
 
+        private Queue readQueue, writeQueue, messagesToRead;
+        int maxQueueLength = 1;
+
         public SerialArduino(string port, int baudrate = 9600)
         {
             _port = port;
             _baudrate = baudrate;
-            this.Open();
+
+            readQueue = Queue.Synchronized(new Queue());
+            writeQueue = Queue.Synchronized(new Queue());
+            messagesToRead = Queue.Synchronized(new Queue());
+
+            Open();
         }
 
         /// <summary>
@@ -40,10 +48,11 @@ namespace Uduino
                 #endif
                 serial = new SerialPort(_port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
-                serial.WriteTimeout = 100;
+                serial.WriteTimeout = 50;
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
+
                 Log.Info("Opening stream on port <color=#2196F3>[" + _port + "]</color>");
             }
             catch (Exception e)
@@ -94,11 +103,26 @@ namespace Uduino
         public void WriteToArduino(string message, object value = null)
         {
 
-            if (serial == null || !serial.IsOpen || message == null || message == "" )
+            if (message == null || message == "" )
                 return;
 
             if (value != null)
                 message = " " + value.ToString();
+
+            if(writeQueue.Count < maxQueueLength)
+                writeQueue.Enqueue(message);
+        }
+
+        public void WriteToArduinoLoop()
+        {
+
+            if (serial == null || !serial.IsOpen)
+                return;
+
+            if (writeQueue.Count == 0)
+                return;
+
+            string message = (string)writeQueue.Dequeue();
 
             try
             {
@@ -108,7 +132,9 @@ namespace Uduino
                     serial.BaseStream.Flush();
                     Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
                 }
-                catch (System.IO.IOException e) {
+                catch (System.IO.IOException e)
+                {
+                    writeQueue.Enqueue(message);
                     Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
                     Close();
                 }
@@ -125,17 +151,13 @@ namespace Uduino
         /// Callback function when a message is written 
         /// </summary>
         /// <param name="message">Message successfully writen</param>
-        public virtual void WritingSuccess(string message)
-        {
-        }
+        public virtual void WritingSuccess(string message) { }
 
         /// <summary>
         /// Callback function when a message is read 
         /// </summary>
         /// <param name="message">Message successfully read</param>
-        public virtual void ReadingSuccess(string message)
-        {
-        }
+        public virtual void ReadingSuccess(string message) { }
 
         /// <summary>
         /// Read Arduino serial port
@@ -143,22 +165,40 @@ namespace Uduino
         /// <param name="message">Write a message to the serial port before reading the serial</param>
         /// <param name="timeout">Timeout in milliseconds</param>
         /// <returns>Read data</returns>
-        public string ReadFromArduino(string message = null, int timeout = 10)
+        public string ReadFromArduino(string message = null, int timeout = 200)
         {
-          //  if (readInProcess)
+            //  if (readInProcess)
             //    return null;
+            //Todo : changer 
+            serial.ReadTimeout = timeout;
 
-            readInProcess = true;
 
             if (message != null)
-                WriteToArduino(message);
+                messagesToRead.Enqueue(message);
 
             if (serial == null || !serial.IsOpen)
                 return null;
 
-            serial.ReadTimeout = timeout;
-            serial.DiscardInBuffer(); // TODO : To remove ?
-            serial.DiscardOutBuffer();
+            if (readQueue.Count == 0)
+                return null;
+
+            string finalMessage = (string)readQueue.Dequeue();
+            Debug.Log("mess " + message);
+            Debug.Log("finale " + finalMessage);
+
+            return finalMessage;
+        }
+
+
+        public void ReadFromArduinoLoop()
+        {
+            if(messagesToRead.Count > 0)
+                WriteToArduino((string)messagesToRead.Dequeue());
+
+            if (serial == null || !serial.IsOpen)
+                return ;
+
+            Debug.Log("ReadLoop");
 
             try
             {
@@ -166,25 +206,57 @@ namespace Uduino
                 {
                     string readedLine = serial.ReadLine();
                     ReadingSuccess(readedLine);
-                    readInProcess = false;
-                    return readedLine;
+                    Debug.Log(readedLine);
+
+                    if (readedLine != null && readQueue.Count < maxQueueLength)
+                    {
+                        readQueue.Enqueue(readedLine);
+                    }
                 }
                 catch (TimeoutException e)
                 {
-                    Log.Warning("Error for message: " + message);
-                    Log.Warning(e);
-                    readInProcess = false;
-                    return null;
+                    Log.Info(e);
                 }
             }
             catch (Exception e)
             {
-                readInProcess = false;
                 Log.Error(e);
                 Close();
-                return null;
             }
+
         }
+
+        public string SimpleRead(string message, int timeout = 100)
+        {
+            string returnedValue = null;
+            if (serial == null)
+                return null;
+
+            serial.ReadTimeout = timeout;
+
+
+            try
+            {
+                serial.WriteLine(message + "\r\n");
+                serial.BaseStream.Flush();
+                try
+                {
+                    returnedValue = serial.ReadLine();
+                }
+                catch (TimeoutException e)
+                {
+                    Log.Info(e);
+                }
+            }
+            catch (System.IO.IOException e)
+            {
+
+            }
+
+            return returnedValue;
+        }
+
+
         #endregion
 
         #region Close

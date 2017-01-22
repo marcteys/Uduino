@@ -4,9 +4,11 @@
  */
 
 using UnityEngine;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO.Ports;
+using System.Threading;
 
 namespace Uduino
 {
@@ -92,6 +94,8 @@ namespace Uduino
         /// Dictionnary containing all the connected Arduino devices
         /// </summary>
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
+
+        public List<UduinoDevice> tempUduinoDevices = new List<UduinoDevice>();
 
         /// <summary>
         /// List containing all active pins
@@ -280,11 +284,15 @@ namespace Uduino
         {
             UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
             int tries = 0;
+            tempUduinoDevices.Add(uduinoDevice);
             do
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-                    string reading = uduinoDevice.ReadFromArduino("IDENTITY", 200);
+                    string reading = uduinoDevice.SimpleRead("IDENTITY", 200);
+                 //   uduinoDevice.ReadFromArduinoLoop();
+                  //  uduinoDevice.WriteToArduinoLoop();
+
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
                         string name = reading.Split(new char[0])[1];
@@ -293,6 +301,7 @@ namespace Uduino
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
+                       // yield return new WaitForSeconds(5f);
                         InitAllPins();
                         break;
                     }
@@ -399,11 +408,11 @@ namespace Uduino
         /// </summary>
         public void InitAllPins()
         {
-            Log.Debug("Init all pins");
             foreach(Pin pin in pins)
             {
                 pin.Init();
             }
+            Log.Debug("Init all pins");
             SendBundle("init");
         }
 
@@ -740,8 +749,8 @@ namespace Uduino
         /// <summary>
         /// Threading variables
         /// </summary>
-        private System.Threading.Thread _Thread = null;
-        private bool readAllPorts = true;
+        private Thread _Thread = null;
+        private bool threadRunning = true;
 
         /// <summary>
         /// Initialisation of the Thread reading on Awake()
@@ -750,7 +759,7 @@ namespace Uduino
         {
             try
             {
-                _Thread = new System.Threading.Thread(ReadPorts);
+                _Thread = new Thread(new ThreadStart(ReadPorts));
                 _Thread.Start();
             }
             catch (System.Threading.ThreadStateException e)
@@ -760,21 +769,38 @@ namespace Uduino
             }
         }
 
+        public void StopThread()
+        {
+            lock (this)
+            {
+                threadRunning = false;
+            }
+        }
+
+        public bool IsRunning()
+        {
+            lock (this)
+            {
+                return threadRunning;
+            }
+        }
+
+        void Update()
+        {
+             Debug.Log(_Thread.ThreadState);
+        }
         /// <summary>
         ///  Read the Serial Port data in a new thread.
         /// </summary>
         public void ReadPorts()
         {
-            while (readAllPorts)
+            while (IsRunning())
             {
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                Dictionary<string, UduinoDevice> tmpUduino = new Dictionary<string, UduinoDevice>(uduinoDevices);
+                foreach (KeyValuePair<string, UduinoDevice> uduino in tmpUduino)
                 {
-                    if (uduino.Value.read != null)
-                    {
-                        string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
-                        uduino.Value.read = null;
-                        ReadData(data, uduino.Key);
-                    }
+                 //   uduino.Value.WriteToArduinoLoop();
+                 //   uduino.Value.ReadFromArduinoLoop();
                 }
             }
         }
@@ -796,7 +822,7 @@ namespace Uduino
                         string data = uduino.ReadFromArduino(uduino.read, 50);
                         uduino.read = null;
                         yield return null;
-                        ReadData(data, target);
+                        ParseData(data, target);
                     }
                     else
                     {
@@ -816,7 +842,7 @@ namespace Uduino
         /// </summary>
         /// <param name="data">Received data</param>
         /// <param name="target">TODO : for the moment target is unused</param>
-        void ReadData(string data, string target = null)
+        void ParseData(string data, string target = null)
         {
             if (data != null && data != "" && data != "Null")
             {
@@ -857,13 +883,6 @@ namespace Uduino
                     pinTarget.Destroy();
             }
 
-            List<string> keys = new List<string>(uduinoDevices.Keys);
-            foreach (string key in keys)
-            {
-                SerialArduino device = uduinoDevices[key];
-                device.Close();
-                uduinoDevices.Remove(key);
-            }
         }
 
         public void OnDisable()
@@ -877,8 +896,9 @@ namespace Uduino
 
         void DisableThread()
         {
-            readAllPorts = false;
-            if (_Thread != null) _Thread.Abort();
+            StopThread();
+            if (_Thread != null)
+                _Thread.Join();
             _Thread = null;
         }
         #endregion
