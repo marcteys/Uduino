@@ -180,8 +180,8 @@ namespace Uduino
         /// <summary>
         /// Number of tries to discover the attached serial ports
         /// </summary>
-        private int discoverTries = 20;
         [SerializeField]
+        private int discoverTries = 20;
         public int DiscoverTries
         {
             get { return discoverTries; }
