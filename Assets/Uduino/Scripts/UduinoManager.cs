@@ -809,7 +809,7 @@ namespace Uduino
                     {
                         UduinoDevice device = uduinoDevices[key];
                         device.WriteToArduinoLoop();
-                        device.ReadFromArduinoLoop();
+                     //   device.ReadFromArduinoLoop();
                     }
                 }
             }

@@ -24,6 +24,8 @@ namespace Uduino
         private Queue readQueue, writeQueue, messagesToRead;
         int maxQueueLength = 1;
 
+        string messageToRead = null;
+
         public SerialArduino(string port, int baudrate = 9600)
         {
             _port = port;
@@ -172,7 +174,8 @@ namespace Uduino
             //Todo : changer 
             serial.ReadTimeout = timeout;
 
-
+            messageToRead = message;
+            return SimpleRead(message);
             if (message != null)
                 messagesToRead.Enqueue(message);
 
