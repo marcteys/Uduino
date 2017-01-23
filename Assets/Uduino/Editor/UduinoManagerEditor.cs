@@ -145,6 +145,25 @@ public class UduinoManagerEditor : Editor {
             olInput.alignment = TextAnchor.MiddleLeft;
         }
     }
+
+    public void  CheckCompatibility()
+    {
+        if (PlayerSettings.apiCompatibilityLevel == ApiCompatibilityLevel.NET_2_0_Subset)
+        {
+            SetGUIBackgroundColor("#ef5350");
+            EditorGUILayout.HelpBox("Uduino works only with .NET 2.0 (not Subset).", MessageType.Error, true);
+            if (GUILayout.Button("Fix Now", GUILayout.ExpandWidth(true)))
+            {
+                PlayerSettings.apiCompatibilityLevel = ApiCompatibilityLevel.NET_2_0;
+                PlayerSettings.runInBackground = true;
+                Debug.LogWarning("Reimporting all assets.");
+                AssetDatabase.ImportAsset("Assets/Uduino/Scripts", ImportAssetOptions.ImportRecursive);
+                AssetDatabase.Refresh();
+            }
+            SetGUIBackgroundColor();
+        }
+    }
+
     public override void OnInspectorGUI()
     {
         if (manager == null)
@@ -157,10 +176,12 @@ public class UduinoManagerEditor : Editor {
         SetColorAndStyles();
 
         DrawLogo();
-
         defaultPanel = DrawHeaderTitle("Uduino Settings", defaultPanel, headerColor);
         if (defaultPanel)
         {
+
+            CheckCompatibility();
+
             GUILayout.Label("General", EditorStyles.boldLabel);
             EditorGUI.indentLevel++;
             manager.debugLevel = (LogLevel)EditorGUILayout.EnumPopup("Log Level", manager.debugLevel);
