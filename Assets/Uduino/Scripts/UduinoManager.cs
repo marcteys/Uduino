@@ -297,7 +297,7 @@ namespace Uduino
                     {
                         string name = reading.Split(new char[0])[1];
                         uduinoDevice.name = name;
-                        lock(uduinoDevice)
+                        lock(uduinoDevices)
                             uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
@@ -525,15 +525,24 @@ namespace Uduino
             int max = 0;
             if (parts.Length == 1) max = 1;
             else max = parts.Length - 1;
-            for (int i=0;i< max; i++)
+            try
             {
-                int recivedPin = -1;
-                int.TryParse(parts[i].Split(' ')[0], out recivedPin);
-               
-                int value = 0;
-                int.TryParse(parts[i].Split(' ')[1], out value);
-                if (recivedPin != -1)
-                    dispatchValueForPin("", recivedPin, value);
+                for (int i = 0; i < max; i++)
+                {
+                    string[] subParts = parts[i].Split(' ');
+                    if (subParts.Length != 2)
+                        return;
+                    int recivedPin = -1;
+                    recivedPin = int.Parse(subParts[0]);
+
+                    int value =  int.Parse(subParts[1]);
+                    if (recivedPin != -1)
+                        dispatchValueForPin("", recivedPin, value);
+                }
+            }
+            catch (FormatException)
+            {
+
             }
         }
 
@@ -772,12 +781,6 @@ namespace Uduino
             }
         }
         
-
-        void Update()
-        {
-        //    Debug.Log(_Thread.ThreadState);
-        }
-
         public void StopThread()
         {
             lock (this)
@@ -794,15 +797,15 @@ namespace Uduino
             }
         }
 
-        /*
+        
         void Update()
         {
-            if (_thread.ThreadState == ThreadState.Stopped)
+            if (!isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
             {
                 Log.Warning("Resarting Thread");
                 StartThread();
             }
-        }*/
+        }
 
         /// <summary>
         ///  Read the Serial Port data in a new thread.
@@ -920,8 +923,10 @@ namespace Uduino
 
         }
 
+        bool isApplicationQuiting = false;
         void OnApplicationQuit()
         {
+            isApplicationQuiting = true;
             if (uduinoDevices.Count != 0)
                 CloseAllPorts();
             DisableThread();

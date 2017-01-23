@@ -22,7 +22,7 @@ namespace Uduino
         private bool readInProcess = false;
 
         private Queue readQueue, writeQueue, messagesToRead;
-        int maxQueueLength = 1;
+        int maxQueueLength = 100;
 
         public SerialArduino(string port, int baudrate = 9600)
         {
@@ -109,7 +109,7 @@ namespace Uduino
             if (value != null)
                 message = " " + value.ToString();
 
-            if(writeQueue.Count < maxQueueLength)
+            if(!writeQueue.Contains(message) && writeQueue.Count < maxQueueLength)
                 writeQueue.Enqueue(message);
         }
 
@@ -125,6 +125,7 @@ namespace Uduino
             if (writeQueue.Count == 0)
                 return;
 
+            Debug.Log(writeQueue.Count);
             string message = (string)writeQueue.Dequeue();
 
             try
@@ -232,6 +233,10 @@ namespace Uduino
         /// </summary>
         public void Close()
         {
+            readQueue.Clear();
+            writeQueue.Clear();
+            messagesToRead.Clear();
+
             if (serial != null && serial.IsOpen)
             {
                 Log.Warning("Closing port : <color=#2196F3>[" + _port + "]</color>");

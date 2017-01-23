@@ -1,5 +1,4 @@
 // Uduino Default Board
-#include <MemoryFree.h>
 
 #include<Uduino.h>
 Uduino uduino("uduinoBoard"); // Declare and name your object
