@@ -786,7 +786,11 @@ namespace Uduino
 
         void Update()
         {
-        //    Debug.Log(_Thread.ThreadState);
+            if (_Thread.ThreadState == ThreadState.Stopped)
+            {
+                Log.Warning("Resarting Thread");
+                StartThread();
+            }
         }
         /// <summary>
         ///  Read the Serial Port data in a new thread.
