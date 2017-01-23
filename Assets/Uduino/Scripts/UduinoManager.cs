@@ -926,17 +926,18 @@ namespace Uduino
         bool isApplicationQuiting = false;
         void OnApplicationQuit()
         {
+            DisableThread();
             isApplicationQuiting = true;
             if (uduinoDevices.Count != 0)
                 CloseAllPorts();
-            DisableThread();
         }
 
         public void OnDisable()
         {
-            if(uduinoDevices.Count != 0)
-                CloseAllPorts();
             DisableThread();
+
+            if (uduinoDevices.Count != 0)
+                CloseAllPorts();
         }
 
         void DisableThread()
@@ -945,6 +946,7 @@ namespace Uduino
             if (_thread != null)
                 _thread.Join();
             _thread = null;
+            Debug.Log("Thread = " + _thread);
         }
         #endregion
     }

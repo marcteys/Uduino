@@ -125,7 +125,6 @@ namespace Uduino
             if (writeQueue.Count == 0)
                 return;
 
-            Debug.Log(writeQueue.Count);
             string message = (string)writeQueue.Dequeue();
 
             try
