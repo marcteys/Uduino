@@ -764,7 +764,7 @@ namespace Uduino
 
         void Update()
         {
-            Debug.Log(_Thread.ThreadState);
+        //    Debug.Log(_Thread.ThreadState);
         }
 
         /// <summary>
@@ -779,9 +779,7 @@ namespace Uduino
                     string[] keys = new string[uduinoDevices.Count];
                     for (int i=0;i < uduinoDevices.Count;i++)
                     {
-                        print(i);
                         uduinoDevices.Keys.CopyTo(keys,i);
-
                     }
                     foreach(string key in keys)
                     {
@@ -792,29 +790,7 @@ namespace Uduino
                             ReadData(data, key);
                         }
                     }
-                    /*
-                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    {
-
-                        if (uduino.Value.read != null)
-                        {
-                            string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
-                            uduino.Value.read = null;
-                            ReadData(data, uduino.Key);
-                        }
-
-                    }*/
                 }
-                //       foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                //  {
-                /*
-                if (uduino.Value.read != null)
-                {
-                    string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
-                    uduino.Value.read = null;
-                    ReadData(data, uduino.Key);
-                }*/
-                // }
             }
         }
 

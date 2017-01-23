@@ -148,8 +148,6 @@ namespace Uduino
           //  if (readInProcess)
             //    return null;
 
-            readInProcess = true;
-
             if (message != null)
                 WriteToArduino(message);
 
@@ -166,20 +164,16 @@ namespace Uduino
                 {
                     string readedLine = serial.ReadLine();
                     ReadingSuccess(readedLine);
-                    readInProcess = false;
                     return readedLine;
                 }
                 catch (TimeoutException e)
                 {
-                    Log.Warning("Error for message: " + message);
-                    Log.Warning(e);
-                    readInProcess = false;
+                    Log.Info("Error for message: " + message + " " + e);
                     return null;
                 }
             }
             catch (Exception e)
             {
-                readInProcess = false;
                 Log.Error(e);
                 Close();
                 return null;
