@@ -284,14 +284,13 @@ namespace Uduino
         {
             UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
             int tries = 0;
-            tempUduinoDevices.Add(uduinoDevice);
             do
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-                    string reading = uduinoDevice.SimpleRead("IDENTITY", 200);
-                 //   uduinoDevice.ReadFromArduinoLoop();
-                  //  uduinoDevice.WriteToArduinoLoop();
+                    string reading = uduinoDevice.SimpleRead("IDENTITY", 100);
+                //    uduinoDevice.ReadFromArduinoLoop();
+                 //   uduinoDevice.WriteToArduinoLoop();
 
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
@@ -787,7 +786,7 @@ namespace Uduino
 
         void Update()
         {
-             Debug.Log(_Thread.ThreadState);
+        //    Debug.Log(_Thread.ThreadState);
         }
         /// <summary>
         ///  Read the Serial Port data in a new thread.
@@ -796,11 +795,18 @@ namespace Uduino
         {
             while (IsRunning())
             {
-                Dictionary<string, UduinoDevice> tmpUduino = new Dictionary<string, UduinoDevice>(uduinoDevices);
-                foreach (KeyValuePair<string, UduinoDevice> uduino in tmpUduino)
+                lock (uduinoDevices)
                 {
-                 //   uduino.Value.WriteToArduinoLoop();
-                 //   uduino.Value.ReadFromArduinoLoop();
+                    string[] keys = new string[uduinoDevices.Count];
+                    for (int i = 0; i < uduinoDevices.Count; i++)
+                        uduinoDevices.Keys.CopyTo(keys, i);
+
+                    foreach (string key in keys)
+                    {
+                        UduinoDevice device = uduinoDevices[key];
+                        device.WriteToArduinoLoop();
+                        device.ReadFromArduinoLoop();
+                    }
                 }
             }
         }
@@ -883,15 +889,16 @@ namespace Uduino
                     pinTarget.Destroy();
             }
 
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                uduino.Value.Close();
+
         }
 
         public void OnDisable()
         {
-            if (readOnThread)
-            {
-                DisableThread();
-            }
-            if(uduinoDevices.Count != 0) CloseAllPorts();
+            if(uduinoDevices.Count != 0)
+                CloseAllPorts();
+            DisableThread();
         }
 
         void DisableThread()
