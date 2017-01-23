@@ -20,11 +20,8 @@ public class AnalogRead : MonoBehaviour {
 
     void Update ()
     {
-        if (true || Input.GetKey(KeyCode.Space))
-        {
-            // Single();
-            Multiple();
-        }
+        // Single();
+        Multiple();
     }
 
     void Single()

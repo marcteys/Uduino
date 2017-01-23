@@ -55,6 +55,7 @@ void ReadBundle() {
   for (int i = 0; i < len; i++) {
     uduino.launchCommand(arg);
   }
+  Serial.println("");
 }
 
 void SetMode() {

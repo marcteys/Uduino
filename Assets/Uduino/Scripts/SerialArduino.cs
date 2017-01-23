@@ -24,8 +24,6 @@ namespace Uduino
         private Queue readQueue, writeQueue, messagesToRead;
         int maxQueueLength = 1;
 
-        string messageToRead = null;
-
         public SerialArduino(string port, int baudrate = 9600)
         {
             _port = port;
@@ -115,6 +113,9 @@ namespace Uduino
                 writeQueue.Enqueue(message);
         }
 
+        /// <summary>
+        /// Loop every thead request to write a message on the arduino (if any)
+        /// </summary>
         public void WriteToArduinoLoop()
         {
 
@@ -149,17 +150,6 @@ namespace Uduino
             WritingSuccess(message);
         }
 
-        /// <summary>
-        /// Callback function when a message is written 
-        /// </summary>
-        /// <param name="message">Message successfully writen</param>
-        public virtual void WritingSuccess(string message) { }
-
-        /// <summary>
-        /// Callback function when a message is read 
-        /// </summary>
-        /// <param name="message">Message successfully read</param>
-        public virtual void ReadingSuccess(string message) { }
 
         /// <summary>
         /// Read Arduino serial port
@@ -169,28 +159,18 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 200)
         {
-            //  if (readInProcess)
-            //    return null;
-            //Todo : changer 
             if (serial == null || !serial.IsOpen)
                 return null;
 
             serial.ReadTimeout = timeout;
 
-            messageToRead = message;
-
-            return SimpleRead(message);
-
             if (message != null)
                 messagesToRead.Enqueue(message);
-
 
             if (readQueue.Count == 0)
                 return null;
 
             string finalMessage = (string)readQueue.Dequeue();
-            Debug.Log("mess " + message);
-            Debug.Log("finale " + finalMessage);
 
             return finalMessage;
         }
@@ -198,27 +178,25 @@ namespace Uduino
 
         public void ReadFromArduinoLoop()
         {
-            if(messagesToRead.Count > 0)
-                WriteToArduino((string)messagesToRead.Dequeue());
-
             if (serial == null || !serial.IsOpen)
-                return ;
+                return;
 
-            Debug.Log("ReadLoop");
+            if (messagesToRead.Count > 0)
+                WriteToArduino((string)messagesToRead.Dequeue());
+            else
+            {
+                //TODO "It read a message only if a message is sent");
+                return;
+            }
 
             try
             {
                 try
                 {
                     string readedLine = serial.ReadLine();
-                    Debug.Log("message read " + readedLine);
-
                     ReadingSuccess(readedLine);
-
                     if (readedLine != null && readQueue.Count < maxQueueLength)
-                    {
                         readQueue.Enqueue(readedLine);
-                    }
                 }
                 catch (TimeoutException e)
                 {
@@ -230,40 +208,20 @@ namespace Uduino
                 Log.Error(e);
                 Close();
             }
-
-        }
-
-        public string SimpleRead(string message, int timeout = 100)
-        {
-            string returnedValue = null;
-            if (serial == null)
-                return null;
-
-            serial.ReadTimeout = timeout;
-
-
-            try
-            {
-                serial.WriteLine(message + "\r\n");
-                serial.BaseStream.Flush();
-                try
-                {
-                    returnedValue = serial.ReadLine();
-                }
-                catch (TimeoutException e)
-                {
-                    Log.Info(e);
-                }
-            }
-            catch (System.IO.IOException e)
-            {
-
-            }
-
-            return returnedValue;
         }
 
 
+        /// <summary>
+        /// Callback function when a message is written 
+        /// </summary>
+        /// <param name="message">Message successfully writen</param>
+        public virtual void WritingSuccess(string message) { }
+
+        /// <summary>
+        /// Callback function when a message is read 
+        /// </summary>
+        /// <param name="message">Message successfully read</param>
+        public virtual void ReadingSuccess(string message) { }
         #endregion
 
         #region Close

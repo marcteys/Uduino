@@ -104,6 +104,11 @@ namespace Uduino
         {
             lastRead = message;
             if (callback != null) callback(message);
+            else
+            {
+                if(Application.isPlaying)
+                    UduinoManager.Instance.TriggerEvent(message, name);
+            }
         }
 
     }
