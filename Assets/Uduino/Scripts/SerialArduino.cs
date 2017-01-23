@@ -172,15 +172,18 @@ namespace Uduino
             //  if (readInProcess)
             //    return null;
             //Todo : changer 
+            if (serial == null || !serial.IsOpen)
+                return null;
+
             serial.ReadTimeout = timeout;
 
             messageToRead = message;
+
             return SimpleRead(message);
+
             if (message != null)
                 messagesToRead.Enqueue(message);
 
-            if (serial == null || !serial.IsOpen)
-                return null;
 
             if (readQueue.Count == 0)
                 return null;
@@ -208,8 +211,9 @@ namespace Uduino
                 try
                 {
                     string readedLine = serial.ReadLine();
+                    Debug.Log("message read " + readedLine);
+
                     ReadingSuccess(readedLine);
-                    Debug.Log(readedLine);
 
                     if (readedLine != null && readQueue.Count < maxQueueLength)
                     {

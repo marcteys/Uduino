@@ -516,6 +516,11 @@ namespace Uduino
         //TODO : Add ref to the card 
         public void ParseAnalogReadValue(string data/*, string target =null*/)
         {
+            if (data == null || data == "")
+                return;
+            Debug.Log("sqfgqsdgsqdgqsehg " + data);
+            Debug.Log("sqfgqsdgsqdgqsehg " + data[0]);
+
             string[] parts = data.Split('-');
             int max = 0;
             if (parts.Length == 1) max = 1;
@@ -809,7 +814,7 @@ namespace Uduino
                     {
                         UduinoDevice device = uduinoDevices[key];
                         device.WriteToArduinoLoop();
-                     //   device.ReadFromArduinoLoop();
+                        device.ReadFromArduinoLoop();
                     }
                 }
             }
