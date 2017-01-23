@@ -821,6 +821,20 @@ namespace Uduino
             }
         }
 
+
+        /// <summary>
+        /// Used for Editor
+        /// </summary>
+        /// <param name="target"></param>
+        public void ReadWriteArduino(string target)
+        {
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+            {
+                uduino.Value.ReadFromArduinoLoop();
+                uduino.Value.WriteToArduinoLoop();
+            }
+        }
+
         /// <summary>
         /// Retreive the Data from the Serial Prot using Unity Coroutines
         /// </summary>
@@ -889,9 +903,22 @@ namespace Uduino
                     pinTarget.Destroy();
             }
 
-            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                uduino.Value.Close();
+            lock (uduinoDevices)
+            {
+                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                {
+                    uduino.Value.Close();
+                }
+                uduinoDevices.Clear();
+            }
 
+        }
+
+        void OnApplicationQuit()
+        {
+            if (uduinoDevices.Count != 0)
+                CloseAllPorts();
+            DisableThread();
         }
 
         public void OnDisable()
