@@ -289,7 +289,8 @@ namespace Uduino
                     {
                         string name = reading.Split(new char[0])[1];
                         uduinoDevice.name = name;
-                        uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
+                        lock(uduinoDevices)
+                            uduinoDevices.Add(name, uduinoDevice); //Add the new device to the devices array
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
@@ -759,6 +760,12 @@ namespace Uduino
                 Log.Error(e);
             }
         }
+        
+
+        void Update()
+        {
+            Debug.Log(_Thread.ThreadState);
+        }
 
         /// <summary>
         ///  Read the Serial Port data in a new thread.
@@ -767,15 +774,47 @@ namespace Uduino
         {
             while (readAllPorts)
             {
-                foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                lock (uduinoDevices)
                 {
-                    if (uduino.Value.read != null)
+                    string[] keys = new string[uduinoDevices.Count];
+                    for (int i=0;i < uduinoDevices.Count;i++)
                     {
-                        string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
-                        uduino.Value.read = null;
-                        ReadData(data, uduino.Key);
+                        print(i);
+                        uduinoDevices.Keys.CopyTo(keys,i);
+
                     }
+                    foreach(string key in keys)
+                    {
+                        if (uduinoDevices[key].read != null)
+                        {
+                            string data = uduinoDevices[key].ReadFromArduino(uduinoDevices[key].read, 50);
+                            uduinoDevices[key].read = null;
+                            ReadData(data, key);
+                        }
+                    }
+                    /*
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    {
+
+                        if (uduino.Value.read != null)
+                        {
+                            string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
+                            uduino.Value.read = null;
+                            ReadData(data, uduino.Key);
+                        }
+
+                    }*/
                 }
+                //       foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                //  {
+                /*
+                if (uduino.Value.read != null)
+                {
+                    string data = uduino.Value.ReadFromArduino(uduino.Value.read, 50);
+                    uduino.Value.read = null;
+                    ReadData(data, uduino.Key);
+                }*/
+                // }
             }
         }
 
