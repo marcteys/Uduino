@@ -20,23 +20,10 @@ public class AnalogRead : MonoBehaviour {
 
     void Update ()
     {
-        if (Input.GetKey(KeyCode.Space))
-        {
-            // Single();
-            Multiple();
-        }
+        ReadLights();
     }
 
-    void Single()
-    {
-        readValue = UduinoManager.Instance.analogRead(AnalogPin.A0);
-        lightSouce.intensity = readValue / 400.0f;
-
-        test = UduinoManager.Instance.analogRead(AnalogPin.A1);
-        lightSouce2.intensity = test / 200.0f;
-    }
-
-    void Multiple()
+    void ReadLights()
     {
         readValue = UduinoManager.Instance.analogRead(AnalogPin.A0, "PinRead");
         lightSouce.intensity = readValue / 400.0f;

@@ -61,7 +61,10 @@ public class EditorPin : Pin
 
     public override void WriteMessage(string message, string bundle = null)
     {
-        if (editorManager != null) editorManager.WriteMessage(arduinoName, message);
+        if (editorManager != null)
+        {
+            editorManager.WriteMessage(arduinoName, message);
+        }
     }
 
 }
@@ -142,7 +145,6 @@ public class UduinoManagerEditor : Editor {
             olInput.alignment = TextAnchor.MiddleLeft;
         }
     }
-
     public override void OnInspectorGUI()
     {
         if (manager == null)
@@ -204,16 +206,14 @@ public class UduinoManagerEditor : Editor {
             AdvancedSettings();
         }
 
-        if (GUI.changed) // Can be commented
-        {
-            EditorUtility.SetDirty(target);
-        }
+       // if (GUI.changed)
+           EditorUtility.SetDirty(target);
 
     }
 
     public void ArduinoSetings()
     {
-        if (manager.uduinoDevices.Count == 0)
+        if ( manager.uduinoDevices.Count == 0)
         {
             SetGUIBackgroundColor("#ef5350");
             GUILayout.BeginVertical("Box", GUILayout.ExpandWidth(true));
@@ -289,6 +289,7 @@ public class UduinoManagerEditor : Editor {
                     {
                         manager.Write(uduino.Key, message);
                         manager.Read(uduino.Key);
+                        manager.ReadWriteArduino(uduino.Key);
                     }
                 }
                 GUILayout.EndVertical();
@@ -603,11 +604,13 @@ public class UduinoManagerEditor : Editor {
     public void WriteMessage(string targetBoard, string message)
     {
         manager.Write(targetBoard, message);
+        manager.ReadWriteArduino(targetBoard);
     }
 
     public void Read(string target = null, string variable = null, System.Action<string> action = null)
     {
         manager.DirectReadFromArduino(target, variable, action: action);
+        manager.ReadWriteArduino(target);
     }
 
     public void RemovePin(Pin pin)

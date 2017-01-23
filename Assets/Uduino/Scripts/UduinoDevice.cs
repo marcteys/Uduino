@@ -47,7 +47,7 @@ namespace Uduino
                 bundles[bundle] = existing;
             }
             existing.Add("," + message);
-            Log.Debug("Message <color=#4CAF50>" + message + "</color> added to the bundle " + bundle);
+          //  Log.Debug("Message <color=#4CAF50>" + message + "</color> added to the bundle " + bundle);
         }
 
         /// <summary>
@@ -65,16 +65,15 @@ namespace Uduino
                 if (bundleValues.Count == 1 ) // If there is one message
                 {
                     string message = bundleValues[0].Substring(1, bundleValues[0].Length - 1);
-                    if (message.Contains("r")) read = message;
+                    if (message.Contains("r")) ReadFromArduino(message);
                     else WriteToArduino(message);
-
                     return;
                 }
 
                 for (int i = 0; i < bundleValues.Count; i++)
                     fullMessage += bundleValues[i];
 
-                if (fullMessage.Contains("r")) read = fullMessage;
+                if (fullMessage.Contains("r")) ReadFromArduino(fullMessage);
                 else WriteToArduino(fullMessage);
 
                 if (fullMessage.Length >= 120)
@@ -105,6 +104,11 @@ namespace Uduino
         {
             lastRead = message;
             if (callback != null) callback(message);
+            else
+            {
+                if(Application.isPlaying)
+                    UduinoManager.Instance.TriggerEvent(message, name);
+            }
         }
 
     }
