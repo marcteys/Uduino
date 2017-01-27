@@ -93,9 +93,9 @@ namespace Uduino
         public void Destroy()
         {
             if(pinMode == PinMode.Output)
-                WriteMessage("d " + currentPin + " 0");
+                WriteMessage("d " + currentPin + " 0","destroy");
             else if (pinMode == PinMode.PWM || pinMode == PinMode.Analog)
-                WriteMessage("a " + currentPin + " 0");
+                WriteMessage("a " + currentPin + " 0", "destroy");
         }
 
         public virtual void Draw()

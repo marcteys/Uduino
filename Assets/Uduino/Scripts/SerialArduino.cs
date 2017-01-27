@@ -48,7 +48,7 @@ namespace Uduino
                 #endif
                 serial = new SerialPort(_port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
-                serial.WriteTimeout = 50;
+                serial.WriteTimeout = 150;
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
@@ -190,6 +190,9 @@ namespace Uduino
                 return;
             }
 
+            serial.DiscardOutBuffer();
+            serial.DiscardInBuffer();
+            
             try
             {
                 try
@@ -232,6 +235,8 @@ namespace Uduino
         /// </summary>
         public void Close()
         {
+            WriteToArduinoLoop();
+
             readQueue.Clear();
             writeQueue.Clear();
             messagesToRead.Clear();

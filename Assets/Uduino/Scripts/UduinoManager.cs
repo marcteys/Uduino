@@ -916,6 +916,7 @@ namespace Uduino
             {
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
+                    uduino.Value.SendBundle("destroy");
                     uduino.Value.Close();
                 }
                 uduinoDevices.Clear();
@@ -946,7 +947,6 @@ namespace Uduino
             if (_thread != null)
                 _thread.Join();
             _thread = null;
-            Debug.Log("Thread = " + _thread);
         }
         #endregion
     }
