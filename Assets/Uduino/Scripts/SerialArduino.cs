@@ -10,19 +10,19 @@ namespace Uduino
 {
     public class SerialArduino
     {
+        //Serial status
+        public SerialPort serial;
 
         private string _port;
 
         private int _baudrate;
 
-        public SerialPort serial;
-
         SerialStatus serialStatus = SerialStatus.UNDEF;
 
-        private bool readInProcess = false;
 
+        //Messages reading
         private Queue readQueue, writeQueue, messagesToRead;
-        int maxQueueLength = 100;
+        int maxQueueLength = 10;
 
         public SerialArduino(string port, int baudrate = 9600)
         {
@@ -90,6 +90,24 @@ namespace Uduino
             #if UNITY_EDITOR
             if(Application.isPlaying) EditorUtility.SetDirty(UduinoManager.Instance);
             #endif
+        }
+
+        /// <summary>
+        /// Set serial read timeout
+        /// </summary>
+        /// <param name="timeout">Timeout value, in ms</param>
+        public void SetReadTimeout(int timeout)
+        {
+
+        }
+
+        /// <summary>
+        /// Set write Timeout
+        /// </summary>
+        /// <param name="timeout">Timeout value, in ms</param>
+        public void SetWriteTimeout(int timeout)
+        {
+
         }
 
         #endregion

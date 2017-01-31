@@ -1,21 +1,23 @@
 #include<Uduino.h>
-Uduino uduino("servoBoard");
-
-#include <Servo.h>
-Servo myservo;
+Uduino uduino("advancedBoard");
 
 void setup()
 {
   Serial.begin(9600);
-  myservo.attach(9);
-   myservo.write(90);
-  uduino.addCommand("R", rotate);
+
+  uduino.addCommand("turnLeft", turnLeft);
+  uduino.addCommand("off", disable);
 }
 
-void rotate() {
+void turnLeft() {
   char *arg;
   arg = uduino.next();
   myservo.write(atoi(arg));
+}
+
+
+void disable() {
+  digitalWrite(13, LOW);
 }
 
 void loop()
@@ -23,6 +25,6 @@ void loop()
   if (Serial.available() > 0)
     uduino.readSerial();
 
-  delay(15);    
+  delay(15);
 
 }

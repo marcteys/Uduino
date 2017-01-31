@@ -134,7 +134,18 @@ namespace Uduino
         public bool ReadOnThread
         {
             get { return readOnThread; }
-            set { readOnThread = value; }
+            set {
+                if(value)
+                {
+                    StopAllCoroutines();
+                    StartThread();
+                } else
+                {
+                    StopThread();
+                    StartCoroutine(ReadSerial());
+                }
+                readOnThread = value;
+            }
         }
 
         /// <summary>
@@ -828,6 +839,8 @@ namespace Uduino
                     }
                 }
             }
+
+            Debug.LogError("TODO / THE ARDUINO IS DISCONNECTED ! ");
         }
 
 
@@ -849,20 +862,20 @@ namespace Uduino
         /// </summary>
         /// <param name="target"></param>
         /// <returns>null</returns>
-        public IEnumerator ReadSerial(string target)
+        public IEnumerator ReadSerial(string target = null)
         {
             while (true)
             {
                 UduinoDevice uduino = null;
-                if (uduinoDevices.TryGetValue(target, out uduino))
+                if (target != null && uduinoDevices.TryGetValue(target, out uduino))
                 {
+                    uduino.WriteToArduinoLoop();
                     if (uduino.read != null)
                     {
-                        string data = uduino.ReadFromArduino(uduino.read, 50);
-                        uduino.read = null;
+                        uduino.ReadFromArduino(uduino.read, 100);
+                        uduino.ReadFromArduinoLoop();
                         yield return null;
-                        Debug.LogError("todo here");
-                       // ParseData(data, target);
+
                     }
                     else
                     {
@@ -871,6 +884,11 @@ namespace Uduino
                 }
                 else
                 {
+                    foreach (KeyValuePair<string, UduinoDevice> uduinoDevice in uduinoDevices)
+                    {
+                        uduinoDevice.Value.ReadFromArduinoLoop();
+                        uduinoDevice.Value.WriteToArduinoLoop();
+                    }
                     yield return null;
                 }
             }
