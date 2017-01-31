@@ -135,14 +135,18 @@ namespace Uduino
         {
             get { return readOnThread; }
             set {
-                if(value)
+                if (Application.isPlaying)
                 {
-                    StopAllCoroutines();
-                    StartThread();
-                } else
-                {
-                    StopThread();
-                    StartCoroutine(ReadSerial());
+                    if (value)
+                    {
+                        StopAllCoroutines();
+                        StartThread();
+                    }
+                    else
+                    {
+                        StopThread();
+                        StartCoroutine(ReadSerial());
+                    }
                 }
                 readOnThread = value;
             }
@@ -781,6 +785,7 @@ namespace Uduino
         /// </summary>
         void StartThread()
         {
+            Debug.Log("StartThread");
             try
             {
                 _thread = new Thread(new ThreadStart(ReadPorts));
@@ -811,7 +816,7 @@ namespace Uduino
         
         void Update()
         {
-            if (!isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
+            if (readOnThread && !isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
             {
                 Log.Warning("Resarting Thread");
                 StartThread();
@@ -823,6 +828,8 @@ namespace Uduino
         /// </summary>
         public void ReadPorts()
         {
+            Debug.Log("ReadPorts");
+
             while (IsRunning())
             {
                 lock (uduinoDevices)

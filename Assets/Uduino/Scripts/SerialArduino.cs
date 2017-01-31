@@ -157,7 +157,7 @@ namespace Uduino
                 {
                     writeQueue.Enqueue(message);
                     Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
-                    Close();
+                  //  Close();
                 }
             }
             catch (Exception e)

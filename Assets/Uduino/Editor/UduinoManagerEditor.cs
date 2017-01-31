@@ -166,6 +166,7 @@ public class UduinoManagerEditor : Editor {
 
     public override void OnInspectorGUI()
     {
+
         if (manager == null)
         {
             manager = (UduinoManager)target;
@@ -176,6 +177,7 @@ public class UduinoManagerEditor : Editor {
         SetColorAndStyles();
 
         DrawLogo();
+
         defaultPanel = DrawHeaderTitle("Uduino Settings", defaultPanel, headerColor);
         if (defaultPanel)
         {
