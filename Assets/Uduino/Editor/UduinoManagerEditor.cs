@@ -347,10 +347,19 @@ public class UduinoManagerEditor : Editor {
 
     public void AdvancedSettings()
     {
+
+        GUILayout.Label("Serial settings", EditorStyles.boldLabel);
+        EditorGUI.indentLevel++;
+
+        manager.readTimeout = EditorGUILayout.IntField("Read timeout", manager.readTimeout);
+        manager.writeTimeout = EditorGUILayout.IntField("Write timeout", manager.writeTimeout);
+
+        EditorGUI.indentLevel--;
+
         GUILayout.Label("Discovery settings", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
 
-        manager.DiscoverTries = EditorGUILayout.IntField("Number of tries", manager.DiscoverTries);
+        manager.DiscoverTries = EditorGUILayout.IntField("Discovert of tries", manager.DiscoverTries);
 
         blacklistedFoldout = EditorGUI.Foldout(GUILayoutUtility.GetRect(40f, 40f, 16f, 16f, EditorStyles.foldout), blacklistedFoldout, "Blacklisted ports", true, EditorStyles.foldout);
         if (blacklistedFoldout)

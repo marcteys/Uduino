@@ -31,7 +31,11 @@ namespace Uduino
 
         private Dictionary<string, List<string>> bundles = new Dictionary<string, List<string>>();
          
-        public UduinoDevice(string port, int baudrate = 9600) : base(port, baudrate) { }
+        public UduinoDevice(string port, int baudrate = 9600, int readTimeout = 100, int writeTimeout= 100 ) : base(port, baudrate)
+        {
+            SetReadTimeout(readTimeout);
+            SetWriteTimeout(writeTimeout);
+        }
 
         /// <summary>
         /// Add a message to the bundle

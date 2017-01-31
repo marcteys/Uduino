@@ -184,6 +184,9 @@ namespace Uduino
         }
         private bool autoSendIsRunning = false;
 
+        public int readTimeout = 100;
+
+        public int writeTimeout = 100;
 
         /// <summary>
         /// SendRateSpeed
@@ -299,14 +302,14 @@ namespace Uduino
         /// <param name="portName">Port open</param>
         IEnumerator FindBoardPort(string portName)
         {
-            UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate);
+            UduinoDevice uduinoDevice = new UduinoDevice(portName, baudRate, readTimeout, writeTimeout);
             int tries = 0;
             do
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
                     //Todo : Those three lines could be improved and put on the Thread
-                   string reading = uduinoDevice.ReadFromArduino("IDENTITY", 100);
+                   string reading = uduinoDevice.ReadFromArduino("IDENTITY");
                    uduinoDevice.ReadFromArduinoLoop();
                    uduinoDevice.WriteToArduinoLoop();
 
@@ -596,7 +599,7 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string message = null, int timeout = 100, System.Action<string> action = null, string bundle = null)
+        public void Read(string target = null, string message = null, int timeout = 0, System.Action<string> action = null, string bundle = null)
         {
             if (bundle != null)
             {
@@ -611,34 +614,6 @@ namespace Uduino
                         uduino.Value.callback = action;
                         uduino.Value.AddToBundle(message, bundle);
                     }
-            }
-            else
-            {
-                if (UduinoTargetExists(target))
-                {
-                    uduinoDevices[target].callback = action;
-                    uduinoDevices[target].ReadFromArduino(message);
-                }
-                else
-                {
-                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                    {
-                        uduino.Value.callback = action;
-                        uduino.Value.ReadFromArduino(message);
-                    }
-                }
-            }
-        }
-
-        public void DirectReadFromArduino(string target = null, string message = null, System.Action<string> action = null, int timeout = 100, string bundle = null)
-        {
-            if (bundle != null)
-            {
-                if (UduinoTargetExists(target))
-                    uduinoDevices[target].AddToBundle(message, bundle);
-                else
-                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
-                        uduino.Value.AddToBundle(message, bundle);
             }
             else
             {
@@ -658,8 +633,36 @@ namespace Uduino
             }
         }
 
+        public void DirectReadFromArduino(string target = null, string message = null, int timeout = 0, System.Action<string> action = null, string bundle = null)
+        {
+            if (bundle != null)
+            {
+                if (UduinoTargetExists(target))
+                    uduinoDevices[target].AddToBundle(message, bundle);
+                else
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                        uduino.Value.AddToBundle(message, bundle);
+            }
+            else
+            {
+                if (UduinoTargetExists(target))
+                {
+                    uduinoDevices[target].callback = action;
+                    uduinoDevices[target].ReadFromArduino(message);
+                }
+                else
+                {
+                    foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+                    {
+                        uduino.Value.callback = action;
+                        uduino.Value.ReadFromArduino(message, timeout);
+                    }
+                }
+            }
+        }
+
         //TODO : Too much overload ? Bundle ? 
-        public void Read(int pin, string target=null, System.Action<string> action = null, int timeout = 100)
+        public void Read(int pin, string target=null, System.Action<string> action = null) //TODO : ref timeout ? 
         {
             DirectReadFromArduino(action: action);
         }
@@ -879,7 +882,7 @@ namespace Uduino
                     uduino.WriteToArduinoLoop();
                     if (uduino.read != null)
                     {
-                        uduino.ReadFromArduino(uduino.read, 100);
+                        uduino.ReadFromArduino(uduino.read);
                         uduino.ReadFromArduinoLoop();
                         yield return null;
 

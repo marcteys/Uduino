@@ -48,7 +48,7 @@ namespace Uduino
                 #endif
                 serial = new SerialPort(_port, _baudrate, Parity.None, 8, StopBits.One);
                 serial.ReadTimeout = 100;
-                serial.WriteTimeout = 150;
+                serial.WriteTimeout = 100;
                 serial.Close();
                 serial.Open();
                 serialStatus = SerialStatus.OPEN;
@@ -98,7 +98,7 @@ namespace Uduino
         /// <param name="timeout">Timeout value, in ms</param>
         public void SetReadTimeout(int timeout)
         {
-
+            if (serial != null) serial.ReadTimeout = timeout;
         }
 
         /// <summary>
@@ -107,7 +107,7 @@ namespace Uduino
         /// <param name="timeout">Timeout value, in ms</param>
         public void SetWriteTimeout(int timeout)
         {
-
+            if (serial != null) serial.WriteTimeout = timeout;
         }
 
         #endregion
@@ -120,7 +120,6 @@ namespace Uduino
         /// <param name="message">Message to write on this arduino serial</param>
         public void WriteToArduino(string message, object value = null)
         {
-
             if (message == null || message == "" )
                 return;
 
@@ -175,13 +174,13 @@ namespace Uduino
         /// <param name="message">Write a message to the serial port before reading the serial</param>
         /// <param name="timeout">Timeout in milliseconds</param>
         /// <returns>Read data</returns>
-        public string ReadFromArduino(string message = null, int timeout = 200)
+        public string ReadFromArduino(string message = null, int timeout = 0)
         {
             if (serial == null || !serial.IsOpen)
                 return null;
 
-            //TODO : Better ?
-            serial.ReadTimeout = timeout;
+            if (timeout > 0 && timeout != serial.ReadTimeout)
+                SetReadTimeout(timeout);
 
             if (message != null)
                 messagesToRead.Enqueue(message);
@@ -191,9 +190,9 @@ namespace Uduino
 
             string finalMessage = (string)readQueue.Dequeue();
 
+            //TODO : Test if the first time it returns something
             return finalMessage;
         }
-
 
         public void ReadFromArduinoLoop()
         {
@@ -204,7 +203,8 @@ namespace Uduino
                 WriteToArduino((string)messagesToRead.Dequeue());
             else
             {
-                //TODO "It read a message only if a message is sent");
+                //TODO "It read a message only if a message  "r" is sent");
+                // Incompatible with a "always read" method to trigger events
                 return;
             }
 
