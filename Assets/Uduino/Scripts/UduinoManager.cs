@@ -135,7 +135,7 @@ namespace Uduino
         {
             get { return readOnThread; }
             set {
-                if (Application.isPlaying)
+                if (Application.isPlaying && readOnThread != value)
                 {
                     if (value)
                     {
@@ -229,11 +229,13 @@ namespace Uduino
             Instance = this;
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
-            if(readOnThread) StartThread();
+
             OnValueReceived += DefaultOnValueReceived;
 
             StopCoroutine("AutoSendBundle");
-            if (limitSendRate) StartCoroutine("AutoSendBundle");
+
+            if (limitSendRate)
+                StartCoroutine("AutoSendBundle");
         }
 
         #endregion
@@ -317,7 +319,9 @@ namespace Uduino
                         if (!ReadOnThread) StartCoroutine(ReadSerial(name)); // Initiate the Async reading of variables 
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
-                       // yield return new WaitForSeconds(5f);
+
+                        if (_thread == null && readOnThread) StartThread();
+
                         InitAllPins();
                         break;
                     }
@@ -785,7 +789,7 @@ namespace Uduino
         /// </summary>
         void StartThread()
         {
-            Debug.Log("StartThread");
+            Log.Debug("Starting read/write thread");
             try
             {
                 _thread = new Thread(new ThreadStart(ReadPorts));
@@ -816,7 +820,7 @@ namespace Uduino
         
         void Update()
         {
-            if (readOnThread && !isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
+            if (_thread != null && !isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
             {
                 Log.Warning("Resarting Thread");
                 StartThread();
@@ -828,8 +832,6 @@ namespace Uduino
         /// </summary>
         public void ReadPorts()
         {
-            Debug.Log("ReadPorts");
-
             while (IsRunning())
             {
                 lock (uduinoDevices)
@@ -845,11 +847,9 @@ namespace Uduino
                         device.ReadFromArduinoLoop();
                     }
                 }
+                if (limitSendRate) Thread.Sleep((int)sendRateSpeed/2);
             }
-
-            Debug.LogError("TODO / THE ARDUINO IS DISCONNECTED ! ");
         }
-
 
         /// <summary>
         /// Used for Editor
