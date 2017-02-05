@@ -232,6 +232,7 @@ namespace Uduino
         void Awake()
         {
             Instance = this;
+            FullReset();
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
 
@@ -325,14 +326,14 @@ namespace Uduino
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
 
-                        if (_thread == null && readOnThread) StartThread();
+                        if ( Application.isPlaying && _thread == null && readOnThread) StartThread();
 
                         InitAllPins();
                         break;
                     }
                     else
                     {
-                        Log.Info("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
+                        Log.Debug("Impossible to get name on <color=#2196F3>[" + portName + "]</color>. Retrying.");
                     }
                 }
                 yield return new WaitForSeconds(0.05f);    //Wait one frame with yield return null
@@ -950,26 +951,26 @@ namespace Uduino
                 }
                 uduinoDevices.Clear();
             }
-
         }
 
         bool isApplicationQuiting = false;
         void OnApplicationQuit()
         {
             isApplicationQuiting = true;
-            DestroyAndQuit();
+            FullReset();
         }
 
-        public void OnDisable()
+        void OnDisable()
         {
-            DestroyAndQuit();
+            FullReset();
         }
 
-        void DestroyAndQuit()
+        public void FullReset()
         {
-            DisableThread();
             if (uduinoDevices.Count != 0)
                 CloseAllPorts();
+            StopAllCoroutines();
+            DisableThread();
         }
 
         void DisableThread()

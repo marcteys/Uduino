@@ -27,8 +27,6 @@ namespace Uduino
 
         public System.Action<string> callback = null;
 
-        private List<Pin> pins = new List<Pin>();
-
         private Dictionary<string, List<string>> bundles = new Dictionary<string, List<string>>();
          
         public UduinoDevice(string port, int baudrate = 9600, int readTimeout = 100, int writeTimeout= 100 ) : base(port, baudrate)
@@ -108,6 +106,7 @@ namespace Uduino
         {
             lastRead = message;
             if (callback != null) callback(message);
+            if(UduinoManager.Instance)
             UduinoManager.Instance.TriggerEvent(message, _name);
         }
 

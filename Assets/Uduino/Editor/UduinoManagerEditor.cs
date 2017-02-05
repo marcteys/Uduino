@@ -335,7 +335,8 @@ public class UduinoManagerEditor : Editor {
         SetGUIBackgroundColor("#ef5350");
         if (GUILayout.Button("Close ports"))
         {
-            manager.CloseAllPorts();
+            manager.FullReset();
+            manager.StopAllCoroutines();
         }
         SetGUIBackgroundColor();
         GUILayout.EndVertical();
