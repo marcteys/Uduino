@@ -331,7 +331,7 @@ namespace Uduino
                         if ( Application.isPlaying && _thread == null && readOnThread)
                             StartThread();
 
-                    //    Write(name, "boardfound");
+                           Write(name, "boardfound");
                         //uduinoDevice.WriteToArduino();
                         InitAllPins();
                         break;
@@ -805,6 +805,8 @@ namespace Uduino
             {
                 _thread = new Thread(new ThreadStart(ReadPorts));
                 _thread.Start();
+                lock(_thread)
+                    threadRunning = true;
             }
             catch (ThreadStateException e)
             {
@@ -848,6 +850,7 @@ namespace Uduino
                // Debug.Log(autoRead);
                 lock (uduinoDevices)
                 {
+                    
                     string[] keys = new string[uduinoDevices.Count];
                     for (int i = 0; i < uduinoDevices.Count; i++)
                         uduinoDevices.Keys.CopyTo(keys, i);
