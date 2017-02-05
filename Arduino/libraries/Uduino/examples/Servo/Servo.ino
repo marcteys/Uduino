@@ -22,8 +22,7 @@ void disable() {
 
 void loop()
 {
-  if (Serial.available() > 0)
-    uduino.readSerial();
+  uduino.readSerial();
 
   delay(15);
 

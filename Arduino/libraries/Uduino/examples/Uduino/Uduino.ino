@@ -168,8 +168,7 @@ void BundleReadPin() {
 
 void loop()
 {
-  if (Serial.available() > 0)
-    uduino.readSerial();
+  uduino.readSerial();
 
   for (int i = 0; i < MAXSERVOS; i++) {
     updateServo(&Servos[i]);

@@ -15,11 +15,10 @@ void GetVariable() {
 
 void loop()
 {
-   if (Serial.available() > 0)
-    uduino.readSerial();
+  uduino.readSerial();
 
   variable ++;
-  if(variable == 20) variable = 10;
-  
-  delay(100);    
+  if (variable == 20) variable = 10;
+
+  delay(100);
 }

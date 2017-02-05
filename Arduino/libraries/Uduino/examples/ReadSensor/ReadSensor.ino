@@ -12,8 +12,7 @@ void GetVariable() {
 }
 void loop()
 {
-   if (Serial.available() > 0) // verify if the serial is available...
-    uduino.readSerial();       // ...then process Uduino. /!\ This part is mandatory
+  uduino.readSerial();       //!\ This part is mandatory
 
-   delay(50);
+  delay(50);
 }
