@@ -19,6 +19,6 @@ public class ReadSensor : MonoBehaviour
 
     void OnValueReceived(string data, string device)
     {
-        Debug.Log(int.Parse(data)); // Use the data as you want !
+        Debug.Log(data); // Use the data as you want !
     }
 }

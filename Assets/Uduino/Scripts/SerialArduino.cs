@@ -203,7 +203,7 @@ namespace Uduino
                 WriteToArduino((string)messagesToRead.Dequeue());
             else
             {
-                //TODO "It read a message only if a message  "r" is sent");
+                Log.Debug("TODO : It read a message only if a message  r is sent");
                 // Incompatible with a "always read" method to trigger events
                 return;
             }

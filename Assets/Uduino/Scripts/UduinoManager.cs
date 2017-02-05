@@ -63,7 +63,9 @@ namespace Uduino
         public static UduinoManager Instance
         {
             get {
-                //UduinoManager Instance StackOverflowException 
+                if (_instance != null)
+                    return _instance;
+
                 UduinoManager[] uduinoManagers = FindObjectsOfType(typeof(UduinoManager)) as UduinoManager[];
                 if (uduinoManagers.Length == 0 )
                 {
@@ -80,8 +82,8 @@ namespace Uduino
                     _instance = value;
                 else
                 {
-                    Log.Warning("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
-                    DestroyImmediate(value);
+                    Log.Error("You can only use one UduinoManager. Destroying the new one attached to the GameObject " + value.gameObject.name);
+                    Destroy(value);
                 }
             }
         }
@@ -885,7 +887,6 @@ namespace Uduino
                         uduino.ReadFromArduino(uduino.read);
                         uduino.ReadFromArduinoLoop();
                         yield return null;
-
                     }
                     else
                     {
@@ -955,16 +956,18 @@ namespace Uduino
         bool isApplicationQuiting = false;
         void OnApplicationQuit()
         {
-            DisableThread();
             isApplicationQuiting = true;
-            if (uduinoDevices.Count != 0)
-                CloseAllPorts();
+            DestroyAndQuit();
         }
 
         public void OnDisable()
         {
-            DisableThread();
+            DestroyAndQuit();
+        }
 
+        void DestroyAndQuit()
+        {
+            DisableThread();
             if (uduinoDevices.Count != 0)
                 CloseAllPorts();
         }

@@ -108,7 +108,7 @@ namespace Uduino
         {
             lastRead = message;
             if (callback != null) callback(message);
-            //TODO : ONValueReceived callback
+            UduinoManager.Instance.TriggerEvent(message, _name);
         }
 
     }
