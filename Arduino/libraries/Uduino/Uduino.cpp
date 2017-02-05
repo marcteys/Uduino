@@ -13,6 +13,7 @@
 #endif
 
 char * Uduino::_identity = "none";
+int Uduino::init = 0;
 
 
 // Constructor makes sure some things are set. 
@@ -26,10 +27,12 @@ Uduino::Uduino(char* identity)
   clearBuffer(); 
 
   Uduino::_identity = identity;
+
   int val = 2;
   void* p = &val;
 
   this->addCommand("IDENTITY",Uduino::printIdentity);
+  this->addCommand("boardfound",Uduino::arduinoFound);
 
 }
 
@@ -49,7 +52,7 @@ Uduino::Uduino(SoftwareSerial &_SoftSer,char* identity)
 
 
 
-void Uduino::printIdentity() {
+void Uduino::printIdentity() { // TODO : refactor that
   char* additionnal = "uduinoIdentity ";
   char* full_text;
   full_text = (char*)malloc(strlen(additionnal)+strlen(Uduino::_identity)+1); 
@@ -65,6 +68,17 @@ char* Uduino::getIdentity() {
   strcpy(full_text, additionnal ); 
   strcat(full_text, _identity);
   return full_text;
+}
+
+
+
+void Uduino::arduinoFound() { 
+  init = 1;
+}
+
+int Uduino::isInit()
+{
+  return init;
 }
 
 //

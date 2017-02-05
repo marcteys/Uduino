@@ -61,6 +61,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define UDUINODEBUG 1
 #undef UDUINODEBUG      // Comment for Debug Mode
 
+
 class Uduino
 {
   public:
@@ -82,6 +83,8 @@ class Uduino
     // Uduino specific commands
     char *getIdentity();
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)
+    static void arduinoFound();   // Sets the command buffer to all '\0' (nulls)
+    int isInit(); 
 
   private:
     char inChar;          // A character read from the serial stream 
@@ -100,6 +103,8 @@ class Uduino
     UduinoCallback CommandList[MAXCOMMANDS];   // Actual definition for command/handler array
     void (*defaultHandler)();           // Pointer to the default handler function 
     int usingSoftwareSerial;            // Used as boolean to see if we're using SoftwareSerial object or not
+    static int init; 
+
     #ifndef UDUINO_HARDWAREONLY 
     SoftwareSerial *SoftSerial;         // Pointer to a user-created SoftwareSerial object
     #endif

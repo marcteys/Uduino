@@ -354,6 +354,7 @@ public class UduinoManagerEditor : Editor {
 
         manager.readTimeout = EditorGUILayout.IntField("Read timeout", manager.readTimeout);
         manager.writeTimeout = EditorGUILayout.IntField("Write timeout", manager.writeTimeout);
+        manager.autoRead = EditorGUILayout.Toggle("Auto read", manager.autoRead);
 
         EditorGUI.indentLevel--;
 

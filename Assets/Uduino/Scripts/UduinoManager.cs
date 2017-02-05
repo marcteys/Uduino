@@ -190,6 +190,8 @@ namespace Uduino
 
         public int writeTimeout = 100;
 
+        public bool autoRead = false;
+
         /// <summary>
         /// SendRateSpeed
         /// </summary>
@@ -326,8 +328,11 @@ namespace Uduino
                         Log.Warning("Board <color=#ff3355>" + name + "</color> <color=#2196F3>[" + uduinoDevice.getPort() + "]</color> added to dictionnary");
                         uduinoDevice.UduinoFound();
 
-                        if ( Application.isPlaying && _thread == null && readOnThread) StartThread();
+                        if ( Application.isPlaying && _thread == null && readOnThread)
+                            StartThread();
 
+                    //    Write(name, "boardfound");
+                        //uduinoDevice.WriteToArduino();
                         InitAllPins();
                         break;
                     }
@@ -840,6 +845,7 @@ namespace Uduino
         {
             while (IsRunning())
             {
+               // Debug.Log(autoRead);
                 lock (uduinoDevices)
                 {
                     string[] keys = new string[uduinoDevices.Count];
