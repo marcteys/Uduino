@@ -105,10 +105,15 @@ namespace Uduino
         public override void ReadingSuccess(string message)
         {
             lastRead = message;
-            if (callback != null) callback(message);
-            if(UduinoManager.Instance)
-            UduinoManager.Instance.TriggerEvent(message, _name);
+            if (UduinoManager.Instance)
+            {
+                UduinoManager.Instance.InvokeAsync(() =>
+                {
+                    if (callback != null) callback(message);
+                    UduinoManager.Instance.TriggerEvent(message, _name);
+                });
+            } else if(!Application.isPlaying && callback != null)
+                callback(message); // Condition if it's on the editor mode andwe press "read" - TODO :  Test
         }
-
     }
 }

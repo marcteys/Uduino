@@ -4,21 +4,45 @@ using Uduino;
 
 public class ButtonTrigger : MonoBehaviour
 {
+    public GameObject button;
 
     UduinoManager u;
 
     void Awake()
     {
-        UduinoManager.Instance.AlwaysRead("uduinoButton", ButonTrigger); 
+        UduinoManager.Instance.OnValueReceived += OnValueReceived; //Create the Delegate
+
+        UduinoManager.Instance.AlwaysRead("uduinoButton");
+       // UduinoManager.Instance.AlwaysRead("uduinoButton", ButonTrigger);
     }
 
-    void Update()
+    void PressDown()
     {
+        button.GetComponent<Renderer>().material.color = Color.red;
+        button.transform.Translate(Vector3.down);
 
     }
 
+    void PressUp()
+    {
+        button.GetComponent<Renderer>().material.color = Color.green;
+        button.transform.Translate(Vector3.up);
+    }
+
+    void OnValueReceived(string data, string device)
+    {
+        if (data == "0")
+            PressDown();
+        else if (data == "1")
+            PressUp();
+    }
+
+    /*
     void ButonTrigger(string data)
     {
-        Debug.Log(data); // Use the data as you want !
-    }
+        if (data == "0")
+            PressDown();
+        else if (data == "1")
+            PressUp();
+    }*/
 }

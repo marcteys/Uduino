@@ -176,7 +176,7 @@ namespace Uduino
         /// <returns>Read data</returns>
         public string ReadFromArduino(string message = null, int timeout = 0)
         {
-            if (serial == null || !serial.IsOpen)
+            if (serial == null || !serial.IsOpen || serialStatus == SerialStatus.STOPPING)
                 return null;
 
             if (timeout > 0 && timeout != serial.ReadTimeout)
@@ -196,7 +196,7 @@ namespace Uduino
 
         public void ReadFromArduinoLoop()
         {
-            if (serial == null || !serial.IsOpen)
+            if (serial == null || !serial.IsOpen || serialStatus == SerialStatus.STOPPING)
                 return;
 
             if (messagesToRead.Count > 0)
@@ -248,6 +248,11 @@ namespace Uduino
         #endregion
 
         #region Close
+
+        public void Stopping()
+        {
+            serialStatus = SerialStatus.STOPPING;
+        }
 
         /// <summary>
         /// Close Serial port 

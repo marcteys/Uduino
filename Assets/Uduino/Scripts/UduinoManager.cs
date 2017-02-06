@@ -36,6 +36,7 @@ namespace Uduino
         UNDEF,
         OPEN,
         FOUND,
+        STOPPING,
         CLOSE
     };
 
@@ -113,6 +114,13 @@ namespace Uduino
         /// </summary>
         public delegate void OnValueReceivedEvent(string data, string device);
         public event OnValueReceivedEvent OnValueReceived;
+
+        /// <summary>
+        /// Variables for the async trigger of functions
+        /// </summary>
+        private object _lockAsync = new object();
+
+        private System.Action _callbacksAsync;
 
         /// <summary>
         /// Log level
@@ -241,7 +249,7 @@ namespace Uduino
             Log.SetLogLevel(debugLevel);
             DiscoverPorts();
 
-            OnValueReceived += DefaultOnValueReceived;
+          //  OnValueReceived += DefaultOnValueReceived;
 
             StopCoroutine("AutoSendBundle");
 
@@ -694,6 +702,7 @@ namespace Uduino
         {
             if (target == null) target = "allBoards";
             autoReads.Add(target, action);
+            InitAutoRead();
         }
 
         public void InitAutoRead()
@@ -706,7 +715,7 @@ namespace Uduino
                     uduinoDevices[target].autoRead = true;
                     uduinoDevices[target].callback = autoReadElem.Value;
                 }
-                if(target == "allBoards")
+                else if(target == "allBoards")
                 {
                     Log.Debug("TODO : init all boards ");
                 }
@@ -866,6 +875,20 @@ namespace Uduino
         
         void Update()
         {
+            //Async Call
+            // TODO : refactor ?
+            Action a = null;
+            lock (_lockAsync)
+            {
+                if (_callbacksAsync != null)
+                {
+                    a = _callbacksAsync;
+                    _callbacksAsync = null;
+                }
+            }
+            if (a != null) a();
+
+            // Threading Loop
             if (_thread != null && !isApplicationQuiting && _thread.ThreadState == ThreadState.Stopped)
             {
                 Log.Warning("Resarting Thread");
@@ -948,22 +971,31 @@ namespace Uduino
             }
         }
 
-
-        public void TriggerEvent(string data, string target)
-        {
-            OnValueReceived(data, target);
-        }
         /// <summary>
-        /// Default delegate OnValueReceived 
+        /// Trigger an async event, from the thread read to the main thread
         /// </summary>
-        /// TODO : Maybe it's better to use delegate rather than CallbackFunction
-        /// <param name="data">Data received</param>
-        /// <param name="device">Device emmiter</param>
-        void DefaultOnValueReceived(string data, string device)
+        /// <param name="data">Message received</param>
+        /// <param name="device">Device who receive the message</param>
+        public void TriggerEvent(string data, string device)
         {
-        //   Debug.Log(data);
+            InvokeAsync(() =>
+            {
+                if (OnValueReceived != null)
+                    OnValueReceived(data, device);
+            });
         }
 
+        /// <summary>
+        /// Invoke a function from a read thead to the main thread
+        /// </summary>
+        /// <param name="callback">Callback functions</param>
+        public void InvokeAsync(Action callback)
+        {
+            lock (_lockAsync)
+            {
+                _callbacksAsync += callback;
+            }
+        }
         #endregion
 
         #region Close Ports
@@ -982,6 +1014,11 @@ namespace Uduino
             {
                 foreach (Pin pinTarget in pins)
                     pinTarget.Destroy();
+            }
+
+            foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
+            {
+                uduino.Value.Stopping();
             }
 
             lock (uduinoDevices)
@@ -1043,4 +1080,5 @@ namespace Uduino
         }
     }
     #endregion
+
 }
