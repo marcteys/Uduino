@@ -23,6 +23,7 @@ namespace Uduino
         //Messages reading
         private Queue readQueue, writeQueue, messagesToRead;
         int maxQueueLength = 10;
+        public bool autoRead = false;
 
         public SerialArduino(string port, int baudrate = 9600)
         {
@@ -150,7 +151,7 @@ namespace Uduino
                 {
                     serial.WriteLine(message + "\r\n");
                     serial.BaseStream.Flush();
-                    Log.Info("<color=#4CAF50>" + message + "</color> is sent to <color=#2196F3>[" + _port + "]</color>");
+                    Log.Info("<color=#4CAF50>" + message + "</color> sent to <color=#2196F3>[" + _port + "]</color>");
                 }
                 catch (System.IO.IOException e)
                 {
@@ -166,7 +167,6 @@ namespace Uduino
             }
             WritingSuccess(message);
         }
-
 
         /// <summary>
         /// Read Arduino serial port
@@ -201,6 +201,7 @@ namespace Uduino
 
             if (messagesToRead.Count > 0)
                 WriteToArduino((string)messagesToRead.Dequeue());
+            else if(autoRead) { }
             else
             {
                 Log.Debug("TODO : It read a message only if a message  r is sent");

@@ -97,12 +97,15 @@ namespace Uduino
         /// </summary>
         public Dictionary<string, UduinoDevice> uduinoDevices = new Dictionary<string, UduinoDevice>();
 
-        public List<UduinoDevice> tempUduinoDevices = new List<UduinoDevice>();
-
         /// <summary>
         /// List containing all active pins
         /// </summary>
         public List<Pin> pins = new List<Pin>();
+
+        /// <summary>
+        /// Dictionnary containing all the connected Arduino devices
+        /// </summary>
+        public Dictionary<string, Action<string>> autoReads = new Dictionary<string, Action<string>>();
 
         /// <summary>
         /// Create a delegate event to trigger the function OnValueReceived()
@@ -314,7 +317,7 @@ namespace Uduino
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
                     //Todo : Those three lines could be improved and put on the Thread
-                   string reading = uduinoDevice.ReadFromArduino("IDENTITY");
+                   string reading = uduinoDevice.ReadFromArduino("identity");
                    uduinoDevice.ReadFromArduinoLoop();
                    uduinoDevice.WriteToArduinoLoop();
 
@@ -331,9 +334,9 @@ namespace Uduino
                         if ( Application.isPlaying && _thread == null && readOnThread)
                             StartThread();
 
-                           Write(name, "boardfound");
+                           Write(name, "connected");
                         //uduinoDevice.WriteToArduino();
-                        InitAllPins();
+                        InitAllArduinos();
                         break;
                     }
                     else
@@ -445,6 +448,13 @@ namespace Uduino
             }
             Log.Debug("Init all pins");
             SendBundle("init");
+        }
+
+
+        public void InitAllArduinos()
+        {
+            InitAllPins();
+            InitAutoRead();
         }
 
         #endregion
@@ -607,7 +617,7 @@ namespace Uduino
         /// <param name="variable">Variable watched, if defined</param>
         /// <param name="timeout">Read Timeout, if defined </param>
         /// <param name="callback">Action callback</param>
-        public void Read(string target = null, string message = null, int timeout = 0, System.Action<string> action = null, string bundle = null)
+        public void Read(string target = null, string message = null, int timeout = 0, Action<string> action = null, string bundle = null)
         {
             if (bundle != null)
             {
@@ -641,7 +651,7 @@ namespace Uduino
             }
         }
 
-        public void DirectReadFromArduino(string target = null, string message = null, int timeout = 0, System.Action<string> action = null, string bundle = null)
+        public void DirectReadFromArduino(string target = null, string message = null, int timeout = 0, Action<string> action = null, string bundle = null)
         {
             if (bundle != null)
             {
@@ -670,15 +680,39 @@ namespace Uduino
         }
 
         //TODO : Too much overload ? Bundle ? 
-        public void Read(int pin, string target=null, System.Action<string> action = null) //TODO : ref timeout ? 
+        public void Read(int pin, string target = null, Action<string> action = null) //TODO : ref timeout ? 
         {
             DirectReadFromArduino(action: action);
         }
 
-        public void Read(int pin, System.Action<string> action = null)
+        public void Read(int pin, Action<string> action = null)
         {
             DirectReadFromArduino(action: action);
         }
+
+        public void AlwaysRead(string target = null, Action<string> action = null)
+        {
+            if (target == null) target = "allBoards";
+            autoReads.Add(target, action);
+        }
+
+        public void InitAutoRead()
+        {
+            foreach (KeyValuePair<string, Action<string>> autoReadElem in autoReads)
+            {
+                string target = autoReadElem.Key;
+                if (UduinoTargetExists(target))
+                {
+                    uduinoDevices[target].autoRead = true;
+                    uduinoDevices[target].callback = autoReadElem.Value;
+                }
+                if(target == "allBoards")
+                {
+                    Log.Debug("TODO : init all boards ");
+                }
+            }
+        }
+
         #endregion
 
         #region Write advanced commands
@@ -829,7 +863,6 @@ namespace Uduino
                 return threadRunning;
             }
         }
-
         
         void Update()
         {

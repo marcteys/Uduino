@@ -31,9 +31,9 @@ Uduino::Uduino(char* identity)
   int val = 2;
   void* p = &val;
 
-  this->addCommand("IDENTITY",Uduino::printIdentity);
-  this->addCommand("boardfound",Uduino::arduinoFound);
-
+  this->addCommand("identity",Uduino::printIdentity);
+  this->addCommand("connected",Uduino::arduinoFound);
+ // this->addCommand("disconnected",Uduino::arduinoFound);
 }
 
 #ifndef UDUINO_HARDWAREONLY
@@ -51,29 +51,21 @@ Uduino::Uduino(SoftwareSerial &_SoftSer,char* identity)
 #endif
 
 
-
 void Uduino::printIdentity() { // TODO : refactor that
   char* additionnal = "uduinoIdentity ";
   char* full_text;
   full_text = (char*)malloc(strlen(additionnal)+strlen(Uduino::_identity)+1); 
   strcpy(full_text, additionnal ); 
   strcat(full_text, Uduino::_identity);
+    Uduino::init = 1;
+  init = 1;
   Serial.println (full_text);
 }
 
-char* Uduino::getIdentity() {
-  char* additionnal = "uduinoIdentity ";
-  char* full_text;
-  full_text = (char*)malloc(strlen(additionnal)+strlen(_identity)+1); 
-  strcpy(full_text, additionnal ); 
-  strcat(full_text, _identity);
-  return full_text;
-}
-
-
 
 void Uduino::arduinoFound() { 
-  init = 1;
+//  init = 1;
+   // Serial.println(init);
 }
 
 int Uduino::isInit()

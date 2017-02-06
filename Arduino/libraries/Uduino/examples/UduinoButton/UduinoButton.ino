@@ -20,6 +20,6 @@ void loop()
   if (buttonState != prevButtonState) {
     Serial.println(buttonState);
   }
-  delay(10);
+  delay(15);
   
 }

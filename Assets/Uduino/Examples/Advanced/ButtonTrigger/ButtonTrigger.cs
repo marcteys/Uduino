@@ -9,8 +9,7 @@ public class ButtonTrigger : MonoBehaviour
 
     void Awake()
     {
-        UduinoManager.Instance.OnValueReceived += OnValueReceived; //Create the Delegate
-    //    UduinoManager.Instance.AutoRead("uduinoButton"); 
+        UduinoManager.Instance.AlwaysRead("uduinoButton", ButonTrigger); 
     }
 
     void Update()
@@ -18,7 +17,7 @@ public class ButtonTrigger : MonoBehaviour
 
     }
 
-    void OnValueReceived(string data, string device)
+    void ButonTrigger(string data)
     {
         Debug.Log(data); // Use the data as you want !
     }

@@ -81,7 +81,6 @@ class Uduino
     int charToInt(char* arg); //COnverts char to int
 
     // Uduino specific commands
-    char *getIdentity();
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)
     static void arduinoFound();   // Sets the command buffer to all '\0' (nulls)
     int isInit(); 
