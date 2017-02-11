@@ -9,8 +9,7 @@ namespace Uduino
     {
         public UduinoManager manager = null;
 
-        public string arduinoName = null; // TODO : we don't need that !! 
-        public UduinoDevice uduinoDevice = null;
+        public string arduinoName = null;
 
         public PinMode pinMode;
         public PinMode prevPinMode;

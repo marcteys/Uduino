@@ -112,8 +112,8 @@ namespace Uduino
                     if (callback != null) callback(message);
                     UduinoManager.Instance.TriggerEvent(message, _name);
                 });
-            } else if(!Application.isPlaying && callback != null)
-                callback(message); // Condition if it's on the editor mode andwe press "read" - TODO :  Test
+            } else if(!Application.isPlaying && callback != null) //if it's the editor
+                callback(message);
         }
     }
 }

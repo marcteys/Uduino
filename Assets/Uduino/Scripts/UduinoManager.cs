@@ -324,7 +324,6 @@ namespace Uduino
             {
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-                    //Todo : Those three lines could be improved and put on the Thread
                    string reading = uduinoDevice.ReadFromArduino("identity");
                    uduinoDevice.ReadFromArduinoLoop();
                    uduinoDevice.WriteToArduinoLoop();
@@ -364,9 +363,7 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Debug all ports state.
-        /// TODO : Really neccessary ? They are always open...
-        /// TODO : Put that in the utils.cs ? 
+        /// Debug ports state.
         /// </summary>
         public void GetPortState()
         {
@@ -444,7 +441,7 @@ namespace Uduino
             InitPin((int)pin, mode);
         }
 
-        // TODO : Refactor that. Should not work with multiple boards !
+        // TODO :Should not work with multiple boards ! Refactor that. 
         /// <summary>
         /// Init all Pins when the arduino boards are found
         /// </summary>
@@ -619,7 +616,6 @@ namespace Uduino
         /// <summary>
         /// Send a read command to a specific arduino.
         /// A read command will be returned in the OnValueReceived() delegate function
-        /// TODO : I should remove that from here ? 
         /// </summary>
         /// <param name="target">Target device name. Not defined means read everything</param>
         /// <param name="variable">Variable watched, if defined</param>
@@ -778,8 +774,8 @@ namespace Uduino
                 return true;
             else
             {
-				//TODO: Restart a loop to find all objects
-                if(target != null && target != "") Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
+                if(target != null && target != "")
+                    Log.Warning("The object " + target + " cannot be found. Are you sure it's connected and correctly detected ?");
                 return false;
             }
         }
