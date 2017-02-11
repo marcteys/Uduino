@@ -773,9 +773,8 @@ namespace Uduino
         /// <returns>Re</returns>
         private bool UduinoTargetExists(string target)
         {
-            UduinoDevice uduino = null;
             if (target == "" || target == null) return false;
-            if (uduinoDevices.TryGetValue(target, out uduino))
+            if (uduinoDevices.ContainsKey(target))
                 return true;
             else
             {

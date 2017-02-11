@@ -136,7 +136,6 @@ namespace Uduino
         /// </summary>
         public void WriteToArduinoLoop()
         {
-
             if (serial == null || !serial.IsOpen)
                 return;
 
@@ -157,7 +156,6 @@ namespace Uduino
                 {
                     writeQueue.Enqueue(message);
                     Log.Warning("Impossible to send a message to <color=#2196F3>[" + _port + "]</color>," + e);
-                  //  Close();
                 }
             }
             catch (Exception e)
@@ -166,6 +164,24 @@ namespace Uduino
                 Close();
             }
             WritingSuccess(message);
+        }
+
+        /// <summary>
+        /// Immediately write a message to a serial port
+        /// </summary>
+        /// <param name="message">Message to write on this arduino serial</param>
+        public void WriteToArduinoInstant(string message, object value = null)
+        {
+            if (message == null || message == "")
+                return;
+
+            if (value != null)
+                message = " " + value.ToString();
+
+            if (!writeQueue.Contains(message) && writeQueue.Count < maxQueueLength)
+                writeQueue.Enqueue(message);
+
+            WriteToArduinoLoop();
         }
 
         /// <summary>
@@ -200,7 +216,8 @@ namespace Uduino
                 return;
 
             if (messagesToRead.Count > 0)
-                WriteToArduino((string)messagesToRead.Dequeue());
+                WriteToArduinoInstant((string)messagesToRead.Dequeue());
+
             else if(autoRead) { }
             else
             {
