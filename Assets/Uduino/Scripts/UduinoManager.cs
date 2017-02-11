@@ -1013,6 +1013,7 @@ namespace Uduino
 
             foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
             {
+                uduino.Value.SendBundle("destroy");
                 uduino.Value.Stopping();
             }
 
@@ -1020,7 +1021,6 @@ namespace Uduino
             {
                 foreach (KeyValuePair<string, UduinoDevice> uduino in uduinoDevices)
                 {
-                    uduino.Value.SendBundle("destroy");
                     uduino.Value.Close();
                 }
                 uduinoDevices.Clear();

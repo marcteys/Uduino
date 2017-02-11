@@ -268,6 +268,7 @@ namespace Uduino
 
         public void Stopping()
         {
+            WriteToArduinoInstant("disconnected");
             serialStatus = SerialStatus.STOPPING;
         }
 

@@ -83,6 +83,7 @@ class Uduino
     // Uduino specific commands
     static void printIdentity();   // Sets the command buffer to all '\0' (nulls)
     static void arduinoFound();   // Sets the command buffer to all '\0' (nulls)
+    static void arduinoDisconnected();   // Sets the command buffer to all '\0' (nulls)
     int isInit(); 
 
   private:

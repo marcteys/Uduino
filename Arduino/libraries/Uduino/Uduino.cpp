@@ -33,7 +33,7 @@ Uduino::Uduino(char* identity)
 
   this->addCommand("identity",Uduino::printIdentity);
   this->addCommand("connected",Uduino::arduinoFound);
- // this->addCommand("disconnected",Uduino::arduinoFound);
+  this->addCommand("disconnected",Uduino::arduinoDisconnected);
 }
 
 #ifndef UDUINO_HARDWAREONLY
@@ -57,11 +57,16 @@ void Uduino::printIdentity() { // TODO : refactor that
   full_text = (char*)malloc(strlen(additionnal)+strlen(Uduino::_identity)+1); 
   strcpy(full_text, additionnal ); 
   strcat(full_text, Uduino::_identity);
-    Uduino::init = 1;
+  Uduino::init = 1;
   init = 1;
   Serial.println (full_text);
 }
 
+
+void Uduino::arduinoDisconnected() { 
+  Uduino::init = 0;
+  init = 0;
+}
 
 void Uduino::arduinoFound() { 
 //  init = 1;
