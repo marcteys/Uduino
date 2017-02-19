@@ -21,4 +21,9 @@ public class ReadSensor : MonoBehaviour
     {
         Debug.Log(data); // Use the data as you want !
     }
+
+    void Read()
+    {
+
+    }
 }

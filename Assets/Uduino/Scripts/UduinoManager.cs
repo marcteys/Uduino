@@ -499,6 +499,7 @@ namespace Uduino
         /// </summary>
         public void digitalWrite(int pin, int value, string bundle = null)
         {
+            Debug.Log(value);
             digitalWrite("", pin, value, bundle);
         }
 
@@ -654,6 +655,7 @@ namespace Uduino
                 }
             }
         }
+
 
         public void DirectReadFromArduino(string target = null, string message = null, int timeout = 0, Action<string> action = null, string bundle = null)
         {
