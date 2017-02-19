@@ -499,7 +499,6 @@ namespace Uduino
         /// </summary>
         public void digitalWrite(int pin, int value, string bundle = null)
         {
-            Debug.Log(value);
             digitalWrite("", pin, value, bundle);
         }
 

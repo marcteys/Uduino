@@ -10,8 +10,9 @@ public class ReadWrite : MonoBehaviour {
 
     void Start ()
     {
-        UduinoManager.Instance.InitPin(AnalogPin.A0, PinMode.Analog);
-        UduinoManager.Instance.InitPin(11, PinMode.PWM);
+        u = UduinoManager.Instance;
+        u.InitPin(AnalogPin.A0, PinMode.Analog);
+        u.InitPin(11, PinMode.PWM);
     }
 
     void Update ()
@@ -21,7 +22,7 @@ public class ReadWrite : MonoBehaviour {
 
     void ReadValue()
     {
-        readValue = UduinoManager.Instance.analogRead(AnalogPin.A0);
-        UduinoManager.Instance.analogWrite(11,readValue/2);
+        readValue = u.analogRead(AnalogPin.A0);
+        u.analogWrite(11,readValue/10);
     }
 }

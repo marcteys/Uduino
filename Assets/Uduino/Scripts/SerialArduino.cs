@@ -198,7 +198,7 @@ namespace Uduino
             if (timeout > 0 && timeout != serial.ReadTimeout)
                 SetReadTimeout(timeout);
 
-            if (message != null)
+            if (message != null && messagesToRead.Count < maxQueueLength)
                 messagesToRead.Enqueue(message);
 
             if (readQueue.Count == 0)
