@@ -240,7 +240,7 @@ namespace Uduino
                 }
                 catch (TimeoutException e)
                 {
-                    Log.Info(e);
+                    Log.Info("ReadTimeout. Are you sure someting is written in the serial of the board ? \n"  + e);
                 }
             }
             catch (Exception e)

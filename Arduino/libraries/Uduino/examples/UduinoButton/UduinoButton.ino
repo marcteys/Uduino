@@ -1,7 +1,7 @@
 #include<Uduino.h>
 Uduino uduino("uduinoButton");
 
-const int buttonPin = 2;
+const int buttonPin = 12;
 int buttonState = 0;
 int prevButtonState = 0;
 
@@ -19,6 +19,7 @@ void loop()
 
   if (buttonState != prevButtonState) {
     Serial.println(buttonState);
+    prevButtonState = buttonState;
   }
   delay(15);
   

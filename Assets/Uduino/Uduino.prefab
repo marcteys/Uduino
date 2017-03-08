@@ -55,4 +55,10 @@ MonoBehaviour:
   baudRate: 9600
   readOnThread: 1
   limitSendRate: 0
+  readTimeout: 100
+  writeTimeout: 100
+  autoRead: 0
   sendRateSpeed: 0
+  discoverTries: 20
+  stopAllOnQuit: 1
+  blackListedPorts: []

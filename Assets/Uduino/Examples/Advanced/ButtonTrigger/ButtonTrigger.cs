@@ -20,7 +20,6 @@ public class ButtonTrigger : MonoBehaviour
     {
         button.GetComponent<Renderer>().material.color = Color.red;
         button.transform.Translate(Vector3.down / 10);
-
     }
 
     void PressUp()
@@ -31,17 +30,17 @@ public class ButtonTrigger : MonoBehaviour
 
     void OnValueReceived(string data, string device)
     {
-        if (data == "0")
+        if (data == "1")
             PressDown();
-        else if (data == "1")
+        else if (data == "0")
             PressUp();
     }
     
     void ButonTrigger(string data)
     {
-        if (data == "0")
+        if (data == "1")
             PressDown();
-        else if (data == "1")
+        else if (data == "0")
             PressUp();
     }
 }
