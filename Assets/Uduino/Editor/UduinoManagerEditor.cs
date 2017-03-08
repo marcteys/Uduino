@@ -24,11 +24,11 @@ public class EditorPin : Pin
         ChangePinMode(mode);
     }
 
-    public override void SendRead(string bundle = null, System.Action<string> action = null)
+    public override void SendRead(string bundle = null, System.Action<string> action = null, string digital = "")
     {
         if (editorManager != null)
         {
-            editorManager.Read(arduinoName, "r " + currentPin, action: editorManager.ParseReadData);
+            editorManager.Read(arduinoName, "r"+ digital + " " + currentPin, action: editorManager.ParseReadData);
         }
     }
 
@@ -498,7 +498,7 @@ public class UduinoManagerEditor : Editor {
                 break;
             case PinMode.Input_pullup:
                 if (GUILayout.Button("Read", "toolbarButton", GUILayout.MaxWidth(55)))
-                    pin.SendRead();
+                    pin.SendRead(digital:"d");
                 GUILayout.Label(pin.lastReadValue.ToString(), "TE Toolbarbutton");
                 UpdateReadPins(pin.arduinoName, pin.currentPin, pin.lastReadValue);
                 break;

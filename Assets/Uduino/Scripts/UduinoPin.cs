@@ -69,9 +69,9 @@ namespace Uduino
         /// Send OptimizedValue
         /// </summary>
         /// <param name="sendValue">Value to send</param>
-        public virtual void SendRead(string bundle = null, System.Action<string> action = null)
+        public virtual void SendRead(string bundle = null, System.Action<string> action = null, string digital = "")
         {
-            string cmd = "r";
+            string cmd = "r" + digital;
             if (bundle != null) cmd = "br";
             manager.Read(arduinoName, cmd + " " + currentPin, action: action, bundle: bundle);
         }

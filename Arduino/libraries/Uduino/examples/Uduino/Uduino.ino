@@ -38,7 +38,8 @@ void setup()
   uduino.addCommand("s", SetMode);
   uduino.addCommand("d", WritePinDigital);
   uduino.addCommand("a", WritePinAnalog);
-  uduino.addCommand("r", ReadPin);
+  uduino.addCommand("rd",ReadDigitalPin);
+  uduino.addCommand("r", ReadAnalogPin);
   uduino.addCommand("br", BundleReadPin);
   uduino.addCommand("b", ReadBundle);
 }
@@ -138,7 +139,7 @@ void WritePinDigital() {
 
 }
 
-void ReadPin() {
+void ReadAnalogPin() {
   int pinToRead;
   char *arg;
   arg = uduino.next();
@@ -151,6 +152,18 @@ void ReadPin() {
   Serial.println(analogRead(pinToRead));
 }
 
+void ReadDigitalPin() {
+  int pinToRead;
+  char *arg;
+  arg = uduino.next();
+  if (arg != NULL)
+  {
+    pinToRead = atoi(arg);
+  }
+  Serial.print(pinToRead);
+  Serial.print(" ");
+  Serial.println(digitalRead(pinToRead));
+}
 
 void BundleReadPin() {
   int pinToRead;
