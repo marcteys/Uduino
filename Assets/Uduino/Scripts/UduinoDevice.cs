@@ -31,8 +31,8 @@ namespace Uduino
          
         public UduinoDevice(string port, int baudrate = 9600, int readTimeout = 100, int writeTimeout= 100 ) : base(port, baudrate)
         {
-            SetReadTimeout(readTimeout);
-            SetWriteTimeout(writeTimeout);
+            this.readTimeout = readTimeout;
+            this.writeTimeout = writeTimeout;
         }
 
         /// <summary>

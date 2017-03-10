@@ -69,7 +69,6 @@ public class EditorPin : Pin
 
 }
 
-
 [CustomEditor(typeof(UduinoManager))]
 public class UduinoManagerEditor : Editor {
 
@@ -98,6 +97,7 @@ public class UduinoManagerEditor : Editor {
     GUIStyle boldtext = null;
     GUIStyle olLight = null;
     GUIStyle olInput = null;
+    GUIStyle customFoldtout = null;
 
     //Setings - Todo : could do better
     bool isUpToDate = false;
@@ -107,6 +107,8 @@ public class UduinoManagerEditor : Editor {
     public string[] baudRates = new string[] { "4800", "9600", "19200", "57600", "115200" };
     int prevBaudRateIndex = 1;
     public int baudRateIndex = 1;
+    public int defaultArduinoBoard = 0;
+
 
     ArduinoBoardType defaultBaordType = null;
 
@@ -117,7 +119,7 @@ public class UduinoManagerEditor : Editor {
 
     void SetColorAndStyles()
     {
-        if(boldtext == null)
+        if(boldtext == null )
         {
             //Color and GUI
             defaultButtonColor = GUI.backgroundColor;
@@ -146,6 +148,10 @@ public class UduinoManagerEditor : Editor {
             olInput.fontStyle = FontStyle.Bold;
             olInput.fontSize = 10;
             olInput.alignment = TextAnchor.MiddleLeft;
+
+            customFoldtout = new GUIStyle(EditorStyles.foldout);
+            customFoldtout.fontStyle = FontStyle.Bold;
+
         }
     }
 
@@ -182,8 +188,6 @@ public class UduinoManagerEditor : Editor {
         DrawLogo();
 
         defaultPanel = DrawHeaderTitle("Uduino Settings", defaultPanel, headerColor);
-
-        EditorGUILayout.Popup(0, BoardsTypeList.Boards.ListToNames());
 
         if (defaultPanel)
         {
@@ -322,6 +326,33 @@ public class UduinoManagerEditor : Editor {
                     }
                 }
                 GUILayout.EndVertical();
+
+
+                //More setings
+              //  EditorGUILayout.Separator();
+                bool foldout = EditorPrefs.GetBool(uduino.Key);
+                EditorGUI.BeginChangeCheck();
+                EditorGUILayout.GetControlRect(true, 16f, EditorStyles.foldout);
+                Rect foldRect = GUILayoutUtility.GetLastRect();
+                if (Event.current.type == EventType.MouseUp && foldRect.Contains(Event.current.mousePosition))
+                {
+                    foldout = !foldout;
+                    EditorPrefs.SetBool(uduino.Key, foldout);
+                    GUI.changed = true;
+                    Event.current.Use();
+                }
+
+                foldout = EditorGUI.Foldout(foldRect, foldout, "Other settings", customFoldtout);
+
+                if (foldout)
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.Popup("Board Type", 0, BoardsTypeList.Boards.ListToNames());
+                    uduino.Value.readTimeout = EditorGUILayout.IntField("Read timeout", uduino.Value.readTimeout);
+                    uduino.Value.writeTimeout = EditorGUILayout.IntField("Write timeout", uduino.Value.writeTimeout);
+                    uduino.Value.continuousRead = EditorGUILayout.Toggle("Auto read", uduino.Value.continuousRead);
+                    EditorGUI.indentLevel--;
+                }
             }
         }
 
@@ -355,9 +386,10 @@ public class UduinoManagerEditor : Editor {
     public void AdvancedSettings()
     {
 
-        GUILayout.Label("Serial settings", EditorStyles.boldLabel);
+        GUILayout.Label("General Serial settings", EditorStyles.boldLabel);
         EditorGUI.indentLevel++;
 
+        defaultArduinoBoard = EditorGUILayout.Popup("Board Type", defaultArduinoBoard, BoardsTypeList.Boards.ListToNames());
         manager.readTimeout = EditorGUILayout.IntField("Read timeout", manager.readTimeout);
         manager.writeTimeout = EditorGUILayout.IntField("Write timeout", manager.writeTimeout);
         manager.autoRead = EditorGUILayout.Toggle("Auto read", manager.autoRead);

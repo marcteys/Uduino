@@ -19,6 +19,33 @@ namespace Uduino
 
         SerialStatus serialStatus = SerialStatus.UNDEF;
 
+        //Timeout
+        public int readTimeout 
+        {
+            get {
+                if (serial != null) return serial.ReadTimeout;
+                else return 0;
+            }
+            set {
+                if (serial != null)
+                    serial.ReadTimeout = value;
+            }
+        }
+
+        //Timeout
+        public int writeTimeout
+        {
+            get
+            {
+                if (serial != null) return serial.WriteTimeout;
+                else return 0;
+            }
+            set
+            {
+                if (serial != null)
+                    serial.WriteTimeout = value;
+            }
+        }
 
         //Messages reading
         private Queue readQueue, writeQueue, messagesToRead;
@@ -92,25 +119,27 @@ namespace Uduino
             if(Application.isPlaying) EditorUtility.SetDirty(UduinoManager.Instance);
             #endif
         }
-
+        /*
         /// <summary>
         /// Set serial read timeout
         /// </summary>
         /// <param name="timeout">Timeout value, in ms</param>
-        public void SetReadTimeout(int timeout)
+        public int SetReadTimeout(int timeout)
         {
             if (serial != null) serial.ReadTimeout = timeout;
+            return timeout;
         }
 
         /// <summary>
         /// Set write Timeout
         /// </summary>
         /// <param name="timeout">Timeout value, in ms</param>
-        public void SetWriteTimeout(int timeout)
+        public int SetWriteTimeout(int timeout)
         {
             if (serial != null) serial.WriteTimeout = timeout;
+            return timeout;
         }
-
+        */
         #endregion
 
         #region Commands
@@ -196,7 +225,7 @@ namespace Uduino
                 return null;
 
             if (timeout > 0 && timeout != serial.ReadTimeout)
-                SetReadTimeout(timeout);
+                readTimeout = timeout;
 
             if (message != null && messagesToRead.Count < maxQueueLength)
                 messagesToRead.Enqueue(message);
