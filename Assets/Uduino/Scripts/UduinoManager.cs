@@ -12,7 +12,6 @@ using System.Threading;
 
 namespace Uduino
 {
-
     #region Enums
     public enum PinMode
     {
@@ -48,9 +47,97 @@ namespace Uduino
         ERROR,
         NONE
     };
-
-
     #endregion
+
+    #region Board definitions
+    /// <summary>
+    /// For the moment this is not used
+    /// </summary>
+    public class ArduinoBoardType
+    {
+        public string name = "";
+        List<string> pins = new List<string>();
+
+        public ArduinoBoardType(string name,int numberDigital, int numberAnalog)
+        {
+            this.name = name;
+            for(int i =0; i <= numberDigital;i++)
+                pins.Add(""+i);
+            for (int i = 0; i <= numberAnalog; i++)
+                pins.Add("A" + i);
+        }
+
+        public string[] GetPins()
+        {
+            return pins.ToArray();
+        }
+    }
+
+    public class BoardsTypeList
+    {
+        private static BoardsTypeList _boards = null;
+        public static BoardsTypeList Boards
+        {
+            get
+            {
+                if (_boards != null)
+                    return _boards;
+                else
+                {
+                    _boards = new BoardsTypeList();
+                    return _boards;
+                }
+            }
+            set
+            {
+                if (Boards == null)
+                    _boards = value;
+            }
+        }
+
+        [SerializeField]
+        public List<ArduinoBoardType> boardTypes = new List<ArduinoBoardType>();
+
+        BoardsTypeList()
+        {
+            boardTypes.Add(new ArduinoBoardType("Arduino Uno", 13, 5));
+            boardTypes.Add(new ArduinoBoardType("Arduino Duemilanove", 13, 5));
+            boardTypes.Add(new ArduinoBoardType("Arduino Leonardo", 13, 5));
+            boardTypes.Add(new ArduinoBoardType("Arduino Pro Mini", 13, 5));
+            boardTypes.Add(new ArduinoBoardType("Arduino Mega", 53, 15));
+            boardTypes.Add(new ArduinoBoardType("Arduino Due", 53, 13));
+            boardTypes.Add(new ArduinoBoardType("Arduino Nano", 13, 7));
+            boardTypes.Add(new ArduinoBoardType("Arduino Mini", 13, 7));
+            boardTypes.Add(new ArduinoBoardType("Arduino Yun", 13, 11));
+        }
+
+        public string[] ListToNames()
+        {
+            List<string> names = new List<string>();
+            boardTypes.ForEach(x => names.Add(x.name));
+            return names.ToArray();
+        }
+
+        public ArduinoBoardType GetBoardFromName(string name)
+        {
+            return boardTypes.Find(x => x.name == name);
+        }
+
+        /// <summary>
+        /// Add a new board type
+        /// </summary>
+        /// <param name="name">Name of the custom board</param>
+        /// <param name="numberDigital">Number of digital pins</param>
+        /// <param name="numberAnalog">Number of analog pin</param>
+        /// <returns>Return new boardType</returns>
+        public ArduinoBoardType addCustomBoardType(string name, int numberDigital, int numberAnalog)
+        {
+            ArduinoBoardType board = new ArduinoBoardType(name, numberDigital, numberAnalog);
+            boardTypes.Add(board);
+            return board;
+        }
+    }
+   #endregion
 
     public class UduinoManager : MonoBehaviour {
 
@@ -79,7 +166,7 @@ namespace Uduino
                     return _instance;
             }
             set {
-                if(UduinoManager.Instance == null)
+                if(Instance == null)
                     _instance = value;
                 else
                 {

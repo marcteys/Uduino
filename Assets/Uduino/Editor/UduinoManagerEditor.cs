@@ -83,12 +83,13 @@ public class UduinoManagerEditor : Editor {
     LogLevel debugLevel;
 
     List<Pin> pins = new List<Pin>();
+    bool usingArduino = true;
 
     bool defaultPanel = true;
     bool arduinoPanel = true;
     bool advancedPanel = false;
     bool blacklistedFoldout = false;
-
+    
     //Style-related
     Color headerColor = new Color(0.65f, 0.65f, 0.65f, 1);
     //Color backgroundColor = new Color(0.75f, 0.75f, 0.75f);
@@ -106,6 +107,8 @@ public class UduinoManagerEditor : Editor {
     public string[] baudRates = new string[] { "4800", "9600", "19200", "57600", "115200" };
     int prevBaudRateIndex = 1;
     public int baudRateIndex = 1;
+
+    ArduinoBoardType defaultBaordType = null;
 
     void OnEnable()
     {
@@ -179,6 +182,9 @@ public class UduinoManagerEditor : Editor {
         DrawLogo();
 
         defaultPanel = DrawHeaderTitle("Uduino Settings", defaultPanel, headerColor);
+
+        EditorGUILayout.Popup(0, BoardsTypeList.Boards.ListToNames());
+
         if (defaultPanel)
         {
 
