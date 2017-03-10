@@ -76,26 +76,18 @@ namespace Uduino
     public class BoardsTypeList
     {
         private static BoardsTypeList _boards = null;
-        public static BoardsTypeList Boards
-        {
-            get
-            {
+        public static BoardsTypeList Boards {
+            get {
                 if (_boards != null)
                     return _boards;
-                else
-                {
+                else {
                     _boards = new BoardsTypeList();
-                    return _boards;
-                }
-            }
-            set
-            {
+                    return _boards; }
+            } set {
                 if (Boards == null)
                     _boards = value;
             }
         }
-
-        [SerializeField]
         public List<ArduinoBoardType> boardTypes = new List<ArduinoBoardType>();
 
         BoardsTypeList()
@@ -111,13 +103,21 @@ namespace Uduino
             boardTypes.Add(new ArduinoBoardType("Arduino Yun", 13, 11));
         }
 
+        /// <summary>
+        /// List the arduino boards as an array
+        /// </summary>
+        /// <returns>Array of arduino boards</returns>
         public string[] ListToNames()
         {
             List<string> names = new List<string>();
             boardTypes.ForEach(x => names.Add(x.name));
             return names.ToArray();
         }
-
+        /// <summary>
+        /// Return the arduino board type from a name
+        /// </summary>
+        /// <param name="name">Name of the board</param>
+        /// <returns>ArduinoBoardType</returns>
         public ArduinoBoardType GetBoardFromName(string name)
         {
             return boardTypes.Find(x => x.name == name);
