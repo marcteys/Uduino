@@ -370,13 +370,11 @@ namespace Uduino
 
 			if (p == 4 || p == 128 || p == 6) {
 				string[] ttys = System.IO.Directory.GetFiles ("/dev/", "tty.*");
-				return ttys;
-                //TODO : Test on Linux and MacOS
-                /*
 				foreach (string dev in ttys) {
-					if (dev.StartsWith ("/dev/tty.*")) // TODO : Test if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
+					if (dev.StartsWith ("/dev/tty.usb")) { // TODO : Test if (portName.StartsWith ("/dev/tty.usb") || portName.StartsWith ("/dev/ttyUSB"))
 						serial_ports.Add (dev);
-				}*/
+					}
+				}
 			} 
 			return serial_ports.ToArray();
 		}
