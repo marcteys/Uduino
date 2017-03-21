@@ -148,7 +148,9 @@ namespace Uduino
         /// Write a message to a serial port
         /// </summary>
         /// <param name="message">Message to write on this arduino serial</param>
-        public void WriteToArduino(string message, object value = null)
+        /// <param name="value">Extra value to send</param>
+        /// <param name="instant">Write the message value now and not in the thread loop</param>
+        public void WriteToArduino(string message, object value = null, bool instant = false)
         {
             if (message == null || message == "" )
                 return;
@@ -158,6 +160,9 @@ namespace Uduino
 
             if(!writeQueue.Contains(message) && writeQueue.Count < maxQueueLength)
                 writeQueue.Enqueue(message);
+
+            if(instant)
+                WriteToArduinoLoop();
         }
 
         /// <summary>
@@ -196,30 +201,13 @@ namespace Uduino
         }
 
         /// <summary>
-        /// Immediately write a message to a serial port
-        /// </summary>
-        /// <param name="message">Message to write on this arduino serial</param>
-        public void WriteToArduinoInstant(string message, object value = null)
-        {
-            if (message == null || message == "")
-                return;
-
-            if (value != null)
-                message = " " + value.ToString();
-
-            if (!writeQueue.Contains(message) && writeQueue.Count < maxQueueLength)
-                writeQueue.Enqueue(message);
-
-            WriteToArduinoLoop();
-        }
-
-        /// <summary>
         /// Read Arduino serial port
         /// </summary>
         /// <param name="message">Write a message to the serial port before reading the serial</param>
         /// <param name="timeout">Timeout in milliseconds</param>
+        /// <param name="instant">Read the message value now and not in the thread loop</param>
         /// <returns>Read data</returns>
-        public string ReadFromArduino(string message = null, int timeout = 0)
+        public string ReadFromArduino(string message = null, int timeout = 0, bool instant = false)
         {
             if (serial == null || !serial.IsOpen || serialStatus == SerialStatus.STOPPING)
                 return null;
@@ -229,6 +217,9 @@ namespace Uduino
 
             if (message != null && messagesToRead.Count < maxQueueLength)
                 messagesToRead.Enqueue(message);
+
+            if (instant)
+                ReadFromArduinoLoop();
 
             if (readQueue.Count == 0)
                 return null;
@@ -245,7 +236,7 @@ namespace Uduino
                 return;
 
             if (messagesToRead.Count > 0)
-                WriteToArduinoInstant((string)messagesToRead.Dequeue());
+                WriteToArduino((string)messagesToRead.Dequeue(),instant:true);
 
             else if(autoRead) { }
             else
@@ -297,7 +288,7 @@ namespace Uduino
 
         public void Stopping()
         {
-            WriteToArduinoInstant("disconnected");
+            WriteToArduino("disconnected",instant:true);
             serialStatus = SerialStatus.STOPPING;
         }
 

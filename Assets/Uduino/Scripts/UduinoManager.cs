@@ -407,14 +407,9 @@ namespace Uduino
             int tries = 0;
             do
             {
-
                 if (uduinoDevice.getStatus() == SerialStatus.OPEN)
                 {
-					string reading = uduinoDevice.ReadFromArduino("identity");
-                   uduinoDevice.ReadFromArduinoLoop();
-					uduinoDevice.WriteToArduinoInstant("identity");
-
-				 //  reading = uduinoDevice.ReadFromArduino("identity");
+					string reading = uduinoDevice.ReadFromArduino("identity", instant:true);
 
                     if (reading != null && reading.Split(new char[0])[0] == "uduinoIdentity")
                     {
@@ -441,6 +436,7 @@ namespace Uduino
                 }
 				//TODO : compare with yield return new WaitForSeconds(0.5f);
                 yield return null;    //Wait one frame with yield return null
+
             } while (uduinoDevice.getStatus() != SerialStatus.UNDEF && tries++ < discoverTries);
 
             if(uduinoDevice.getStatus() != SerialStatus.FOUND)
