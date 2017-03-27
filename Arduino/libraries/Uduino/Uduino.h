@@ -67,7 +67,7 @@ class Uduino
   public:
     static char *_identity; 
 
-    Uduino(char* identity);      // Constructor
+    Uduino(const char* identity);      // Constructor
     #ifndef UDUINO_HARDWAREONLY
     Uduino(SoftwareSerial &SoftSer,char* identity);  // Constructor for using SoftwareSerial objects
     #endif
