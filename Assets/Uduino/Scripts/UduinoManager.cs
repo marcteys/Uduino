@@ -56,20 +56,38 @@ namespace Uduino
     public class ArduinoBoardType
     {
         public string name = "";
-        List<string> pins = new List<string>();
-
-        public ArduinoBoardType(string name,int numberDigital, int numberAnalog)
+        Dictionary<string,int> pins = new Dictionary<string, int>();
+        
+        //                                                                      TODO : If we add this as optional value, it breaks
+        public ArduinoBoardType(string name,int numberDigital, int numberAnalog, int[] otherAnalogPins)
         {
+            int totalPin = 0;
             this.name = name;
             for(int i =0; i <= numberDigital;i++)
-                pins.Add(""+i);
+            {
+                totalPin++;
+                pins.Add("" + i, totalPin);
+
+            }
             for (int i = 0; i <= numberAnalog; i++)
-                pins.Add("A" + i);
+            {
+                totalPin++;
+                pins.Add("A" + i, totalPin);
+            }
+            if (otherAnalogPins != null)
+            {
+                for (int i = 0; i <= otherAnalogPins.Length; i++)
+                {
+                    pins.Add("A" + (numberAnalog + i), otherAnalogPins[i]);
+                }
+            }
         }
 
         public string[] GetPins()
         {
-            return pins.ToArray();
+            string[] keys = new string[pins.Keys.Count];
+            pins.Keys.CopyTo(keys, 0);
+            return keys;
         }
     }
 
@@ -92,15 +110,15 @@ namespace Uduino
 
         BoardsTypeList()
         {
-            boardTypes.Add(new ArduinoBoardType("Arduino Uno", 13, 5));
-            boardTypes.Add(new ArduinoBoardType("Arduino Duemilanove", 13, 5));
-            boardTypes.Add(new ArduinoBoardType("Arduino Leonardo", 13, 5));
-            boardTypes.Add(new ArduinoBoardType("Arduino Pro Mini", 13, 5));
-            boardTypes.Add(new ArduinoBoardType("Arduino Mega", 53, 15));
-            boardTypes.Add(new ArduinoBoardType("Arduino Due", 53, 13));
-            boardTypes.Add(new ArduinoBoardType("Arduino Nano", 13, 7));
-            boardTypes.Add(new ArduinoBoardType("Arduino Mini", 13, 7));
-            boardTypes.Add(new ArduinoBoardType("Arduino Yun", 13, 11));
+            boardTypes.Add(new ArduinoBoardType("Arduino Uno", 13, 6, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Duemilanove", 13, 6, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Leonardo", 13, 6, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Pro Mini", 13, 6, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Mega", 53, 15, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Due", 53, 13, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Nano", 13, 8, null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Mini", 13, 7,null));
+            boardTypes.Add(new ArduinoBoardType("Arduino Yun", 13, 6, new int[] {4,6,7,8,9,10,12}));
         }
 
         /// <summary>
@@ -130,9 +148,9 @@ namespace Uduino
         /// <param name="numberDigital">Number of digital pins</param>
         /// <param name="numberAnalog">Number of analog pin</param>
         /// <returns>Return new boardType</returns>
-        public ArduinoBoardType addCustomBoardType(string name, int numberDigital, int numberAnalog)
+        public ArduinoBoardType addCustomBoardType(string name, int numberDigital, int numberAnalog, int[] otherAnalogPins)
         {
-            ArduinoBoardType board = new ArduinoBoardType(name, numberDigital, numberAnalog);
+            ArduinoBoardType board = new ArduinoBoardType(name, numberDigital, numberAnalog, otherAnalogPins);
             boardTypes.Add(board);
             return board;
         }
