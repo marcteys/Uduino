@@ -12,12 +12,12 @@
 #include <SoftwareSerial.h>
 #endif
 
-char * Uduino::_identity = "none";
+char * Uduino::_identity = (char*)"none";
 int Uduino::init = 0;
 
 
 // Constructor makes sure some things are set. 
-Uduino::Uduino(char* identity)
+Uduino::Uduino(const char* identity)
 {
   usingSoftwareSerial=0;
   strncpy(delim," ",MAXDELIMETER);  // strtok_r needs a null-terminated string
@@ -26,7 +26,7 @@ Uduino::Uduino(char* identity)
   numCommand=0;    // Number of callback handlers installed
   clearBuffer(); 
 
-  Uduino::_identity = identity;
+  Uduino::_identity = (char*)identity;
 
   int val = 2;
   void* p = &val;
@@ -52,7 +52,7 @@ Uduino::Uduino(SoftwareSerial &_SoftSer,char* identity)
 
 
 void Uduino::printIdentity() { // TODO : refactor that
-  char* additionnal = "uduinoIdentity ";
+  char* additionnal = (char*)"uduinoIdentity ";
   char* full_text;
   full_text = (char*)malloc(strlen(additionnal)+strlen(Uduino::_identity)+1); 
   strcpy(full_text, additionnal ); 
