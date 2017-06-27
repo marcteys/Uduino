@@ -13,4 +13,4 @@ This project was created after too much frustration on how to properly connected
 ## Where to find it
 
 While waiting for a sustainable open-source alternative, I removed Uduino source code from Github. 
-You can now get Uduino on [Unity Asset Store](https://www.sasetstore.unity3d.com/#!/content/78402) and get more informations on the [official website](http://marcteyssier.com/uduino/).
+You can now get Uduino on [Unity Asset Store](http://u3d.as/Fxm) and get more informations on the [official website](http://marcteyssier.com/uduino/).
